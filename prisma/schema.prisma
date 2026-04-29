@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                    String   @id @default(uuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([providerId, accountId])
+}
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, value])
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  bio       String?
+  photos    String[]
+  gender    String?
+  birthDate String?
+  location  String?
+  interests String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Event {
+  id          String          @id @default(uuid())
+  code        String          @unique
+  name        String
+  description String?
+  location    String?
+  createdById String
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  expiresAt   DateTime?
+  attendees   EventAttendee[]
+  swipes      EventSwipe[]
+  matches     EventMatch[]
+}
+
+model EventAttendee {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  joinedAt  DateTime @default(now())
+  leftAt    DateTime?
+
+  @@unique([eventId, userId])
+}
+
+model EventSwipe {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  swiperId  String
+  swipedId  String
+  direction String // like | pass | super
+  createdAt DateTime @default(now())
+}
+
+model EventMatch {
+  id        String          @id @default(uuid())
+  eventId   String
+  event     Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user1Id   String
+  user2Id   String
+  createdAt DateTime        @default(now())
+  messages  EventMessage[]
+}
+
+model EventMessage {
+  id        String     @id @default(uuid())
+  matchId   String
+  match     EventMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  senderId  String
+  content   String
+  createdAt DateTime   @default(now())
+  readAt    DateTime?
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  reporterId String
+  reportedId String
+  reason     String
+  createdAt  DateTime @default(now())
+}
+
+model Todo {
+  id        String   @id @default(uuid())
+  title     String
+  createdAt DateTime @default(now())
+}

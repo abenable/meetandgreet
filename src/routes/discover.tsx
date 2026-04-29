@@ -1,0 +1,227 @@
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { Bookmark, X, Heart, MapPin, Users, ArrowRight } from 'lucide-react'
+import { activeEventId, getProfilesForEvent, mockEvents } from '#/lib/mock-data'
+
+export const Route = createFileRoute('/discover')({ component: DiscoverPage })
+
+interface Profile {
+  id: string
+  name: string
+  age: number
+  bio: string
+  photos: string[]
+  gender: string
+  location: string
+  distance: string
+  interests: string[]
+}
+
+function generateFeed(profiles: Profile[], page: number): Profile[] {
+  return profiles.map((p, i) => ({ ...p, id: `${p.id}_p${page}_${i}` }))
+}
+
+function DiscoverPage() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const event = mockEvents.find((e) => e.id === activeEventId)
+  const baseProfiles = getProfilesForEvent(activeEventId)
+  const [pages, setPages] = useState<Profile[][]>(() =>
+    baseProfiles.length > 0 ? [generateFeed(baseProfiles as Profile[], 0)] : []
+  )
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [photoIndices, setPhotoIndices] = useState<Record<string, number>>({})
+  const [loadingMore, setLoadingMore] = useState(false)
+  const totalItems = pages.flat().length
+
+  const flatProfiles = pages.flat()
+
+  const loadMore = useCallback(() => {
+    if (loadingMore) return
+    setLoadingMore(true)
+    setTimeout(() => {
+      const nextPage = pages.length
+      setPages((prev) => [...prev, generateFeed(baseProfiles as Profile[], nextPage)])
+      setLoadingMore(false)
+    }, 800)
+  }, [loadingMore, pages.length, baseProfiles])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number((entry.target as HTMLElement).dataset.index)
+            if (!Number.isNaN(idx)) {
+              setCurrentIndex(idx)
+              if (idx >= totalItems - 3) {
+                loadMore()
+              }
+            }
+          }
+        })
+      },
+      { threshold: 0.6 }
+    )
+
+    Array.from(container.children).forEach((child) => observer.observe(child))
+    return () => observer.disconnect()
+  }, [flatProfiles.length, totalItems, loadMore])
+
+  const handleAction = (_action: 'like' | 'pass' | 'save') => {
+    const container = containerRef.current
+    if (!container) return
+    const next = currentIndex + 1
+    if (next < container.children.length) {
+      ;(container.children[next] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+    if (next >= totalItems - 3) {
+      loadMore()
+    }
+  }
+
+  const nextPhoto = (profileId: string, max: number) => {
+    setPhotoIndices((prev) => {
+      const cur = prev[profileId] ?? 0
+      return { ...prev, [profileId]: Math.min(cur + 1, max - 1) }
+    })
+  }
+
+  const prevPhoto = (profileId: string) => {
+    setPhotoIndices((prev) => {
+      const cur = prev[profileId] ?? 0
+      return { ...prev, [profileId]: Math.max(cur - 1, 0) }
+    })
+  }
+
+  // If not in an event, show event selection prompt
+  if (!event || baseProfiles.length === 0) {
+    return (
+      <main className="page-wrap flex flex-col items-center justify-center px-4 py-16 text-center">
+        <Users className="mb-4 h-16 w-16 text-[var(--mag-ink-muted)]" />
+        <h2 className="text-xl font-bold text-[var(--mag-ink)]">Join an Event First</h2>
+        <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
+          Discover is only available when you are checked into an event. Join one to start meeting people.
+        </p>
+        <Link
+          to="/events"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-green)] px-6 py-3 text-sm font-bold text-white no-underline transition hover:bg-[var(--mag-green-dark)]"
+        >
+          Browse Events <ArrowRight className="h-4 w-4" />
+        </Link>
+      </main>
+    )
+  }
+
+  return (
+    <div className="flex h-[calc(100dvh-112px)] flex-col bg-[var(--mag-bg)]">
+      {/* Event context strip */}
+      <div className="mx-auto w-1/2 px-2 pt-2">
+        <div className="flex items-center justify-between rounded-xl bg-[var(--mag-card)] px-3 py-2 text-xs text-[var(--mag-ink-soft)] border border-[var(--mag-line)]">
+          <span className="font-semibold text-[var(--mag-ink)] truncate">{event.name}</span>
+          <span className="inline-flex items-center gap-1 shrink-0">
+            <Users className="h-3 w-3" />
+            {baseProfiles.length} here
+          </span>
+        </div>
+      </div>
+      <div className="mx-auto h-full w-1/2">
+        <div
+          ref={containerRef}
+          className="hide-scrollbar relative h-full snap-y snap-mandatory overflow-y-auto"
+          style={{ scrollBehavior: 'smooth' }}
+        >
+          {flatProfiles.map((profile, index) => {
+            const photoIdx = photoIndices[profile.id] ?? 0
+            return (
+              <section
+                key={profile.id}
+                data-index={index}
+                className="relative h-full w-full shrink-0 snap-start snap-always overflow-hidden"
+              >
+                <img
+                  src={profile.photos[photoIdx]}
+                  alt={profile.name}
+                  className="h-full w-full object-cover"
+                  loading={index < 3 ? 'eager' : 'lazy'}
+                />
+
+                <div className="gradient-overlay absolute inset-0" />
+
+                <div className="absolute top-4 left-4 right-4 flex gap-1.5">
+                  {profile.photos.map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-1 flex-1 rounded-full transition ${i === photoIdx ? 'bg-white' : 'bg-white/40'}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => prevPhoto(profile.id)}
+                  className="absolute left-0 top-0 h-[40%] w-1/4"
+                  aria-label="Previous photo"
+                />
+                <button
+                  onClick={() => nextPhoto(profile.id, profile.photos.length)}
+                  className="absolute right-0 top-0 h-[40%] w-1/4"
+                  aria-label="Next photo"
+                />
+
+                <div className="absolute bottom-0 left-0 right-0 p-5 pb-24">
+                  <h2 className="text-3xl font-bold text-white">{profile.name}</h2>
+                  <div className="mt-1 flex items-center gap-1.5 text-sm text-white/80">
+                    <MapPin className="h-4 w-4" />
+                    <span>{profile.distance}</span>
+                  </div>
+                  <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">{profile.bio}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {profile.interests.slice(0, 5).map((interest) => (
+                      <span
+                        key={interest}
+                        className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
+                      >
+                        {interest}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right-side actions */}
+                <div className="absolute right-3 bottom-24 flex flex-col items-center gap-4">
+                  <button
+                    onClick={() => handleAction('like')}
+                    className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110"
+                  >
+                    <Heart className="h-6 w-6 fill-[var(--mag-green)] text-[var(--mag-green)]" />
+                  </button>
+                  <button
+                    onClick={() => handleAction('pass')}
+                    className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110"
+                  >
+                    <X className="h-6 w-6 text-red-400" strokeWidth={2.5} />
+                  </button>
+                  <button
+                    onClick={() => handleAction('save')}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110"
+                  >
+                    <Bookmark className="h-5 w-5 text-blue-400" />
+                  </button>
+                </div>
+              </section>
+            )
+          })}
+
+          {loadingMore && (
+            <div className="flex h-32 shrink-0 items-center justify-center gap-2 text-sm text-[var(--mag-ink-soft)]">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+              Loading more...
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

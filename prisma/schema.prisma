@@ -62,12 +62,14 @@ model Verification {
 model Profile {
   id        String   @id @default(uuid())
   userId    String   @unique
+  name      String?
   bio       String?
   photos    String[]
   gender    String?
   birthDate String?
   location  String?
   interests String[]
+  job       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

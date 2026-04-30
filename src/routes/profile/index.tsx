@@ -166,7 +166,6 @@ function ProfilePage() {
         {(profile.interests || []).map((interest: string) => (
           <span key={interest} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-xs font-medium text-[var(--mag-ink)]">{interest}</span>
         ))}
-        <button className="rounded-full border border-dashed border-[var(--mag-line)] px-3 py-1.5 text-xs font-medium text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]">+ Add</button>
       </div>
 
       <div onClick={() => openEdit('bio', profile.bio || '')} className="mb-4 cursor-pointer rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow transition hover:border-[var(--mag-green)]/30">
@@ -204,28 +203,6 @@ function ProfilePage() {
         </div>
       </div>
 
-      <div className="mb-5 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Gender</h3>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {['Male', 'Female'].map((g) => (
-            <button
-              key={g}
-              onClick={() => updateMutation.mutate({ gender: g })}
-              disabled={updateMutation.isPending}
-              className={`rounded-full px-4 py-2 text-xs font-medium transition ${
-                g === profile.gender
-                  ? 'bg-[var(--mag-green)] text-white'
-                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)] hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]'
-              } disabled:opacity-60`}
-            >
-              {g}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <div className="mb-4 flex flex-wrap items-center justify-center gap-3">
         <button className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-6 py-2.5 text-sm font-semibold text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] card-shadow">
           <Link2 className="h-4 w-4" />Share Profile
@@ -243,9 +220,39 @@ function ProfilePage() {
       {editingField && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
-            <h3 className="mb-3 text-sm font-semibold text-[var(--mag-ink)]">{editingField === 'name' ? 'Name' : editingField === 'bio' ? 'About Me' : 'Location'}</h3>
-            <textarea value={editValue} onChange={(e) => setEditValue(e.target.value)} rows={editingField === 'bio' ? 4 : 1}
-              className="mb-4 w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
+            <h3 className="mb-3 text-sm font-semibold text-[var(--mag-ink)]">
+              {editingField === 'name' ? 'Edit Profile' : editingField === 'bio' ? 'About Me' : 'Location'}
+            </h3>
+            {editingField === 'name' && (
+              <div className="mb-3">
+                <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">Display Name</label>
+                <input
+                  type="text"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                />
+              </div>
+            )}
+            {editingField !== 'name' && (
+              <textarea value={editValue} onChange={(e) => setEditValue(e.target.value)} rows={editingField === 'bio' ? 4 : 1}
+                className="mb-4 w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
+            )}
+            {editingField === 'name' && (
+              <div className="mb-4">
+                <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">Gender</label>
+                <select
+                  value={editGender}
+                  onChange={(e) => setEditGender(e.target.value)}
+                  className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                >
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+            )}
             <div className="flex gap-2">
               <button onClick={() => setEditingField(null)} className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]">Cancel</button>
               <button onClick={saveEdit} disabled={updateMutation.isPending} className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60">{updateMutation.isPending ? 'Saving...' : 'Save'}</button>

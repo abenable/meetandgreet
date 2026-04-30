@@ -150,19 +150,21 @@ function ProfilePage() {
       </div>
 
       {/* Photo Gallery */}
-      <div className="mb-5 flex gap-3 overflow-x-auto hide-scrollbar pb-1">
-        {(profile.photos || []).map((photo: string, i: number) => (
-          <div key={i} className="relative h-28 w-28 flex-shrink-0 overflow-hidden rounded-xl">
-            <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
-          </div>
-        ))}
-        <Link
-          to="/profile/media"
-          className="flex h-28 w-28 flex-shrink-0 flex-col items-center justify-center gap-1 rounded-xl bg-[var(--mag-green)] text-white dark:text-black transition hover:opacity-90 no-underline"
-        >
-          <Camera className="h-5 w-5" />
-          <span className="text-[10px] font-medium">Add</span>
-        </Link>
+      <div className="mb-5 flex w-full justify-center gap-4 overflow-x-auto hide-scrollbar pb-2">
+        <div className="flex gap-4">
+          {(profile.photos || []).map((photo: string, i: number) => (
+            <div key={i} className="relative h-56 w-56 flex-shrink-0 overflow-hidden rounded-2xl">
+              <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+            </div>
+          ))}
+          <Link
+            to="/profile/media"
+            className="flex h-56 w-56 flex-shrink-0 flex-col items-center justify-center gap-2 rounded-2xl bg-[var(--mag-green)] text-white dark:text-black transition hover:opacity-90 no-underline"
+          >
+            <Camera className="h-8 w-8" />
+            <span className="text-xs font-medium">Add</span>
+          </Link>
+        </div>
       </div>
 
       <div className="mb-5 flex flex-wrap justify-center gap-2">

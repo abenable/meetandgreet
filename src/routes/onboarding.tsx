@@ -53,119 +53,121 @@ function OnboardingPage() {
         </div>
       )}
 
-      {step === 2 && (
-        <div className="rise-in flex flex-1 flex-col">
-          <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">About you</h1>
-          <p className="mb-6 text-sm text-[var(--mag-ink-soft)]">
-            Tell us a little about yourself.
-          </p>
+      <div className="mx-auto flex w-full max-w-xs flex-1 flex-col">
+        {step === 2 && (
+          <div className="rise-in flex flex-1 flex-col">
+            <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">About you</h1>
+            <p className="mb-6 text-sm text-[var(--mag-ink-soft)]">
+              Tell us a little about yourself.
+            </p>
 
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">
-                First Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your first name"
-                  className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
-                />
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">
+                  First Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your first name"
+                    className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">
-                Birthday
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
-                <input
-                  type="date"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
-                  className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
-                />
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">
+                  Birthday
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
+                  <input
+                    type="date"
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">
-                Gender
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {['Woman', 'Man', 'Non-binary'].map((g) => (
-                  <button
-                    key={g}
-                    onClick={() => setGender(g)}
-                    className={`rounded-full px-4 py-2 text-xs font-medium transition ${
-                      gender === g
-                        ? 'bg-[var(--mag-green)] text-white'
-                        : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)] hover:bg-[var(--mag-surface)]'
-                    }`}
-                  >
-                    {g}
-                  </button>
-                ))}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">
+                  Gender
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {['Woman', 'Man', 'Non-binary'].map((g) => (
+                    <button
+                      key={g}
+                      onClick={() => setGender(g)}
+                      className={`rounded-full px-4 py-2 text-xs font-medium transition ${
+                        gender === g
+                          ? 'bg-[var(--mag-green)] text-white'
+                          : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)] hover:bg-[var(--mag-surface)]'
+                      }`}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {step === 3 && (
-        <div className="rise-in flex flex-1 flex-col">
-          <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">Your interests</h1>
-          <p className="mb-6 text-sm text-[var(--mag-ink-soft)]">
-            Pick up to 5 interests to show on your profile.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {[
-              'Coffee', 'Hiking', 'Indie Music', 'Cooking', 'Yoga', 'Photography',
-              'Travel', 'Gaming', 'Fitness', 'Art', 'Reading', 'Dance',
-              'Climbing', 'Board Games', 'Dogs', 'Cats', 'Wine', 'Beer',
-              'Movies', 'Theater', 'Sports', 'Writing', 'Design', 'Startups',
-            ].map((interest) => (
-              <button
-                key={interest}
-                className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-xs font-medium text-[var(--mag-ink)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
-              >
-                {interest}
-              </button>
-            ))}
+        {step === 3 && (
+          <div className="rise-in flex flex-1 flex-col">
+            <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">Your interests</h1>
+            <p className="mb-6 text-sm text-[var(--mag-ink-soft)]">
+              Pick up to 5 interests to show on your profile.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                'Coffee', 'Hiking', 'Indie Music', 'Cooking', 'Yoga', 'Photography',
+                'Travel', 'Gaming', 'Fitness', 'Art', 'Reading', 'Dance',
+                'Climbing', 'Board Games', 'Dogs', 'Cats', 'Wine', 'Beer',
+                'Movies', 'Theater', 'Sports', 'Writing', 'Design', 'Startups',
+              ].map((interest) => (
+                <button
+                  key={interest}
+                  className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-xs font-medium text-[var(--mag-ink)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
+                >
+                  {interest}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="mt-6 flex items-center justify-center gap-3">
-        {step > 1 && (
-          <button
-            onClick={() => setStep(step - 1)}
-            className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-8 py-3 text-sm font-semibold text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
-          >
-            Back
-          </button>
-        )}
-        {step < totalSteps ? (
-          <button
-            onClick={handleNext}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] px-8 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[var(--mag-green-dark)]"
-          >
-            Next
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        ) : (
-          <Link
-            to="/discover"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] px-8 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[var(--mag-green-dark)] no-underline"
-          >
-            <Sparkles className="h-4 w-4" />
-            Start Swiping
-          </Link>
-        )}
+        <div className="mt-6 flex items-center justify-center gap-3">
+          {step > 1 && (
+            <button
+              onClick={() => setStep(step - 1)}
+              className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-8 py-3 text-sm font-semibold text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+            >
+              Back
+            </button>
+          )}
+          {step < totalSteps ? (
+            <button
+              onClick={handleNext}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] px-8 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[var(--mag-green-dark)]"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          ) : (
+            <Link
+              to="/discover"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] px-8 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[var(--mag-green-dark)] no-underline"
+            >
+              <Sparkles className="h-4 w-4" />
+              Start Swiping
+            </Link>
+          )}
+        </div>
       </div>
     </main>
   )

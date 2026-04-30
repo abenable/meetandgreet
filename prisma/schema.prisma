@@ -11,7 +11,7 @@ model User {
   id            String    @id @default(uuid())
   name          String?
   email         String    @unique
-  emailVerified DateTime?
+  emailVerified Boolean  @default(false)
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -25,6 +25,8 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String   @unique
   expiresAt DateTime
+  ipAddress String?
+  userAgent String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -108,6 +110,8 @@ model EventSwipe {
   swipedId  String
   direction String // like | pass | super
   createdAt DateTime @default(now())
+
+  @@unique([eventId, swiperId, swipedId])
 }
 
 model EventMatch {

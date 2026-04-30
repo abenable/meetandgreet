@@ -8,10 +8,11 @@ export const Route = createFileRoute('/discover')({ component: DiscoverPage })
 
 interface Profile {
   id: string
-  name: string
-  bio: string
+  userId: string
+  name: string | null
+  bio: string | null
   photos: string[]
-  location: string
+  location: string | null
   interests: string[]
 }
 
@@ -116,7 +117,7 @@ function DiscoverPage() {
             const pic = profile.photos[photoIdx] ?? ''
             return (
               <section key={profile.id} data-index={index} className="relative h-full w-full shrink-0 snap-start snap-always overflow-hidden">
-                <img src={pic} alt={profile.name} className="h-full w-full object-cover" loading={index < 3 ? 'eager' : 'lazy'} />
+                <img src={pic} alt={profile.name ?? ''} className="h-full w-full object-cover" loading={index < 3 ? 'eager' : 'lazy'} />
                 <div className="gradient-overlay absolute inset-0" />
                 <div className="absolute top-4 left-4 right-4 flex gap-1.5">
                   {profile.photos.map((_, i) => (

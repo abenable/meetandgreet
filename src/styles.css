@@ -151,6 +151,17 @@ button {
   box-shadow: 0 8px 32px rgba(255, 255, 255, 0.06), 0 2px 8px rgba(255, 255, 255, 0.03);
 }
 
+/* Hide browser-native password reveal icons so the custom toggle works reliably */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .gradient-overlay {
   background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 40%, transparent 100%);
 }

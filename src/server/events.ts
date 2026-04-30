@@ -1,7 +1,15 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
+import { getRequest } from '@tanstack/react-start/server'
 import { prisma } from '#/db'
 import { auth } from '#/lib/auth'
+
+async function requireSession() {
+  const request = getRequest()
+  const session = await auth.api.getSession({ headers: request.headers })
+  if (!session?.user?.id) throw new Error('Unauthorized')
+  return session
+}
 
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -24,7 +32,7 @@ export const listEvents = createServerFn({ method: 'GET' })
 
 export const getEventByCode = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
-  .handler(async ({ request, data: code }) => {
+  .handler(async ({ data: code }) => {
     return prisma.event.findUnique({
       where: { code: code.toUpperCase() },
       include: {
@@ -35,7 +43,7 @@ export const getEventByCode = createServerFn({ method: 'GET' })
 
 export const getEventById = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
-  .handler(async ({ request, data: id }) => {
+  .handler(async ({ data: id }) => {
     return prisma.event.findUnique({
       where: { id },
       include: {
@@ -50,9 +58,8 @@ export const createEvent = createServerFn({ method: 'POST' })
     description: z.string().max(500).optional(),
     location: z.string().max(200).optional(),
   }))
-  .handler(async ({ request, data }) => {
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user?.id) throw new Error('Unauthorized')
+  .handler(async ({ data }) => {
+    const session = await requireSession()
 
     return prisma.$transaction(async (tx) => {
       const event = await tx.event.create({
@@ -73,9 +80,8 @@ export const createEvent = createServerFn({ method: 'POST' })
 
 export const joinEvent = createServerFn({ method: 'POST' })
   .inputValidator(z.string())
-  .handler(async ({ request, data: eventId }) => {
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user?.id) throw new Error('Unauthorized')
+  .handler(async ({ data: eventId }) => {
+    const session = await requireSession()
 
     return prisma.eventAttendee.upsert({
       where: {
@@ -88,20 +94,20 @@ export const joinEvent = createServerFn({ method: 'POST' })
 
 export const leaveEvent = createServerFn({ method: 'POST' })
   .inputValidator(z.string())
-  .handler(async ({ request, data: eventId }) => {
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user?.id) throw new Error('Unauthorized')
+  .handler(async ({ data: eventId }) => {
+    const session = await requireSession()
 
-    await prisma.eventAttendee.updateMany({
-      where: { eventId, userId: session.user.id },
+    await prisma.eventAttendee.update({
+      where: {
+        eventId_userId: { eventId, userId: session.user.id },
+      },
       data: { leftAt: new Date() },
     })
   })
 
 export const getMyActiveEvent = createServerFn({ method: 'GET' })
-  .handler(async ({ request }) => {
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user?.id) return null
+  .handler(async () => {
+    const session = await requireSession()
 
     const attendee = await prisma.eventAttendee.findFirst({
       where: { userId: session.user.id, leftAt: null },
@@ -118,9 +124,9 @@ export const getMyActiveEvent = createServerFn({ method: 'GET' })
 
 export const getEventProfiles = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
-  .handler(async ({ request, data: eventId }) => {
-    const session = await auth.api.getSession({ headers: request.headers })
-    const myUserId = session?.user?.id
+  .handler(async ({ data: eventId }) => {
+    const session = await requireSession()
+    const myUserId = session.user.id
 
     const attendees = await prisma.eventAttendee.findMany({
       where: { eventId, leftAt: null },

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
-import { Search, Pizza, BookOpen, Music, Plane, Dumbbell, Palette, ChevronRight, X, MapPin } from 'lucide-react'
+import { Search, Pizza, BookOpen, Music, Plane, Dumbbell, Palette, X, MapPin } from 'lucide-react'
 
 const iconMap: Record<string, React.ReactNode> = {
   pizza: <Pizza className="h-6 w-6" />,

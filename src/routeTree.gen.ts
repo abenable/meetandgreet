@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TopPicksRouteImport } from './routes/top-picks'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -20,11 +21,14 @@ import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyIndexRouteImport } from './routes/verify/index'
+import { Route as SignupIndexRouteImport } from './routes/signup.index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile/index'
 import { Route as MatchesIndexRouteImport } from './routes/matches/index'
+import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password.index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as VerifyCaptureRouteImport } from './routes/verify/capture'
+import { Route as SignupVerifyRouteImport } from './routes/signup.verify'
 import { Route as SettingsPrivacyRouteImport } from './routes/settings/privacy'
 import { Route as SettingsNotificationsRouteImport } from './routes/settings/notifications'
 import { Route as SettingsDiscoveryRouteImport } from './routes/settings/discovery'
@@ -32,6 +36,8 @@ import { Route as SettingsAccountRouteImport } from './routes/settings/account'
 import { Route as ProfileMediaRouteImport } from './routes/profile/media'
 import { Route as ProfileEditRouteImport } from './routes/profile/edit'
 import { Route as MatchesMatchIdRouteImport } from './routes/matches/$matchId'
+import { Route as ForgotPasswordVerifyRouteImport } from './routes/forgot-password.verify'
+import { Route as ForgotPasswordResetRouteImport } from './routes/forgot-password.reset'
 import { Route as EventsJoinRouteImport } from './routes/events/join'
 import { Route as EventsCreateRouteImport } from './routes/events/create'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -39,6 +45,11 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 const TopPicksRoute = TopPicksRouteImport.update({
   id: '/top-picks',
   path: '/top-picks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SafetyRoute = SafetyRouteImport.update({
@@ -91,6 +102,11 @@ const VerifyIndexRoute = VerifyIndexRouteImport.update({
   path: '/verify/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignupIndexRoute = SignupIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SignupRoute,
+} as any)
 const SettingsIndexRoute = SettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
@@ -106,6 +122,11 @@ const MatchesIndexRoute = MatchesIndexRouteImport.update({
   path: '/matches/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
+  id: '/forgot-password/',
+  path: '/forgot-password/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsIndexRoute = EventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
@@ -115,6 +136,11 @@ const VerifyCaptureRoute = VerifyCaptureRouteImport.update({
   id: '/verify/capture',
   path: '/verify/capture',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SignupVerifyRoute = SignupVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => SignupRoute,
 } as any)
 const SettingsPrivacyRoute = SettingsPrivacyRouteImport.update({
   id: '/settings/privacy',
@@ -151,6 +177,16 @@ const MatchesMatchIdRoute = MatchesMatchIdRouteImport.update({
   path: '/matches/$matchId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordVerifyRoute = ForgotPasswordVerifyRouteImport.update({
+  id: '/forgot-password/verify',
+  path: '/forgot-password/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordResetRoute = ForgotPasswordResetRouteImport.update({
+  id: '/forgot-password/reset',
+  path: '/forgot-password/reset',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsJoinRoute = EventsJoinRouteImport.update({
   id: '/events/join',
   path: '/events/join',
@@ -177,9 +213,12 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/safety': typeof SafetyRoute
+  '/signup': typeof SignupRouteWithChildren
   '/top-picks': typeof TopPicksRoute
   '/events/create': typeof EventsCreateRoute
   '/events/join': typeof EventsJoinRoute
+  '/forgot-password/reset': typeof ForgotPasswordResetRoute
+  '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/profile/edit': typeof ProfileEditRoute
   '/profile/media': typeof ProfileMediaRoute
@@ -187,11 +226,14 @@ export interface FileRoutesByFullPath {
   '/settings/discovery': typeof SettingsDiscoveryRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/privacy': typeof SettingsPrivacyRoute
+  '/signup/verify': typeof SignupVerifyRoute
   '/verify/capture': typeof VerifyCaptureRoute
   '/events/': typeof EventsIndexRoute
+  '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/matches/': typeof MatchesIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/signup/': typeof SignupIndexRoute
   '/verify/': typeof VerifyIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -208,6 +250,8 @@ export interface FileRoutesByTo {
   '/top-picks': typeof TopPicksRoute
   '/events/create': typeof EventsCreateRoute
   '/events/join': typeof EventsJoinRoute
+  '/forgot-password/reset': typeof ForgotPasswordResetRoute
+  '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/profile/edit': typeof ProfileEditRoute
   '/profile/media': typeof ProfileMediaRoute
@@ -215,11 +259,14 @@ export interface FileRoutesByTo {
   '/settings/discovery': typeof SettingsDiscoveryRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/privacy': typeof SettingsPrivacyRoute
+  '/signup/verify': typeof SignupVerifyRoute
   '/verify/capture': typeof VerifyCaptureRoute
   '/events': typeof EventsIndexRoute
+  '/forgot-password': typeof ForgotPasswordIndexRoute
   '/matches': typeof MatchesIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/signup': typeof SignupIndexRoute
   '/verify': typeof VerifyIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -234,9 +281,12 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/safety': typeof SafetyRoute
+  '/signup': typeof SignupRouteWithChildren
   '/top-picks': typeof TopPicksRoute
   '/events/create': typeof EventsCreateRoute
   '/events/join': typeof EventsJoinRoute
+  '/forgot-password/reset': typeof ForgotPasswordResetRoute
+  '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/profile/edit': typeof ProfileEditRoute
   '/profile/media': typeof ProfileMediaRoute
@@ -244,11 +294,14 @@ export interface FileRoutesById {
   '/settings/discovery': typeof SettingsDiscoveryRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/privacy': typeof SettingsPrivacyRoute
+  '/signup/verify': typeof SignupVerifyRoute
   '/verify/capture': typeof VerifyCaptureRoute
   '/events/': typeof EventsIndexRoute
+  '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/matches/': typeof MatchesIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/signup/': typeof SignupIndexRoute
   '/verify/': typeof VerifyIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -264,9 +317,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/premium'
     | '/safety'
+    | '/signup'
     | '/top-picks'
     | '/events/create'
     | '/events/join'
+    | '/forgot-password/reset'
+    | '/forgot-password/verify'
     | '/matches/$matchId'
     | '/profile/edit'
     | '/profile/media'
@@ -274,11 +330,14 @@ export interface FileRouteTypes {
     | '/settings/discovery'
     | '/settings/notifications'
     | '/settings/privacy'
+    | '/signup/verify'
     | '/verify/capture'
     | '/events/'
+    | '/forgot-password/'
     | '/matches/'
     | '/profile/'
     | '/settings/'
+    | '/signup/'
     | '/verify/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
@@ -295,6 +354,8 @@ export interface FileRouteTypes {
     | '/top-picks'
     | '/events/create'
     | '/events/join'
+    | '/forgot-password/reset'
+    | '/forgot-password/verify'
     | '/matches/$matchId'
     | '/profile/edit'
     | '/profile/media'
@@ -302,11 +363,14 @@ export interface FileRouteTypes {
     | '/settings/discovery'
     | '/settings/notifications'
     | '/settings/privacy'
+    | '/signup/verify'
     | '/verify/capture'
     | '/events'
+    | '/forgot-password'
     | '/matches'
     | '/profile'
     | '/settings'
+    | '/signup'
     | '/verify'
     | '/api/auth/$'
   id:
@@ -320,9 +384,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/premium'
     | '/safety'
+    | '/signup'
     | '/top-picks'
     | '/events/create'
     | '/events/join'
+    | '/forgot-password/reset'
+    | '/forgot-password/verify'
     | '/matches/$matchId'
     | '/profile/edit'
     | '/profile/media'
@@ -330,11 +397,14 @@ export interface FileRouteTypes {
     | '/settings/discovery'
     | '/settings/notifications'
     | '/settings/privacy'
+    | '/signup/verify'
     | '/verify/capture'
     | '/events/'
+    | '/forgot-password/'
     | '/matches/'
     | '/profile/'
     | '/settings/'
+    | '/signup/'
     | '/verify/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -349,9 +419,12 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
   SafetyRoute: typeof SafetyRoute
+  SignupRoute: typeof SignupRouteWithChildren
   TopPicksRoute: typeof TopPicksRoute
   EventsCreateRoute: typeof EventsCreateRoute
   EventsJoinRoute: typeof EventsJoinRoute
+  ForgotPasswordResetRoute: typeof ForgotPasswordResetRoute
+  ForgotPasswordVerifyRoute: typeof ForgotPasswordVerifyRoute
   MatchesMatchIdRoute: typeof MatchesMatchIdRoute
   ProfileEditRoute: typeof ProfileEditRoute
   ProfileMediaRoute: typeof ProfileMediaRoute
@@ -361,6 +434,7 @@ export interface RootRouteChildren {
   SettingsPrivacyRoute: typeof SettingsPrivacyRoute
   VerifyCaptureRoute: typeof VerifyCaptureRoute
   EventsIndexRoute: typeof EventsIndexRoute
+  ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
   MatchesIndexRoute: typeof MatchesIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
@@ -375,6 +449,13 @@ declare module '@tanstack/react-router' {
       path: '/top-picks'
       fullPath: '/top-picks'
       preLoaderRoute: typeof TopPicksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/safety': {
@@ -447,6 +528,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerifyIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signup/': {
+      id: '/signup/'
+      path: '/'
+      fullPath: '/signup/'
+      preLoaderRoute: typeof SignupIndexRouteImport
+      parentRoute: typeof SignupRoute
+    }
     '/settings/': {
       id: '/settings/'
       path: '/settings'
@@ -468,6 +556,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password/': {
+      id: '/forgot-password/'
+      path: '/forgot-password'
+      fullPath: '/forgot-password/'
+      preLoaderRoute: typeof ForgotPasswordIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/': {
       id: '/events/'
       path: '/events'
@@ -481,6 +576,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/verify/capture'
       preLoaderRoute: typeof VerifyCaptureRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/signup/verify': {
+      id: '/signup/verify'
+      path: '/verify'
+      fullPath: '/signup/verify'
+      preLoaderRoute: typeof SignupVerifyRouteImport
+      parentRoute: typeof SignupRoute
     }
     '/settings/privacy': {
       id: '/settings/privacy'
@@ -531,6 +633,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchesMatchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password/verify': {
+      id: '/forgot-password/verify'
+      path: '/forgot-password/verify'
+      fullPath: '/forgot-password/verify'
+      preLoaderRoute: typeof ForgotPasswordVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password/reset': {
+      id: '/forgot-password/reset'
+      path: '/forgot-password/reset'
+      fullPath: '/forgot-password/reset'
+      preLoaderRoute: typeof ForgotPasswordResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/join': {
       id: '/events/join'
       path: '/events/join'
@@ -555,6 +671,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SignupRouteChildren {
+  SignupVerifyRoute: typeof SignupVerifyRoute
+  SignupIndexRoute: typeof SignupIndexRoute
+}
+
+const SignupRouteChildren: SignupRouteChildren = {
+  SignupVerifyRoute: SignupVerifyRoute,
+  SignupIndexRoute: SignupIndexRoute,
+}
+
+const SignupRouteWithChildren =
+  SignupRoute._addFileChildren(SignupRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -565,9 +694,12 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,
   SafetyRoute: SafetyRoute,
+  SignupRoute: SignupRouteWithChildren,
   TopPicksRoute: TopPicksRoute,
   EventsCreateRoute: EventsCreateRoute,
   EventsJoinRoute: EventsJoinRoute,
+  ForgotPasswordResetRoute: ForgotPasswordResetRoute,
+  ForgotPasswordVerifyRoute: ForgotPasswordVerifyRoute,
   MatchesMatchIdRoute: MatchesMatchIdRoute,
   ProfileEditRoute: ProfileEditRoute,
   ProfileMediaRoute: ProfileMediaRoute,
@@ -577,6 +709,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsPrivacyRoute: SettingsPrivacyRoute,
   VerifyCaptureRoute: VerifyCaptureRoute,
   EventsIndexRoute: EventsIndexRoute,
+  ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
   MatchesIndexRoute: MatchesIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,

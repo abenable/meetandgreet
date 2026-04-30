@@ -1,7 +1,15 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
+import { getRequest } from '@tanstack/react-start/server'
 import { prisma } from '#/db'
 import { auth } from '#/lib/auth'
+
+async function requireSession() {
+  const request = getRequest()
+  const session = await auth.api.getSession({ headers: request.headers })
+  if (!session?.user?.id) throw new Error('Unauthorized')
+  return session
+}
 
 export const recordSwipe = createServerFn({ method: 'POST' })
   .inputValidator(z.object({
@@ -9,32 +17,56 @@ export const recordSwipe = createServerFn({ method: 'POST' })
     swipedId: z.string(),
     direction: z.enum(['like', 'pass', 'super']),
   }))
-  .handler(async ({ request, data }) => {
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user?.id) throw new Error('Unauthorized')
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+    const swiperId = session.user.id
 
-    const swipe = await prisma.eventSwipe.create({
-      data: {
+    if (swiperId === data.swipedId) {
+      throw new Error('Cannot swipe yourself')
+    }
+
+    const [swiperAttendee, swipedAttendee] = await Promise.all([
+      prisma.eventAttendee.findFirst({
+        where: { eventId: data.eventId, userId: swiperId, leftAt: null },
+      }),
+      prisma.eventAttendee.findFirst({
+        where: { eventId: data.eventId, userId: data.swipedId, leftAt: null },
+      }),
+    ])
+
+    if (!swiperAttendee || !swipedAttendee) {
+      throw new Error('Both users must be active attendees of the event')
+    }
+
+    const swipe = await prisma.eventSwipe.upsert({
+      where: {
+        eventId_swiperId_swipedId: {
+          eventId: data.eventId,
+          swiperId,
+          swipedId: data.swipedId,
+        },
+      },
+      update: { direction: data.direction },
+      create: {
         eventId: data.eventId,
-        swiperId: session.user.id,
+        swiperId,
         swipedId: data.swipedId,
         direction: data.direction,
       },
     })
 
-    // Check for mutual like (match)
     if (data.direction === 'like' || data.direction === 'super') {
       const mutual = await prisma.eventSwipe.findFirst({
         where: {
           eventId: data.eventId,
           swiperId: data.swipedId,
-          swipedId: session.user.id,
+          swipedId: swiperId,
           direction: { in: ['like', 'super'] },
         },
       })
 
       if (mutual) {
-        const [u1, u2] = [session.user.id, data.swipedId].sort()
+        const [u1, u2] = [swiperId, data.swipedId].sort()
         const existingMatch = await prisma.eventMatch.findFirst({
           where: { eventId: data.eventId, user1Id: u1, user2Id: u2 },
         })
@@ -56,9 +88,8 @@ export const recordSwipe = createServerFn({ method: 'POST' })
   })
 
 export const getLikes = createServerFn({ method: 'GET' })
-  .handler(async ({ request }) => {
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user?.id) return []
+  .handler(async () => {
+    const session = await requireSession()
 
     const activeAttendee = await prisma.eventAttendee.findFirst({
       where: { userId: session.user.id, leftAt: null },
@@ -84,9 +115,8 @@ export const getLikes = createServerFn({ method: 'GET' })
   })
 
 export const getMatches = createServerFn({ method: 'GET' })
-  .handler(async ({ request }) => {
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user?.id) return []
+  .handler(async () => {
+    const session = await requireSession()
 
     const matches = await prisma.eventMatch.findMany({
       where: {
@@ -127,9 +157,8 @@ export const getMatches = createServerFn({ method: 'GET' })
 
 export const getMessages = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
-  .handler(async ({ request, data: matchId }) => {
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user?.id) return []
+  .handler(async ({ data: matchId }) => {
+    const session = await requireSession()
 
     const match = await prisma.eventMatch.findFirst({
       where: {
@@ -150,9 +179,8 @@ export const sendMessage = createServerFn({ method: 'POST' })
     matchId: z.string(),
     content: z.string().min(1).max(2000),
   }))
-  .handler(async ({ request, data }) => {
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user?.id) throw new Error('Unauthorized')
+  .handler(async ({ data }) => {
+    const session = await requireSession()
 
     const match = await prisma.eventMatch.findFirst({
       where: {

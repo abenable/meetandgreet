@@ -1,18 +1,22 @@
 import { Link, useRouterState } from '@tanstack/react-router'
-import { Flame, Moon, Sun } from 'lucide-react'
+import { Flame, Moon, Sun, User } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { getSession } from '#/server/auth'
 
 export default function Header() {
   const router = useRouterState()
   const path = router.location.pathname
   const [dark, setDark] = useState(false)
+  const { data: session } = useQuery({ queryKey: ['session'], queryFn: () => getSession() })
 
   useEffect(() => {
     setDark(document.documentElement.classList.contains('dark'))
   }, [])
 
-  const hideHeaderPaths = ['/login', '/onboarding']
-  if (hideHeaderPaths.includes(path)) return null
+  const hideHeaderPaths = ['/login', '/signup', '/forgot-password']
+  const isAuthScreen = hideHeaderPaths.some((p) => path === p || path.startsWith(p + '/'))
+  if (isAuthScreen) return null
 
   const toggle = () => {
     const next = !dark
@@ -29,7 +33,20 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--mag-line)] bg-[var(--header-bg)] backdrop-blur-lg">
       <div className="page-wrap flex items-center justify-between py-3">
-        <div className="w-9" />
+        {session?.user ? (
+          <Link
+            to="/profile"
+            className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)]"
+          >
+            {session.user.image ? (
+              <img src={session.user.image} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <User className="h-5 w-5" />
+            )}
+          </Link>
+        ) : (
+          <div className="w-9" />
+        )}
         <Link to="/" className="flex items-center gap-1.5 text-[var(--mag-green)] no-underline">
           <Flame className="h-6 w-6 fill-[var(--mag-green)] text-[var(--mag-green)]" />
           <span className="text-lg font-bold tracking-tight text-[var(--mag-ink)]">Meet & Greet</span>

@@ -1,19 +1,16 @@
-import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { useEffect } from 'react'
+import { HeadContent, Scripts, createRootRouteWithContext, redirect } from '@tanstack/react-router'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
-
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { getSession } from '#/server/auth'
 
 interface MyRouterContext {
   queryClient: QueryClient
+  session?: Awaited<ReturnType<typeof getSession>>
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
@@ -28,43 +25,68 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
     links: [
       {
+        rel: 'icon',
+        type: 'image/svg+xml',
+        href: '/favicon.svg',
+      },
+      {
+        rel: 'alternate icon',
+        href: '/favicon.ico',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/apple-touch-icon.png',
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.json',
+      },
+      {
         rel: 'stylesheet',
         href: appCss,
       },
     ],
   }),
+  beforeLoad: async ({ location }) => {
+    const publicPaths = ['/', '/login', '/signup', '/forgot-password', '/about', '/api']
+    const isPublic = publicPaths.some(
+      (p) => location.pathname === p || location.pathname.startsWith(p + '/')
+    )
+
+    const session = await getSession()
+
+    if (isPublic) {
+      return { session }
+    }
+
+    if (!session) {
+      throw redirect({ to: '/login' })
+    }
+
+    return { session }
+  },
   shellComponent: RootDocument,
 })
 
-function useThemeInit() {
-  useEffect(() => {
-    try {
-      const t = localStorage.getItem('mag-theme')
-      if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-    } catch (e) {
-      // ignore
-    }
-  }, [])
-}
-
 function RootDocument({ children }: { children: React.ReactNode }) {
-  useThemeInit()
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('mag-theme')||'light';if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){}})()`,
+          }}
+        />
       </head>
       <body className="font-sans antialiased flex flex-col min-h-[100dvh]">
         <Header />
-        <main className="flex-1">
+        <main className="flex-1 bg-[var(--mag-bg)]">
           {children}
         </main>
         <Footer />
         <BottomNav />
+        <Scripts />
       </body>
     </html>
   )

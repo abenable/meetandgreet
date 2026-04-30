@@ -3,16 +3,16 @@ import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { Flame, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { authClient } from '#/lib/auth-client'
-import { isEmailVerified, sendEmailVerificationOtp } from '#/server/auth'
+import { sendEmailVerificationOtp } from '#/server/auth'
 
-export const Route = createFileRoute('/login')({ component: LoginPage })
+export const Route = createFileRoute('/signup/')({ component: SignupPage })
 
-function LoginPage() {
+function SignupPage() {
   const navigate = useNavigate()
-  const isEmailVerifiedFn = useServerFn(isEmailVerified)
   const sendEmailVerificationOtpFn = useServerFn(sendEmailVerificationOtp)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -25,24 +25,22 @@ function LoginPage() {
     const normalizedEmail = email.toLowerCase().trim()
 
     try {
-      const res = await authClient.signIn.email({ email: normalizedEmail, password })
+      const res = await authClient.signUp.email({
+        email: normalizedEmail,
+        password,
+        name: name.trim() || normalizedEmail.split('@')[0],
+      })
+
       if (res.error) {
-        setError(res.error.message || 'Login failed')
+        setError(res.error.message || 'Sign up failed')
         setLoading(false)
         return
       }
 
-      const { verified } = await isEmailVerifiedFn({ data: normalizedEmail })
-      if (!verified) {
-        await sendEmailVerificationOtpFn({ data: normalizedEmail })
-        navigate({ to: '/signup/verify', search: { email: normalizedEmail } })
-        return
-      }
-
-      navigate({ to: '/discover' })
+      await sendEmailVerificationOtpFn({ data: normalizedEmail })
+      navigate({ to: '/signup/verify', search: { email: normalizedEmail } })
     } catch (err: any) {
       setError(err?.message || 'Something went wrong')
-    } finally {
       setLoading(false)
     }
   }
@@ -51,8 +49,8 @@ function LoginPage() {
     <main className="page-wrap flex min-h-[90vh] flex-col items-center px-4 py-8">
       <div className="mb-8 text-center">
         <Flame className="mb-4 inline-block h-14 w-14 fill-[var(--mag-green)] text-[var(--mag-green)]" />
-        <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Welcome Back</h1>
-        <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">Log in to continue swiping</p>
+        <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Join Meet & Greet</h1>
+        <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">Create your account to start matching</p>
       </div>
 
       <div className="flex w-full max-w-xs flex-col gap-4">
@@ -63,6 +61,17 @@ function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Full name"
+              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+            />
+          </div>
+
           <div className="relative">
             <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
             <input
@@ -83,6 +92,7 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
+              minLength={8}
               className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-10 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
             />
             <button
@@ -98,12 +108,6 @@ function LoginPage() {
             </button>
           </div>
 
-          <div className="text-right">
-            <Link to="/forgot-password" className="text-xs text-[var(--mag-green)] no-underline hover:underline">
-              Forgot password?
-            </Link>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
@@ -113,7 +117,7 @@ function LoginPage() {
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : (
               <>
-                Log In
+                Create Account
                 <ArrowRight className="h-4 w-4" />
               </>
             )}
@@ -137,9 +141,9 @@ function LoginPage() {
         </button>
 
         <div className="text-center text-xs text-[var(--mag-ink-muted)]">
-          Don't have an account?{' '}
-          <Link to="/signup" className="font-semibold text-[var(--mag-green)] no-underline hover:underline">
-            Sign up
+          Already have an account?{' '}
+          <Link to="/login" className="font-semibold text-[var(--mag-green)] no-underline hover:underline">
+            Log in
           </Link>
         </div>
       </div>

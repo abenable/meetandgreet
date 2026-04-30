@@ -10,7 +10,16 @@ function CreateEventPage() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [location, setLocation] = useState('')
-  const [code, setCode] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  const handleCopyLink = () => {
+    if (!code) return
+    const link = `${window.location.origin}/events/join/${code}`
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
   const [maxAttendees, setMaxAttendees] = useState<number | ''>('')
   const [startsAt, setStartsAt] = useState('')
 
@@ -44,7 +53,13 @@ function CreateEventPage() {
         <div className="mb-6 rounded-2xl border border-[var(--mag-green)] bg-[var(--mag-green)]/5 p-5 text-center">
           <p className="text-xs font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Created</p>
           <p className="mt-2 text-3xl font-mono font-bold tracking-widest text-[var(--mag-green)]">{code}</p>
-          <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">Share this code so others can join</p>
+          <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">Share this code or link so others can join</p>
+          <button
+            onClick={handleCopyLink}
+            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full border border-[var(--mag-green)] bg-[var(--mag-green)] px-4 py-2 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+          >
+            {copied ? 'Copied!' : 'Copy Share Link'}
+          </button>
         </div>
       ) : null}
 

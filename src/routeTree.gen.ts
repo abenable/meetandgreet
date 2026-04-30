@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TopPicksRouteImport } from './routes/top-picks'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SafetyRouteImport } from './routes/safety'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
@@ -41,11 +43,17 @@ import { Route as ForgotPasswordResetRouteImport } from './routes/forgot-passwor
 import { Route as EventsJoinRouteImport } from './routes/events/join'
 import { Route as EventsCreateRouteImport } from './routes/events/create'
 import { Route as EventsManageEventIdRouteImport } from './routes/events/manage.$eventId'
+import { Route as EventsJoinCodeRouteImport } from './routes/events/join.$code'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const TopPicksRoute = TopPicksRouteImport.update({
   id: '/top-picks',
   path: '/top-picks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -56,6 +64,11 @@ const SignupRoute = SignupRouteImport.update({
 const SafetyRoute = SafetyRouteImport.update({
   id: '/safety',
   path: '/safety',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PremiumRoute = PremiumRouteImport.update({
@@ -203,6 +216,11 @@ const EventsManageEventIdRoute = EventsManageEventIdRouteImport.update({
   path: '/events/manage/$eventId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsJoinCodeRoute = EventsJoinCodeRouteImport.update({
+  id: '/$code',
+  path: '/$code',
+  getParentRoute: () => EventsJoinRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -218,11 +236,13 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
+  '/privacy': typeof PrivacyRoute
   '/safety': typeof SafetyRoute
   '/signup': typeof SignupRouteWithChildren
+  '/terms': typeof TermsRoute
   '/top-picks': typeof TopPicksRoute
   '/events/create': typeof EventsCreateRoute
-  '/events/join': typeof EventsJoinRoute
+  '/events/join': typeof EventsJoinRouteWithChildren
   '/forgot-password/reset': typeof ForgotPasswordResetRoute
   '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
@@ -242,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/signup/': typeof SignupIndexRoute
   '/verify/': typeof VerifyIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
 }
 export interface FileRoutesByTo {
@@ -253,10 +274,12 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
+  '/privacy': typeof PrivacyRoute
   '/safety': typeof SafetyRoute
+  '/terms': typeof TermsRoute
   '/top-picks': typeof TopPicksRoute
   '/events/create': typeof EventsCreateRoute
-  '/events/join': typeof EventsJoinRoute
+  '/events/join': typeof EventsJoinRouteWithChildren
   '/forgot-password/reset': typeof ForgotPasswordResetRoute
   '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
@@ -276,6 +299,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupIndexRoute
   '/verify': typeof VerifyIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
 }
 export interface FileRoutesById {
@@ -288,11 +312,13 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
+  '/privacy': typeof PrivacyRoute
   '/safety': typeof SafetyRoute
   '/signup': typeof SignupRouteWithChildren
+  '/terms': typeof TermsRoute
   '/top-picks': typeof TopPicksRoute
   '/events/create': typeof EventsCreateRoute
-  '/events/join': typeof EventsJoinRoute
+  '/events/join': typeof EventsJoinRouteWithChildren
   '/forgot-password/reset': typeof ForgotPasswordResetRoute
   '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
@@ -312,6 +338,7 @@ export interface FileRoutesById {
   '/signup/': typeof SignupIndexRoute
   '/verify/': typeof VerifyIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
 }
 export interface FileRouteTypes {
@@ -325,8 +352,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/premium'
+    | '/privacy'
     | '/safety'
     | '/signup'
+    | '/terms'
     | '/top-picks'
     | '/events/create'
     | '/events/join'
@@ -349,6 +378,7 @@ export interface FileRouteTypes {
     | '/signup/'
     | '/verify/'
     | '/api/auth/$'
+    | '/events/join/$code'
     | '/events/manage/$eventId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -360,7 +390,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/premium'
+    | '/privacy'
     | '/safety'
+    | '/terms'
     | '/top-picks'
     | '/events/create'
     | '/events/join'
@@ -383,6 +415,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify'
     | '/api/auth/$'
+    | '/events/join/$code'
     | '/events/manage/$eventId'
   id:
     | '__root__'
@@ -394,8 +427,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/premium'
+    | '/privacy'
     | '/safety'
     | '/signup'
+    | '/terms'
     | '/top-picks'
     | '/events/create'
     | '/events/join'
@@ -418,6 +453,7 @@ export interface FileRouteTypes {
     | '/signup/'
     | '/verify/'
     | '/api/auth/$'
+    | '/events/join/$code'
     | '/events/manage/$eventId'
   fileRoutesById: FileRoutesById
 }
@@ -430,11 +466,13 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
+  PrivacyRoute: typeof PrivacyRoute
   SafetyRoute: typeof SafetyRoute
   SignupRoute: typeof SignupRouteWithChildren
+  TermsRoute: typeof TermsRoute
   TopPicksRoute: typeof TopPicksRoute
   EventsCreateRoute: typeof EventsCreateRoute
-  EventsJoinRoute: typeof EventsJoinRoute
+  EventsJoinRoute: typeof EventsJoinRouteWithChildren
   ForgotPasswordResetRoute: typeof ForgotPasswordResetRoute
   ForgotPasswordVerifyRoute: typeof ForgotPasswordVerifyRoute
   MatchesMatchIdRoute: typeof MatchesMatchIdRoute
@@ -464,6 +502,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TopPicksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -476,6 +521,13 @@ declare module '@tanstack/react-router' {
       path: '/safety'
       fullPath: '/safety'
       preLoaderRoute: typeof SafetyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/premium': {
@@ -681,6 +733,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsManageEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/join/$code': {
+      id: '/events/join/$code'
+      path: '/$code'
+      fullPath: '/events/join/$code'
+      preLoaderRoute: typeof EventsJoinCodeRouteImport
+      parentRoute: typeof EventsJoinRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -704,6 +763,18 @@ const SignupRouteChildren: SignupRouteChildren = {
 const SignupRouteWithChildren =
   SignupRoute._addFileChildren(SignupRouteChildren)
 
+interface EventsJoinRouteChildren {
+  EventsJoinCodeRoute: typeof EventsJoinCodeRoute
+}
+
+const EventsJoinRouteChildren: EventsJoinRouteChildren = {
+  EventsJoinCodeRoute: EventsJoinCodeRoute,
+}
+
+const EventsJoinRouteWithChildren = EventsJoinRoute._addFileChildren(
+  EventsJoinRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -713,11 +784,13 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,
+  PrivacyRoute: PrivacyRoute,
   SafetyRoute: SafetyRoute,
   SignupRoute: SignupRouteWithChildren,
+  TermsRoute: TermsRoute,
   TopPicksRoute: TopPicksRoute,
   EventsCreateRoute: EventsCreateRoute,
-  EventsJoinRoute: EventsJoinRoute,
+  EventsJoinRoute: EventsJoinRouteWithChildren,
   ForgotPasswordResetRoute: ForgotPasswordResetRoute,
   ForgotPasswordVerifyRoute: ForgotPasswordVerifyRoute,
   MatchesMatchIdRoute: MatchesMatchIdRoute,

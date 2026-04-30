@@ -48,7 +48,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
   beforeLoad: async ({ location }) => {
-    const publicPaths = ['/', '/login', '/signup', '/forgot-password', '/about', '/api']
+    const publicPaths = ['/', '/login', '/signup', '/forgot-password', '/about', '/api', '/events/join']
     const isPublic = publicPaths.some(
       (p) => location.pathname === p || location.pathname.startsWith(p + '/')
     )

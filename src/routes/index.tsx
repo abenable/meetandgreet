@@ -40,8 +40,8 @@ function LandingPage() {
 
       <p className="rise-in mt-8 text-xs text-[var(--mag-ink-muted)]" style={{ animationDelay: '400ms' }}>
         By continuing, you agree to our{' '}
-        <a href="#" className="underline">Terms</a> and{' '}
-        <a href="#" className="underline">Privacy Policy</a>.
+        <Link to="/terms" className="underline">Terms</Link> and{' '}
+        <Link to="/privacy" className="underline">Privacy Policy</Link>.
       </p>
     </main>
   )

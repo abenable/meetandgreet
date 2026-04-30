@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Bookmark, X, Heart, MapPin, Users, ArrowRight } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { X, Heart, MapPin, Users, ArrowRight } from 'lucide-react'
 import { getMyActiveEvent, getEventProfiles } from '#/server/events'
+import { recordSwipe } from '#/server/swipes'
 
 export const Route = createFileRoute('/discover')({ component: DiscoverPage })
 
@@ -17,6 +18,7 @@ interface Profile {
 }
 
 function DiscoverPage() {
+  const queryClient = useQueryClient()
   const containerRef = useRef<HTMLDivElement>(null)
   const { data: activeEvent } = useQuery({ queryKey: ['active-event'], queryFn: () => getMyActiveEvent() })
   const eventId = activeEvent?.id ?? ''
@@ -72,7 +74,20 @@ function DiscoverPage() {
     return () => observer.disconnect()
   }, [flatProfiles.length, totalItems, loadMore])
 
-  const handleAction = () => {
+  const swipeMutation = useMutation({
+    mutationFn: recordSwipe,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['likes'] })
+      queryClient.invalidateQueries({ queryKey: ['matches'] })
+    },
+  })
+
+  const handleAction = useCallback((direction: 'like' | 'pass') => {
+    const profile = flatProfiles[currentIndex]
+    if (profile && eventId) {
+      swipeMutation.mutate({ data: { eventId, swipedId: profile.userId, direction } })
+    }
+
     const container = containerRef.current
     if (!container) return
     const next = currentIndex + 1
@@ -80,7 +95,7 @@ function DiscoverPage() {
       ;(container.children[next] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
     if (next >= totalItems - 3) loadMore()
-  }
+  }, [currentIndex, eventId, flatProfiles, loadMore, swipeMutation, totalItems])
 
   const nextPhoto = (profileId: string, max: number) => {
     setPhotoIndices((prev) => ({ ...prev, [profileId]: Math.min((prev[profileId] ?? 0) + 1, max - 1) }))
@@ -104,12 +119,6 @@ function DiscoverPage() {
 
   return (
     <div className="flex h-[calc(100dvh-112px)] flex-col bg-[var(--mag-bg)]">
-      <div className="mx-auto w-[90%] px-2 pt-2">
-        <div className="flex items-center justify-between rounded-xl bg-[var(--mag-card)] px-3 py-2 text-xs text-[var(--mag-ink-soft)] border border-[var(--mag-line)]">
-          <span className="font-semibold text-[var(--mag-ink)] truncate">{activeEvent.name}</span>
-          <span className="inline-flex items-center gap-1 shrink-0"><Users className="h-3 w-3" />{baseProfiles.length} here</span>
-        </div>
-      </div>
       <div className="mx-auto h-full w-[90%]">
         <div ref={containerRef} className="hide-scrollbar relative h-full snap-y snap-mandatory overflow-y-auto" style={{ scrollBehavior: 'smooth' }}>
           {flatProfiles.map((profile, index) => {
@@ -137,14 +146,11 @@ function DiscoverPage() {
                   </div>
                 </div>
                 <div className="absolute right-3 bottom-24 flex flex-col items-center gap-4">
-                  <button onClick={handleAction} className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110">
+                  <button onClick={() => handleAction('like')} className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110">
                     <Heart className="h-6 w-6 fill-[var(--mag-green)] text-[var(--mag-green)]" />
                   </button>
-                  <button onClick={handleAction} className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110">
+                  <button onClick={() => handleAction('pass')} className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110">
                     <X className="h-6 w-6 text-red-400" strokeWidth={2.5} />
-                  </button>
-                  <button onClick={handleAction} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110">
-                    <Bookmark className="h-5 w-5 text-blue-400" />
                   </button>
                 </div>
               </section>

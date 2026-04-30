@@ -278,7 +278,17 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
 
     if (userIds.length === 0) return []
 
+    // Exclude people the current user has passed on
+    const passes = await prisma.eventSwipe.findMany({
+      where: { eventId, swiperId: myUserId, direction: 'pass' },
+      select: { swipedId: true },
+    })
+    const passedIds = passes.map((p) => p.swipedId)
+    const visibleUserIds = userIds.filter((id) => !passedIds.includes(id))
+
+    if (visibleUserIds.length === 0) return []
+
     return prisma.profile.findMany({
-      where: { userId: { in: userIds } },
+      where: { userId: { in: visibleUserIds } },
     })
   })

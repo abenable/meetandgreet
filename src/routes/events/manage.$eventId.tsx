@@ -11,6 +11,7 @@ import {
   MapPin,
   Calendar,
   CheckCircle2,
+  Link2,
 } from 'lucide-react'
 import { getEventById, updateEvent, deleteEvent, getEventProfiles } from '#/server/events'
 import { getSession } from '#/server/auth'
@@ -51,6 +52,8 @@ function ManageEventPage() {
   const [maxAttendees, setMaxAttendees] = useState<string>('')
   const [startsAt, setStartsAt] = useState<string>('')
   const [savedMsg, setSavedMsg] = useState(false)
+
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (event) {
@@ -127,6 +130,14 @@ function ManageEventPage() {
     deleteMutation.mutate({ data: eventId })
   }
 
+  const handleCopyLink = () => {
+    const link = `${window.location.origin}/events/join/${(event as any).code}`
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
   if (eventLoading || !event) {
     return (
       <main className="page-wrap px-4 py-4">
@@ -180,6 +191,13 @@ function ManageEventPage() {
         <p className="text-xs font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Code</p>
         <p className="mt-2 text-4xl font-mono font-bold tracking-widest text-[var(--mag-ink)]">{(event as any).code}</p>
         <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">Share this code so others can join</p>
+        <button
+          onClick={handleCopyLink}
+          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full border border-[var(--mag-line)] bg-[var(--mag-surface)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
+        >
+          <Link2 className="h-3.5 w-3.5" />
+          {copied ? 'Copied!' : 'Copy Share Link'}
+        </button>
       </div>
 
       {/* Event Details */}

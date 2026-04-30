@@ -29,6 +29,11 @@ function EventsExplorePage() {
     queryFn: () => getMyCreatedEvents(),
   })
 
+  const handleCopyShareLink = (code: string) => {
+    const link = `${window.location.origin}/events/join/${code}`
+    navigator.clipboard.writeText(link)
+  }
+
   const handleLeave = async () => {
     if (!activeEvent) return
     await leaveEvent({ data: activeEvent.id })
@@ -157,6 +162,12 @@ function EventsExplorePage() {
                     <Link to={`/events/manage/${event.id}`} className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] no-underline">
                       Manage
                     </Link>
+                    <button
+                      onClick={() => handleCopyShareLink(event.code)}
+                      className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
+                    >
+                      Copy Link
+                    </button>
                   </div>
                 </div>
               )

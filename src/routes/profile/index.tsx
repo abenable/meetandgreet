@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { MapPin, Briefcase, Camera, Link2, Pencil } from 'lucide-react'
+import { MapPin, Camera, Link2, Pencil } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 
 export const Route = createFileRoute('/profile/')({ component: ProfilePage })
@@ -78,7 +78,6 @@ function ProfilePage() {
     if (!editingField || !profile) return
     const updates: any = {}
     if (editingField === 'bio') updates.bio = editValue
-    if (editingField === 'job') updates.job = editValue
     if (editingField === 'location') updates.location = editValue
     updateMutation.mutate(updates)
   }
@@ -145,7 +144,7 @@ function ProfilePage() {
         <h2 className="mt-3 text-xl font-bold text-[var(--mag-ink)]">{profile.name || 'You'}</h2>
         <div className="mt-0.5 inline-flex items-center gap-1 text-sm text-[var(--mag-ink-soft)]">
           <MapPin className="h-3.5 w-3.5" />
-          <span>{profile.location || 'Add your city'}</span>
+          <span>{profile.location || 'Add your college'}</span>
         </div>
       </div>
 
@@ -182,23 +181,13 @@ function ProfilePage() {
         <p className="text-sm leading-relaxed text-[var(--mag-ink-soft)]">{profile.bio || 'Add a bio'}</p>
       </div>
 
-      <div onClick={() => openEdit('job', profile.job || '')} className="mb-4 cursor-pointer rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow transition hover:border-[var(--mag-green)]/30">
-        <div className="mb-1 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Work</h3>
-          <Pencil className="h-3 w-3 text-[var(--mag-ink-muted)]" />
-        </div>
-        <div className="flex items-center gap-2 text-sm text-[var(--mag-ink-soft)]">
-          <Briefcase className="h-4 w-4 text-[var(--mag-ink-muted)]" /><span>{profile.job || 'Add your job title'}</span>
-        </div>
-      </div>
-
       <div onClick={() => openEdit('location', profile.location || '')} className="mb-4 cursor-pointer rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow transition hover:border-[var(--mag-green)]/30">
         <div className="mb-1 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Location</h3>
           <Pencil className="h-3 w-3 text-[var(--mag-ink-muted)]" />
         </div>
         <div className="flex items-center gap-2 text-sm text-[var(--mag-ink-soft)]">
-          <MapPin className="h-4 w-4 text-[var(--mag-ink-muted)]" /><span>{profile.location || 'Add your city'}</span>
+          <MapPin className="h-4 w-4 text-[var(--mag-ink-muted)]" /><span>{profile.location || 'Add your college'}</span>
         </div>
       </div>
 
@@ -228,7 +217,7 @@ function ProfilePage() {
       {editingField && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
-            <h3 className="mb-3 text-sm font-semibold text-[var(--mag-ink)]">{editingField === 'bio' ? 'About Me' : editingField === 'job' ? 'Job Title' : 'Location'}</h3>
+            <h3 className="mb-3 text-sm font-semibold text-[var(--mag-ink)]">{editingField === 'bio' ? 'About Me' : 'Location'}</h3>
             <textarea value={editValue} onChange={(e) => setEditValue(e.target.value)} rows={editingField === 'bio' ? 4 : 1}
               className="mb-4 w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
             <div className="flex gap-2">

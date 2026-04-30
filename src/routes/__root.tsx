@@ -1,6 +1,7 @@
 import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { useEffect } from 'react'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
@@ -31,27 +32,27 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         href: appCss,
       },
     ],
-    scripts: [
-      {
-        key: 'theme-init',
-        children: `
-          (function() {
-            try {
-              var t = localStorage.getItem('mag-theme') || 'light';
-              if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-              }
-            } catch(e) {}
-          })();
-        `,
-        type: 'text/javascript' as const,
-      },
-    ],
   }),
   shellComponent: RootDocument,
 })
 
+function useThemeInit() {
+  useEffect(() => {
+    try {
+      const t = localStorage.getItem('mag-theme')
+      if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [])
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
+  useThemeInit()
   return (
     <html lang="en">
       <head>

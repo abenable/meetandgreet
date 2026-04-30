@@ -150,18 +150,18 @@ function ProfilePage() {
       </div>
 
       {/* Photo Gallery */}
-      <div className="mb-5 flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+      <div className="mb-5 flex gap-3 overflow-x-auto hide-scrollbar pb-1">
         {(profile.photos || []).map((photo: string, i: number) => (
-          <div key={i} className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl">
+          <div key={i} className="relative h-28 w-28 flex-shrink-0 overflow-hidden rounded-xl">
             <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
           </div>
         ))}
         <Link
           to="/profile/media"
-          className="flex h-20 w-20 flex-shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl bg-[var(--mag-green)] text-white dark:text-black transition hover:opacity-90 no-underline"
+          className="flex h-28 w-28 flex-shrink-0 flex-col items-center justify-center gap-1 rounded-xl bg-[var(--mag-green)] text-white dark:text-black transition hover:opacity-90 no-underline"
         >
-          <Camera className="h-4 w-4" />
-          <span className="text-[9px] font-medium">Add</span>
+          <Camera className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Add</span>
         </Link>
       </div>
 

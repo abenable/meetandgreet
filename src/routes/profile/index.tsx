@@ -39,29 +39,36 @@ function ProfilePage() {
 
   return (
     <main className="page-wrap px-4 py-4">
-      <div className="mb-5 text-center">
-        <h1 className="text-xl font-bold text-[var(--mag-ink)]">My Profile</h1>
+      {/* Profile Avatar */}
+      <div className="mb-4 flex flex-col items-center">
+        <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-[var(--mag-card)] shadow-md">
+          <img
+            src={(profile.photos || [])[0] || ''}
+            alt="Profile"
+            className="h-full w-full object-cover"
+          />
+          <button className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-[var(--mag-green)] text-white shadow-sm transition hover:scale-105">
+            <Camera className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <h2 className="mt-3 text-xl font-bold text-[var(--mag-ink)]">{profile.name || 'You'}</h2>
+        <div className="mt-0.5 inline-flex items-center gap-1 text-sm text-[var(--mag-ink-soft)]">
+          <MapPin className="h-3.5 w-3.5" />
+          <span>{profile.location || 'Add your city'}</span>
+        </div>
       </div>
 
-      <div className="mb-5 flex gap-2 overflow-x-auto hide-scrollbar">
+      {/* Photo Gallery */}
+      <div className="mb-5 flex gap-2 overflow-x-auto hide-scrollbar pb-1">
         {(profile.photos || []).map((photo, i) => (
-          <div key={i} className="relative min-w-[120px] flex-shrink-0 overflow-hidden rounded-2xl">
-            <img src={photo} alt={`Photo ${i + 1}`} className="aspect-[3/4] w-full object-cover" />
-            <button className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/60">
-              <Camera className="h-3.5 w-3.5" />
-            </button>
+          <div key={i} className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl">
+            <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
           </div>
         ))}
-        <button className="flex min-w-[120px] flex-shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]">
-          <Camera className="h-5 w-5" /><span className="text-[10px] font-medium">Add Photo</span>
+        <button className="flex h-20 w-20 flex-shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border-2 border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]">
+          <Camera className="h-4 w-4" />
+          <span className="text-[9px] font-medium">Add</span>
         </button>
-      </div>
-
-      <div className="mb-5 text-center">
-        <h2 className="text-2xl font-bold text-[var(--mag-ink)]">{profile.name || 'You'}</h2>
-        <div className="mt-1 inline-flex items-center gap-1 text-sm text-[var(--mag-ink-soft)]">
-          <MapPin className="h-3.5 w-3.5" /><span>{profile.location || 'Add your city'}</span>
-        </div>
       </div>
 
       <div className="mb-5 flex flex-wrap justify-center gap-2">

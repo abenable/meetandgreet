@@ -15,7 +15,8 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "start": "node --import ./.output/server/instrument.server.mjs .output/server/index.mjs"
+    "start": "bun run server.prod.ts",
+    "start:docker": "bun run server.prod.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",

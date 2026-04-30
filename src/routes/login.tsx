@@ -120,6 +120,7 @@ function LoginPage() {
           </button>
         </form>
 
+        {/**
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-[var(--mag-line)]" />
           <span className="text-xs text-[var(--mag-ink-muted)]">or</span>
@@ -135,6 +136,7 @@ function LoginPage() {
           </svg>
           Continue with Google
         </button>
+        */}
 
         <div className="text-center text-xs text-[var(--mag-ink-muted)]">
           Don't have an account?{' '}

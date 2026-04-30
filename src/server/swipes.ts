@@ -4,7 +4,7 @@ import { prisma } from '#/db'
 import { auth } from '#/lib/auth'
 
 export const recordSwipe = createServerFn({ method: 'POST' })
-  .validator(z.object({
+  .inputValidator(z.object({
     eventId: z.string(),
     swipedId: z.string(),
     direction: z.enum(['like', 'pass', 'super']),
@@ -126,7 +126,7 @@ export const getMatches = createServerFn({ method: 'GET' })
   })
 
 export const getMessages = createServerFn({ method: 'GET' })
-  .validator(z.string())
+  .inputValidator(z.string())
   .handler(async ({ request, data: matchId }) => {
     const session = await auth.api.getSession({ headers: request.headers })
     if (!session?.user?.id) return []
@@ -146,7 +146,7 @@ export const getMessages = createServerFn({ method: 'GET' })
   })
 
 export const sendMessage = createServerFn({ method: 'POST' })
-  .validator(z.object({
+  .inputValidator(z.object({
     matchId: z.string(),
     content: z.string().min(1).max(2000),
   }))

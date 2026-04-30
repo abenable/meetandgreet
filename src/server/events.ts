@@ -23,7 +23,7 @@ export const listEvents = createServerFn({ method: 'GET' })
   })
 
 export const getEventByCode = createServerFn({ method: 'GET' })
-  .validator(z.string())
+  .inputValidator(z.string())
   .handler(async ({ request, data: code }) => {
     return prisma.event.findUnique({
       where: { code: code.toUpperCase() },
@@ -34,7 +34,7 @@ export const getEventByCode = createServerFn({ method: 'GET' })
   })
 
 export const getEventById = createServerFn({ method: 'GET' })
-  .validator(z.string())
+  .inputValidator(z.string())
   .handler(async ({ request, data: id }) => {
     return prisma.event.findUnique({
       where: { id },
@@ -45,7 +45,7 @@ export const getEventById = createServerFn({ method: 'GET' })
   })
 
 export const createEvent = createServerFn({ method: 'POST' })
-  .validator(z.object({
+  .inputValidator(z.object({
     name: z.string().min(1).max(100),
     description: z.string().max(500).optional(),
     location: z.string().max(200).optional(),
@@ -72,7 +72,7 @@ export const createEvent = createServerFn({ method: 'POST' })
   })
 
 export const joinEvent = createServerFn({ method: 'POST' })
-  .validator(z.string())
+  .inputValidator(z.string())
   .handler(async ({ request, data: eventId }) => {
     const session = await auth.api.getSession({ headers: request.headers })
     if (!session?.user?.id) throw new Error('Unauthorized')
@@ -87,7 +87,7 @@ export const joinEvent = createServerFn({ method: 'POST' })
   })
 
 export const leaveEvent = createServerFn({ method: 'POST' })
-  .validator(z.string())
+  .inputValidator(z.string())
   .handler(async ({ request, data: eventId }) => {
     const session = await auth.api.getSession({ headers: request.headers })
     if (!session?.user?.id) throw new Error('Unauthorized')
@@ -117,7 +117,7 @@ export const getMyActiveEvent = createServerFn({ method: 'GET' })
   })
 
 export const getEventProfiles = createServerFn({ method: 'GET' })
-  .validator(z.string())
+  .inputValidator(z.string())
   .handler(async ({ request, data: eventId }) => {
     const session = await auth.api.getSession({ headers: request.headers })
     const myUserId = session?.user?.id

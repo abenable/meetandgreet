@@ -38,6 +38,11 @@ function resizeImageToBase64(file: File, maxWidth = 600): Promise<string> {
   })
 }
 
+function formatNameWithGender(name: string | null, gender: string | null): string {
+  const initial = gender === 'Male' ? 'M' : gender === 'Female' ? 'F' : ''
+  return initial ? `${name || ''}, ${initial}` : (name || '')
+}
+
 function ProfilePage() {
   const qc = useQueryClient()
   const navigate = useNavigate()
@@ -148,7 +153,7 @@ function ProfilePage() {
           />
         </div>
         <div className="mt-3 flex items-center gap-2">
-          <h2 className="text-xl font-bold text-[var(--mag-ink)]">{profile.name || 'You'}</h2>
+          <h2 className="text-xl font-bold text-[var(--mag-ink)]">{formatNameWithGender(profile.name, profile.gender) || 'You'}</h2>
           <button
             onClick={() => openEdit('name', profile.name || '', profile.gender || '')}
             className="rounded-full p-1 text-[var(--mag-ink-muted)] transition hover:bg-[var(--mag-surface)] hover:text-[var(--mag-ink)]"

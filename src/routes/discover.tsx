@@ -15,6 +15,12 @@ interface Profile {
   photos: string[]
   location: string | null
   interests: string[]
+  gender: string | null
+}
+
+function formatNameWithGender(name: string | null, gender: string | null): string {
+  const initial = gender === 'Male' ? 'M' : gender === 'Female' ? 'F' : ''
+  return initial ? `${name || ''}, ${initial}` : (name || '')
 }
 
 function DiscoverPage() {
@@ -136,7 +142,7 @@ function DiscoverPage() {
                 <button onClick={() => prevPhoto(profile.id)} className="absolute left-0 top-0 h-[40%] w-1/4" aria-label="Previous photo" />
                 <button onClick={() => nextPhoto(profile.id, profile.photos.length)} className="absolute right-0 top-0 h-[40%] w-1/4" aria-label="Next photo" />
                 <div className="absolute bottom-0 left-0 right-0 p-5 pb-24">
-                  <h2 className="text-3xl font-bold text-white">{profile.name}</h2>
+                  <h2 className="text-3xl font-bold text-white">{formatNameWithGender(profile.name, profile.gender)}</h2>
                   <div className="mt-1 flex items-center gap-1.5 text-sm text-white/80"><MapPin className="h-4 w-4" /><span>{profile.location}</span></div>
                   <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">{profile.bio}</p>
                   <div className="mt-3 flex flex-wrap gap-2">

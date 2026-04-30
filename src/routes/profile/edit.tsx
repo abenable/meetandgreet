@@ -67,7 +67,7 @@ function EditProfilePage() {
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Gender</label>
           <div className="flex flex-wrap gap-2">
-            {['Woman', 'Man', 'Non-binary'].map((g) => (
+            {['Male', 'Female'].map((g) => (
               <button key={g} onClick={() => setGender(g)} className={`rounded-full px-4 py-2 text-xs font-medium ${g === gender ? 'bg-[var(--mag-green)] text-white' : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)]'}`}>{g}</button>
             ))}
           </div>

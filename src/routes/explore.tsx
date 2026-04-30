@@ -21,9 +21,9 @@ const exploreCategories = [
 ]
 
 const mockProfiles = [
-  { id: 'p1', name: 'Maya', age: 27, bio: 'Architect by day, pottery enthusiast by night.', photos: ['https://picsum.photos/seed/maya1/400/600'], gender: 'Woman', location: 'Seattle, WA', distance: '2 miles away', interests: ['Coffee', 'Hiking', 'Indie Music', 'Pottery'] },
-  { id: 'p2', name: 'Jordan', age: 24, bio: 'Dog lover and weekend hiker.', photos: ['https://picsum.photos/seed/jordan1/400/600'], gender: 'Non-binary', location: 'Seattle, WA', distance: '5 miles away', interests: ['Dogs', 'Hiking', 'Coffee', 'Photography'] },
-  { id: 'p3', name: 'Alex', age: 26, bio: 'Software engineer who loves climbing and cooking.', photos: ['https://picsum.photos/seed/alex1/400/600'], gender: 'Man', location: 'Seattle, WA', distance: '1 mile away', interests: ['Climbing', 'Cooking', 'Ramen', 'Gaming'] },
+  { id: 'p1', name: 'Maya', age: 27, bio: 'Architect by day, pottery enthusiast by night.', photos: ['https://picsum.photos/seed/maya1/400/600'], gender: 'Female', location: 'Seattle, WA', distance: '2 miles away', interests: ['Coffee', 'Hiking', 'Indie Music', 'Pottery'] },
+  { id: 'p2', name: 'Jordan', age: 24, bio: 'Dog lover and weekend hiker.', photos: ['https://picsum.photos/seed/jordan1/400/600'], gender: 'Male', location: 'Seattle, WA', distance: '5 miles away', interests: ['Dogs', 'Hiking', 'Coffee', 'Photography'] },
+  { id: 'p3', name: 'Alex', age: 26, bio: 'Software engineer who loves climbing and cooking.', photos: ['https://picsum.photos/seed/alex1/400/600'], gender: 'Male', location: 'Seattle, WA', distance: '1 mile away', interests: ['Climbing', 'Cooking', 'Ramen', 'Gaming'] },
 ]
 
 const categoryInterestMap: Record<string, string[]> = {

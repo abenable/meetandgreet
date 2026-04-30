@@ -98,7 +98,7 @@ function OnboardingPage() {
                   Gender
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {['Woman', 'Man', 'Non-binary'].map((g) => (
+                  {['Male', 'Female'].map((g) => (
                     <button
                       key={g}
                       onClick={() => setGender(g)}

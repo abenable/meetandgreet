@@ -46,6 +46,7 @@ function ProfilePage() {
 
   const [editingField, setEditingField] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
+  const [editGender, setEditGender] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
   const updateMutation = useMutation({
@@ -69,15 +70,19 @@ function ProfilePage() {
     },
   })
 
-  const openEdit = (field: string, current: string) => {
+  const openEdit = (field: string, current: string, gender?: string) => {
     setEditingField(field)
     setEditValue(current)
+    if (gender) setEditGender(gender)
   }
 
   const saveEdit = () => {
     if (!editingField || !profile) return
     const updates: any = {}
-    if (editingField === 'name') updates.name = editValue
+    if (editingField === 'name') {
+      updates.name = editValue
+      updates.gender = editGender
+    }
     if (editingField === 'bio') updates.bio = editValue
     if (editingField === 'location') updates.location = editValue
     updateMutation.mutate(updates)
@@ -145,7 +150,7 @@ function ProfilePage() {
         <div className="mt-3 flex items-center gap-2">
           <h2 className="text-xl font-bold text-[var(--mag-ink)]">{profile.name || 'You'}</h2>
           <button
-            onClick={() => openEdit('name', profile.name || '')}
+            onClick={() => openEdit('name', profile.name || '', profile.gender || '')}
             className="rounded-full p-1 text-[var(--mag-ink-muted)] transition hover:bg-[var(--mag-surface)] hover:text-[var(--mag-ink)]"
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -154,17 +159,6 @@ function ProfilePage() {
         <div className="mt-0.5 inline-flex items-center gap-1 text-sm text-[var(--mag-ink-soft)]">
           <MapPin className="h-3.5 w-3.5" />
           <span>{profile.location || 'Add your college'}</span>
-        </div>
-      </div>
-
-      {/* Photo Gallery */}
-      <div className="mb-5 flex w-full justify-center gap-4 overflow-x-auto hide-scrollbar pb-2">
-        <div className="flex gap-4">
-          {(profile.photos || []).map((photo: string, i: number) => (
-            <div key={i} className="relative h-56 w-56 flex-shrink-0 overflow-hidden rounded-2xl">
-              <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
-            </div>
-          ))}
         </div>
       </div>
 
@@ -183,6 +177,23 @@ function ProfilePage() {
         <p className="text-sm leading-relaxed text-[var(--mag-ink-soft)]">{profile.bio || 'Add a bio'}</p>
       </div>
 
+      <div onClick={() => navigate({ to: '/profile/media' })} className="mb-4 cursor-pointer rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow transition hover:border-[var(--mag-green)]/30">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-[var(--mag-ink)]">My Photos</h3>
+          <span className="text-xs text-[var(--mag-ink-muted)]">{(profile.photos || []).length} photos</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {(profile.photos || []).slice(0, 4).map((photo: string, i: number) => (
+            <div key={i} className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
+              <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+            </div>
+          ))}
+          {(profile.photos || []).length === 0 && (
+            <span className="text-sm text-[var(--mag-ink-muted)]">Tap to add photos</span>
+          )}
+        </div>
+      </div>
+
       <div onClick={() => openEdit('location', profile.location || '')} className="mb-4 cursor-pointer rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow transition hover:border-[var(--mag-green)]/30">
         <div className="mb-1 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Location</h3>
@@ -194,10 +205,23 @@ function ProfilePage() {
       </div>
 
       <div className="mb-5 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow">
-        <h3 className="mb-2 text-sm font-semibold text-[var(--mag-ink)]">Gender</h3>
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Gender</h3>
+        </div>
         <div className="flex flex-wrap gap-2">
-          {['Woman', 'Man', 'Non-binary'].map((g) => (
-            <span key={g} className={`rounded-full px-4 py-2 text-xs font-medium ${g === profile.gender ? 'bg-[var(--mag-green)] text-white' : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)]'}`}>{g}</span>
+          {['Male', 'Female'].map((g) => (
+            <button
+              key={g}
+              onClick={() => updateMutation.mutate({ gender: g })}
+              disabled={updateMutation.isPending}
+              className={`rounded-full px-4 py-2 text-xs font-medium transition ${
+                g === profile.gender
+                  ? 'bg-[var(--mag-green)] text-white'
+                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)] hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]'
+              } disabled:opacity-60`}
+            >
+              {g}
+            </button>
           ))}
         </div>
       </div>

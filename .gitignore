@@ -14,3 +14,6 @@ todos.json
 .vscode
 .idea
 *.log
+.codex
+.cursorrules
+AGENTS.md

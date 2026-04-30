@@ -25,8 +25,12 @@ function JoinEventPage() {
 
   const handleJoin = async () => {
     if (!foundEvent) return
-    await joinEvent({ data: foundEvent.id })
-    navigate({ to: '/events' })
+    const result = await joinEvent({ data: foundEvent.code })
+    if (result.success) {
+      navigate({ to: '/events' })
+    } else {
+      alert(result.message || 'Failed to join event')
+    }
   }
 
   return (
@@ -76,7 +80,7 @@ function JoinEventPage() {
             <XCircle className="h-5 w-5 text-red-500" />
             <div>
               <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">Event not found</h3>
-              <p className="text-xs text-red-500 dark:text-red-400/80">Double-check the code and try again.</p>
+              <p className="text-xs text-red-500 dark:text-red-400/80">Event not found or not currently open for joining.</p>
             </div>
           </div>
         </div>

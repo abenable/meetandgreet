@@ -85,8 +85,11 @@ model Event {
   createdById String
   isActive    Boolean         @default(true)
   createdAt   DateTime        @default(now())
-  expiresAt   DateTime?
-  attendees   EventAttendee[]
+  expiresAt    DateTime?
+  maxAttendees Int?
+  startsAt     DateTime?
+  endedAt      DateTime?
+  attendees    EventAttendee[]
   swipes      EventSwipe[]
   matches     EventMatch[]
 }

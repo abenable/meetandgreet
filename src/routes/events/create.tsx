@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, MapPin, Plus } from 'lucide-react'
+import { ArrowLeft, Calendar, MapPin, Plus, Users } from 'lucide-react'
 import { createEvent } from '#/server/events'
 
 export const Route = createFileRoute('/events/create')({ component: CreateEventPage })
@@ -11,11 +11,19 @@ function CreateEventPage() {
   const [description, setDescription] = useState('')
   const [location, setLocation] = useState('')
   const [code, setCode] = useState('')
+  const [maxAttendees, setMaxAttendees] = useState<number | ''>('')
+  const [startsAt, setStartsAt] = useState('')
 
   const handleCreate = async () => {
     if (!name.trim()) return
     try {
-      const event = await createEvent({ data: { name: name.trim(), description: description.trim(), location: location.trim() } })
+      const event = await createEvent({ data: { 
+        name: name.trim(), 
+        description: description.trim(), 
+        location: location.trim(),
+        maxAttendees: maxAttendees ? Number(maxAttendees) : undefined,
+        startsAt: startsAt || undefined,
+      } })
       setCode(event.code)
       setTimeout(() => navigate({ to: '/events' }), 1500)
     } catch (e) {
@@ -56,6 +64,22 @@ function CreateEventPage() {
           <div className="relative">
             <MapPin className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
             <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Capitol Hill, Seattle"
+              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
+          </div>
+        </div>
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Max Attendees (optional)</label>
+          <div className="relative">
+            <Users className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
+            <input type="number" min={1} max={1000} value={maxAttendees} onChange={(e) => setMaxAttendees(e.target.value === '' ? '' : Number(e.target.value))} placeholder="No limit"
+              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
+          </div>
+        </div>
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Start Time (optional)</label>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
+            <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)}
               className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
           </div>
         </div>

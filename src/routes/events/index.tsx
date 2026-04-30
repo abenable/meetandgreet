@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Calendar, MapPin, Plus, Search, QrCode, ArrowRight, Users, Clock } from 'lucide-react'
-import { listEvents, getMyActiveEvent, joinEvent, leaveEvent } from '#/server/events'
+import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents } from '#/server/events'
+import { getSession } from '#/server/auth'
 
 export const Route = createFileRoute('/events/')({ component: EventsExplorePage })
 
@@ -18,10 +19,15 @@ function EventsExplorePage() {
     queryFn: () => getMyActiveEvent(),
   })
 
-  const handleJoin = async (eventId: string) => {
-    await joinEvent({ data: eventId })
-    queryClient.invalidateQueries({ queryKey: ['active-event'] })
-  }
+  const { data: session } = useQuery({
+    queryKey: ['session'],
+    queryFn: () => getSession(),
+  })
+
+  const { data: myEvents = [] } = useQuery({
+    queryKey: ['my-created-events'],
+    queryFn: () => getMyCreatedEvents(),
+  })
 
   const handleLeave = async () => {
     if (!activeEvent) return
@@ -53,13 +59,20 @@ function EventsExplorePage() {
           <div className="mb-3 flex items-center gap-3 text-xs text-[var(--mag-ink-soft)]">
             <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{activeEvent.location}</span>
             <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{attendeeCount} people here</span>
-            <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{activeEvent.code}</span>
+            {activeEvent.createdById === session?.user?.id && (
+              <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{activeEvent.code}</span>
+            )}
           </div>
           <div className="flex gap-2">
             <Link to="/discover" className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-green)] py-2.5 text-xs font-bold !text-white no-underline transition hover:bg-[var(--mag-green-dark)]">
               Discover People <ArrowRight className="h-3 w-3" />
             </Link>
             <button onClick={handleLeave} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">Leave</button>
+            {activeEvent.createdById === session?.user?.id && (
+              <Link to={`/events/manage/${activeEvent.id}`} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] no-underline">
+                Manage Event
+              </Link>
+            )}
           </div>
         </div>
       ) : (
@@ -101,17 +114,56 @@ function EventsExplorePage() {
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
                     <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
                     <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
-                    <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{event.code}</span>
                   </div>
                 </div>
-                {!isJoined && (
-                  <button onClick={() => handleJoin(event.id)} className="shrink-0 rounded-full bg-[var(--mag-green)] px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-[var(--mag-green-dark)]">Join</button>
-                )}
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  {!isJoined && (
+                    <Link to="/events/join" className="rounded-full bg-[var(--mag-green)] px-4 py-1.5 text-xs font-semibold !text-white transition hover:bg-[var(--mag-green-dark)] no-underline">
+                      Enter Code to Join
+                    </Link>
+                  )}
+                  {event.createdById === session?.user?.id && (
+                    <Link to={`/events/manage/${event.id}`} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
+                      Manage
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           )
         })}
       </div>
+
+      {myEvents.length > 0 && (
+        <>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--mag-ink)]">My Created Events</h3>
+          </div>
+          <div className="mb-6 space-y-3">
+            {myEvents.map((event) => {
+              const count = (event as any)._count?.attendees ?? 0
+              return (
+                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
+                        <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{event.code}</span>
+                      </div>
+                    </div>
+                    <Link to={`/events/manage/${event.id}`} className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] no-underline">
+                      Manage
+                    </Link>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
 
       {upcomingEvents.length > 0 && (
         <>
@@ -129,9 +181,13 @@ function EventsExplorePage() {
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
                       <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
                       <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{0} interested</span>
-                      <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{event.code}</span>
                     </div>
                   </div>
+                  {event.createdById === session?.user?.id && (
+                    <Link to={`/events/manage/${event.id}`} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
+                      Manage
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}

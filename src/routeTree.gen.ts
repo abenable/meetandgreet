@@ -40,6 +40,7 @@ import { Route as ForgotPasswordVerifyRouteImport } from './routes/forgot-passwo
 import { Route as ForgotPasswordResetRouteImport } from './routes/forgot-password.reset'
 import { Route as EventsJoinRouteImport } from './routes/events/join'
 import { Route as EventsCreateRouteImport } from './routes/events/create'
+import { Route as EventsManageEventIdRouteImport } from './routes/events/manage.$eventId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const TopPicksRoute = TopPicksRouteImport.update({
@@ -197,6 +198,11 @@ const EventsCreateRoute = EventsCreateRouteImport.update({
   path: '/events/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsManageEventIdRoute = EventsManageEventIdRouteImport.update({
+  id: '/events/manage/$eventId',
+  path: '/events/manage/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/signup/': typeof SignupIndexRoute
   '/verify/': typeof VerifyIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/events/manage/$eventId': typeof EventsManageEventIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -269,6 +276,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupIndexRoute
   '/verify': typeof VerifyIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/events/manage/$eventId': typeof EventsManageEventIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -304,6 +312,7 @@ export interface FileRoutesById {
   '/signup/': typeof SignupIndexRoute
   '/verify/': typeof VerifyIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/events/manage/$eventId': typeof EventsManageEventIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -340,6 +349,7 @@ export interface FileRouteTypes {
     | '/signup/'
     | '/verify/'
     | '/api/auth/$'
+    | '/events/manage/$eventId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -373,6 +383,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify'
     | '/api/auth/$'
+    | '/events/manage/$eventId'
   id:
     | '__root__'
     | '/'
@@ -407,6 +418,7 @@ export interface FileRouteTypes {
     | '/signup/'
     | '/verify/'
     | '/api/auth/$'
+    | '/events/manage/$eventId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -440,6 +452,7 @@ export interface RootRouteChildren {
   SettingsIndexRoute: typeof SettingsIndexRoute
   VerifyIndexRoute: typeof VerifyIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  EventsManageEventIdRoute: typeof EventsManageEventIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -661,6 +674,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/manage/$eventId': {
+      id: '/events/manage/$eventId'
+      path: '/events/manage/$eventId'
+      fullPath: '/events/manage/$eventId'
+      preLoaderRoute: typeof EventsManageEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -715,6 +735,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsIndexRoute: SettingsIndexRoute,
   VerifyIndexRoute: VerifyIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  EventsManageEventIdRoute: EventsManageEventIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

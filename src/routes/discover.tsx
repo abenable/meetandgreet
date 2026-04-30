@@ -104,13 +104,13 @@ function DiscoverPage() {
 
   return (
     <div className="flex h-[calc(100dvh-112px)] flex-col bg-[var(--mag-bg)]">
-      <div className="mx-auto w-1/2 px-2 pt-2">
+      <div className="mx-auto w-[80%] px-2 pt-2">
         <div className="flex items-center justify-between rounded-xl bg-[var(--mag-card)] px-3 py-2 text-xs text-[var(--mag-ink-soft)] border border-[var(--mag-line)]">
           <span className="font-semibold text-[var(--mag-ink)] truncate">{activeEvent.name}</span>
           <span className="inline-flex items-center gap-1 shrink-0"><Users className="h-3 w-3" />{baseProfiles.length} here</span>
         </div>
       </div>
-      <div className="mx-auto h-full w-1/2">
+      <div className="mx-auto h-full w-[80%]">
         <div ref={containerRef} className="hide-scrollbar relative h-full snap-y snap-mandatory overflow-y-auto" style={{ scrollBehavior: 'smooth' }}>
           {flatProfiles.map((profile, index) => {
             const photoIdx = photoIndices[profile.id] ?? 0

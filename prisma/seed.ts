@@ -47,10 +47,10 @@ async function main() {
 
   // Seed events
   const events = [
-    { code: 'ARTWALK', name: 'Capitol Hill Art Walk', description: 'Monthly gallery crawl through Capitol Hill.', location: 'Capitol Hill, Seattle', createdById: 'u1', isActive: true },
-    { code: 'FREMONT', name: 'Fremont Friday Night', description: 'Weekly social at the Fremont Brewing taproom.', location: 'Fremont Brewing, Seattle', createdById: 'u6', isActive: true },
-    { code: 'COFFEE', name: 'Downtown Coffee Fest', description: 'Weekend coffee tasting event.', location: 'Pike Place Market, Seattle', createdById: 'u11', isActive: true },
-    { code: 'SUMMIT', name: 'Tech Summit Afterparty', description: 'Networking afterparty for local tech professionals.', location: 'South Lake Union, Seattle', createdById: 'u3', isActive: true },
+    { code: 'ARTWALK', name: 'Capitol Hill Art Walk', description: 'Monthly gallery crawl through Capitol Hill.', location: 'Capitol Hill, Seattle', createdById: 'u1', isActive: true, maxAttendees: 100, startsAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
+    { code: 'FREMONT', name: 'Fremont Friday Night', description: 'Weekly social at the Fremont Brewing taproom.', location: 'Fremont Brewing, Seattle', createdById: 'u6', isActive: true, maxAttendees: 50, startsAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
+    { code: 'COFFEE', name: 'Downtown Coffee Fest', description: 'Weekend coffee tasting event.', location: 'Pike Place Market, Seattle', createdById: 'u11', isActive: true, maxAttendees: 200, startsAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
+    { code: 'SUMMIT', name: 'Tech Summit Afterparty', description: 'Networking afterparty for local tech professionals.', location: 'South Lake Union, Seattle', createdById: 'u3', isActive: true, maxAttendees: 150, startsAt: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000) },
   ]
 
   for (const e of events) {

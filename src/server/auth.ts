@@ -21,6 +21,10 @@ export const sendEmailVerificationOtp = createServerFn({ method: 'POST' })
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
 
+    await prisma.verification.deleteMany({
+      where: { identifier: `email-verify:${email}` },
+    })
+
     await prisma.verification.create({
       data: {
         identifier: `email-verify:${email}`,
@@ -55,7 +59,7 @@ export const verifyEmailOtp = createServerFn({ method: 'POST' })
 
     await prisma.user.update({
       where: { email: data.email },
-      data: { emailVerified: new Date() },
+      data: { emailVerified: true },
     })
 
     await prisma.verification.delete({ where: { id: record.id } })
@@ -82,6 +86,10 @@ export const sendPasswordResetOtp = createServerFn({ method: 'POST' })
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
+
+    await prisma.verification.deleteMany({
+      where: { identifier: `password-reset:${email}` },
+    })
 
     await prisma.verification.create({
       data: {

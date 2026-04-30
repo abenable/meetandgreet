@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { MapPin, Camera, Link2, Pencil } from 'lucide-react'
@@ -165,13 +165,6 @@ function ProfilePage() {
               <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
             </div>
           ))}
-          <Link
-            to="/profile/media"
-            className="flex h-56 w-56 flex-shrink-0 flex-col items-center justify-center gap-2 rounded-2xl bg-[var(--mag-green)] text-white dark:text-black transition hover:opacity-90 no-underline"
-          >
-            <Camera className="h-8 w-8" />
-            <span className="text-xs font-medium">Add</span>
-          </Link>
         </div>
       </div>
 

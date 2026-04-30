@@ -35,7 +35,7 @@ function PremiumPage() {
         ))}
       </div>
 
-      <Link to="/discover" className="inline-flex w-full items-center justify-center rounded-full bg-[var(--mag-green)] py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[var(--mag-green-dark)] no-underline">
+      <Link to="/discover" className="inline-flex w-full items-center justify-center rounded-full bg-[var(--mag-green)] py-3.5 text-sm font-bold !text-white shadow-md transition hover:bg-[var(--mag-green-dark)] no-underline">
         Start Discovering
       </Link>
     </main>

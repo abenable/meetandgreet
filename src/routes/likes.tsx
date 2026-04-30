@@ -9,7 +9,7 @@ function LikesPage() {
   const { data: likes = [], isLoading } = useQuery({ queryKey: ['likes'], queryFn: () => getLikes() })
 
   return (
-    <main className="page-wrap px-4 py-4">
+    <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-bold text-[var(--mag-ink)]">Likes You</h1>
         <span className="rounded-full bg-[var(--mag-green)]/10 px-3 py-1 text-xs font-semibold text-[var(--mag-green)]">{likes.length} likes</span>
@@ -41,6 +41,6 @@ function LikesPage() {
           ))}
         </div>
       )}
-    </main>
+    </div>
   )
 }

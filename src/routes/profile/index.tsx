@@ -102,9 +102,9 @@ function ProfilePage() {
 
   if (!profile) {
     return (
-      <main className="page-wrap flex items-center justify-center py-16">
+      <div className="page-wrap flex flex-1 flex-col items-center justify-center py-16">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
-      </main>
+      </div>
     )
   }
 
@@ -112,7 +112,7 @@ function ProfilePage() {
   const initials = getInitials(profile.name || 'You')
 
   return (
-    <main className="page-wrap px-4 py-4">
+    <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       {/* Profile Avatar */}
       <div className="mb-4 flex flex-col items-center">
         <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-[var(--mag-card)] shadow-md">
@@ -238,6 +238,6 @@ function ProfilePage() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   )
 }

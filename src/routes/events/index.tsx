@@ -35,7 +35,7 @@ function EventsExplorePage() {
   const attendeeCount = (activeEvent as any)?._count?.attendees ?? 0
 
   return (
-    <main className="page-wrap px-4 py-4">
+    <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       <h1 className="mb-4 text-xl font-bold text-[var(--mag-ink)]">Explore Events</h1>
 
       {activeEvent ? (
@@ -56,7 +56,7 @@ function EventsExplorePage() {
             <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{activeEvent.code}</span>
           </div>
           <div className="flex gap-2">
-            <Link to="/discover" className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-green)] py-2.5 text-xs font-bold text-white no-underline transition hover:bg-[var(--mag-green-dark)]">
+            <Link to="/discover" className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-green)] py-2.5 text-xs font-bold !text-white no-underline transition hover:bg-[var(--mag-green-dark)]">
               Discover People <ArrowRight className="h-3 w-3" />
             </Link>
             <button onClick={handleLeave} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">Leave</button>
@@ -142,6 +142,6 @@ function EventsExplorePage() {
       <Link to="/events/create" className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] py-4 text-sm font-medium text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)] no-underline">
         <Plus className="h-4 w-4" />Create New Event
       </Link>
-    </main>
+    </div>
   )
 }

@@ -81,7 +81,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased flex flex-col min-h-[100dvh]">
         <Header />
-        <main className="flex-1 bg-[var(--mag-bg)]">
+        <main className="flex flex-1 flex-col bg-[var(--mag-bg)]">
           {children}
         </main>
         <Footer />

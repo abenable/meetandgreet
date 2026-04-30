@@ -8,7 +8,7 @@ function MatchesPage() {
   const { data: matches = [], isLoading } = useQuery({ queryKey: ['matches'], queryFn: () => getMatches() })
 
   return (
-    <main className="page-wrap px-4 py-4">
+    <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       <h1 className="mb-4 text-xl font-bold text-[var(--mag-ink)]">Messages</h1>
 
       {isLoading ? (
@@ -33,6 +33,6 @@ function MatchesPage() {
           ))}
         </div>
       )}
-    </main>
+    </div>
   )
 }

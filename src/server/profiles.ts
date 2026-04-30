@@ -39,7 +39,7 @@ export const getMyProfile = createServerFn({ method: 'GET' })
 export const updateProfile = createServerFn({ method: 'POST' })
   .inputValidator(z.object({
     bio: z.string().max(500).optional(),
-    photos: z.array(z.string().url()).max(6).optional(),
+    photos: z.array(z.string()).max(6).optional(),
     name: z.string().max(100).optional(),
     gender: z.string().max(50).optional(),
     birthDate: z.string().optional(),

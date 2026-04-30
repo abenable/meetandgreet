@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { prisma } from '#/db'
+import { auth } from '#/lib/auth'
 
 export const recordSwipe = createServerFn({ method: 'POST' })
   .validator(z.object({
@@ -115,7 +116,7 @@ export const getMatches = createServerFn({ method: 'GET' })
         id: match.id,
         eventId: match.eventId,
         peerId,
-        peerName: profile?.userId ?? 'Unknown',
+        peerName: profile?.name ?? 'Unknown',
         peerPhoto: profile?.photos[0],
         lastMessage: match.messages[0]?.content ?? '',
         lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,

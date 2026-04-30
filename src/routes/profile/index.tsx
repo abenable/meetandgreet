@@ -77,6 +77,7 @@ function ProfilePage() {
   const saveEdit = () => {
     if (!editingField || !profile) return
     const updates: any = {}
+    if (editingField === 'name') updates.name = editValue
     if (editingField === 'bio') updates.bio = editValue
     if (editingField === 'location') updates.location = editValue
     updateMutation.mutate(updates)
@@ -141,7 +142,15 @@ function ProfilePage() {
             onChange={handleAvatarFile}
           />
         </div>
-        <h2 className="mt-3 text-xl font-bold text-[var(--mag-ink)]">{profile.name || 'You'}</h2>
+        <div className="mt-3 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-[var(--mag-ink)]">{profile.name || 'You'}</h2>
+          <button
+            onClick={() => openEdit('name', profile.name || '')}
+            className="rounded-full p-1 text-[var(--mag-ink-muted)] transition hover:bg-[var(--mag-surface)] hover:text-[var(--mag-ink)]"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        </div>
         <div className="mt-0.5 inline-flex items-center gap-1 text-sm text-[var(--mag-ink-soft)]">
           <MapPin className="h-3.5 w-3.5" />
           <span>{profile.location || 'Add your college'}</span>
@@ -217,7 +226,7 @@ function ProfilePage() {
       {editingField && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
-            <h3 className="mb-3 text-sm font-semibold text-[var(--mag-ink)]">{editingField === 'bio' ? 'About Me' : 'Location'}</h3>
+            <h3 className="mb-3 text-sm font-semibold text-[var(--mag-ink)]">{editingField === 'name' ? 'Name' : editingField === 'bio' ? 'About Me' : 'Location'}</h3>
             <textarea value={editValue} onChange={(e) => setEditValue(e.target.value)} rows={editingField === 'bio' ? 4 : 1}
               className="mb-4 w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
             <div className="flex gap-2">

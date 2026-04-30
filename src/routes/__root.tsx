@@ -58,19 +58,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased flex flex-col min-h-[100dvh]">
         <Header />
-        {children}
+        <main className="flex-1">
+          {children}
+        </main>
         <Footer />
         <BottomNav />
-        <TanStackDevtools
-          config={{ position: 'bottom-right' }}
-          plugins={[
-            { name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> },
-            TanStackQueryDevtools,
-          ]}
-        />
-        <Scripts />
       </body>
     </html>
   )

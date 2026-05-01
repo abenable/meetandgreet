@@ -18,7 +18,7 @@ const config = defineConfig({
       registerType: 'autoUpdate',
       injectRegister: false,
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        globPatterns: ['**/*.{js,css,svg,png,ico,woff2}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

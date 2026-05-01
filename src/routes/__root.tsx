@@ -15,6 +15,14 @@ interface MyRouterContext {
   session?: Awaited<ReturnType<typeof getSession>>
 }
 
+const PUBLIC_PATHS = ['/', '/login', '/signup', '/forgot-password', '/about', '/api', '/events/join']
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(p + '/')
+  )
+}
+
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
     meta: [
@@ -26,6 +34,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       { title: 'Meet & Greet' },
       { name: 'description', content: 'Meet & Greet - Connect with people' },
       { name: 'theme-color', content: '#10B981' },
+      { name: 'mobile-web-app-capable', content: 'yes' },
       { name: 'apple-mobile-web-app-capable', content: 'yes' },
       { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
       { name: 'apple-mobile-web-app-title', content: 'Meet & Greet' },
@@ -55,18 +64,20 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
   beforeLoad: async ({ location }) => {
-    const publicPaths = ['/', '/login', '/signup', '/forgot-password', '/about', '/api', '/events/join']
-    const isPublic = publicPaths.some(
-      (p) => location.pathname === p || location.pathname.startsWith(p + '/')
-    )
+    const isPublic = isPublicPath(location.pathname)
 
-    const session = await getSession()
+    let session: Awaited<ReturnType<typeof getSession>> = null
+    try {
+      session = await getSession()
+    } catch {
+      // If session fetch fails, treat as unauthenticated
+    }
 
     if (isPublic) {
       return { session }
     }
 
-    if (!session) {
+    if (!session?.session) {
       throw redirect({ to: '/login' })
     }
 

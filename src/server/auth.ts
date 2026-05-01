@@ -17,7 +17,9 @@ export const sendEmailVerificationOtp = createServerFn({ method: 'POST' })
   .inputValidator(z.string().email())
   .handler(async ({ data: email }) => {
     const user = await prisma.user.findUnique({ where: { email } })
-    if (!user) throw new Error('User not found')
+    if (!user) {
+      return { success: false, message: 'We could not find an account with that email.' }
+    }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
 
@@ -143,12 +145,12 @@ export const resetPasswordWithOtp = createServerFn({ method: 'POST' })
     })
 
     if (!record || record.expiresAt < new Date()) {
-      throw new Error('Invalid or expired OTP')
+      return { success: false, message: 'Invalid or expired code. Please request a new one.' }
     }
 
     const user = await prisma.user.findUnique({ where: { email: data.email } })
     if (!user) {
-      throw new Error('User not found')
+      return { success: false, message: 'We could not find an account with that email.' }
     }
 
     const hashed = await hashPassword(data.password)

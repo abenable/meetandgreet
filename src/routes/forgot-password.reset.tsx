@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import { Flame, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Flame, Lock, Eye, EyeOff, ArrowRight, Check, X } from 'lucide-react'
 import { resetPasswordWithOtp } from '#/server/auth'
+import { normalizeAuthError, validatePassword } from '#/lib/auth-errors'
 
 export const Route = createFileRoute('/forgot-password/reset')({ component: ResetPasswordPage })
 
@@ -19,27 +20,34 @@ function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const { valid: passwordValid, requirements } = validatePassword(password)
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     e.stopPropagation()
     setError('')
 
     if (password !== confirm) {
-      setError('Passwords do not match')
+      setError('Passwords do not match.')
       return
     }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+    if (!passwordValid) {
+      setError('Please choose a stronger password.')
       return
     }
 
     setLoading(true)
 
     try {
-      await resetPasswordWithOtpFn({ data: { email, otp, password } })
-      navigate({ to: '/discover' })
+      const res = await resetPasswordWithOtpFn({ data: { email, otp, password } })
+      if (!res.success && res.message) {
+        setError(normalizeAuthError(res.message))
+        setLoading(false)
+        return
+      }
+      navigate({ to: '/login' })
     } catch (err: any) {
-      setError(err?.message || 'Failed to reset password')
+      setError(normalizeAuthError(err?.message || ''))
     } finally {
       setLoading(false)
     }
@@ -85,7 +93,6 @@ function ResetPasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="New password"
               required
-              minLength={8}
               className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-10 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
             />
             <button
@@ -109,10 +116,20 @@ function ResetPasswordPage() {
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="Confirm password"
               required
-              minLength={8}
               className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
             />
           </div>
+
+          {password.length > 0 && (
+            <ul className="space-y-1">
+              {requirements.map((r) => (
+                <li key={r.label} className="flex items-center gap-1.5 text-[11px] text-[var(--mag-ink-muted)]">
+                  {r.met ? <Check className="h-3 w-3 text-[var(--mag-green)]" /> : <X className="h-3 w-3 text-red-400" />}
+                  <span className={r.met ? 'text-[var(--mag-ink-soft)]' : ''}>{r.label}</span>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <button
             type="submit"

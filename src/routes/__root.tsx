@@ -1,7 +1,9 @@
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext, redirect } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import PWAInstallPrompt from '../components/PWAInstallPrompt'
 
 import appCss from '../styles.css?url'
 
@@ -22,6 +24,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
       },
       { title: 'Meet & Greet' },
+      { name: 'description', content: 'Meet & Greet - Connect with people' },
+      { name: 'theme-color', content: '#10B981' },
+      { name: 'apple-mobile-web-app-capable', content: 'yes' },
+      { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
+      { name: 'apple-mobile-web-app-title', content: 'Meet & Greet' },
     ],
     links: [
       {
@@ -75,6 +82,24 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootLayout() {
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      const register = async () => {
+        const { registerSW } = await import('virtual:pwa-register')
+        registerSW({
+          immediate: true,
+          onRegistered(_registration) {
+            // console.log('[PWA] Service Worker registered')
+          },
+          onRegisterError(_error) {
+            // console.error('[PWA] Service Worker registration error')
+          },
+        })
+      }
+      register()
+    }
+  }, [])
+
   return (
     <>
       <Header />
@@ -83,6 +108,7 @@ function RootLayout() {
       </main>
       <Footer />
       <BottomNav />
+      <PWAInstallPrompt />
     </>
   )
 }

@@ -16,10 +16,12 @@ import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LikesRouteImport } from './routes/likes'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as ChatsRouteImport } from './routes/chats'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyIndexRouteImport } from './routes/verify/index'
@@ -45,6 +47,7 @@ import { Route as EventsCreateRouteImport } from './routes/events/create'
 import { Route as EventsManageEventIdRouteImport } from './routes/events/manage.$eventId'
 import { Route as EventsJoinCodeRouteImport } from './routes/events/join.$code'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as EventsChatEventIdPeerIdRouteImport } from './routes/events/chat.$eventId.$peerId'
 
 const TopPicksRoute = TopPicksRouteImport.update({
   id: '/top-picks',
@@ -81,6 +84,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -99,6 +107,11 @@ const ExploreRoute = ExploreRouteImport.update({
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatsRoute = ChatsRouteImport.update({
+  id: '/chats',
+  path: '/chats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -226,14 +239,21 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsChatEventIdPeerIdRoute = EventsChatEventIdPeerIdRouteImport.update({
+  id: '/events/chat/$eventId/$peerId',
+  path: '/events/chat/$eventId/$peerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/chats': typeof ChatsRoute
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -264,14 +284,17 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
+  '/events/chat/$eventId/$peerId': typeof EventsChatEventIdPeerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/chats': typeof ChatsRoute
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -301,15 +324,18 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
+  '/events/chat/$eventId/$peerId': typeof EventsChatEventIdPeerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/chats': typeof ChatsRoute
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -340,16 +366,19 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
+  '/events/chat/$eventId/$peerId': typeof EventsChatEventIdPeerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/chats'
     | '/discover'
     | '/explore'
     | '/likes'
     | '/login'
+    | '/notifications'
     | '/onboarding'
     | '/premium'
     | '/privacy'
@@ -380,14 +409,17 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
+    | '/events/chat/$eventId/$peerId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/chats'
     | '/discover'
     | '/explore'
     | '/likes'
     | '/login'
+    | '/notifications'
     | '/onboarding'
     | '/premium'
     | '/privacy'
@@ -417,14 +449,17 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
+    | '/events/chat/$eventId/$peerId'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/chats'
     | '/discover'
     | '/explore'
     | '/likes'
     | '/login'
+    | '/notifications'
     | '/onboarding'
     | '/premium'
     | '/privacy'
@@ -455,15 +490,18 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
+    | '/events/chat/$eventId/$peerId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  ChatsRoute: typeof ChatsRoute
   DiscoverRoute: typeof DiscoverRoute
   ExploreRoute: typeof ExploreRoute
   LikesRoute: typeof LikesRoute
   LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -491,6 +529,7 @@ export interface RootRouteChildren {
   VerifyIndexRoute: typeof VerifyIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   EventsManageEventIdRoute: typeof EventsManageEventIdRoute
+  EventsChatEventIdPeerIdRoute: typeof EventsChatEventIdPeerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -544,6 +583,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -570,6 +616,13 @@ declare module '@tanstack/react-router' {
       path: '/discover'
       fullPath: '/discover'
       preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chats': {
+      id: '/chats'
+      path: '/chats'
+      fullPath: '/chats'
+      preLoaderRoute: typeof ChatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -747,6 +800,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/chat/$eventId/$peerId': {
+      id: '/events/chat/$eventId/$peerId'
+      path: '/events/chat/$eventId/$peerId'
+      fullPath: '/events/chat/$eventId/$peerId'
+      preLoaderRoute: typeof EventsChatEventIdPeerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -778,10 +838,12 @@ const EventsJoinRouteWithChildren = EventsJoinRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  ChatsRoute: ChatsRoute,
   DiscoverRoute: DiscoverRoute,
   ExploreRoute: ExploreRoute,
   LikesRoute: LikesRoute,
   LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,
   PrivacyRoute: PrivacyRoute,
@@ -809,6 +871,7 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyIndexRoute: VerifyIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   EventsManageEventIdRoute: EventsManageEventIdRoute,
+  EventsChatEventIdPeerIdRoute: EventsChatEventIdPeerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

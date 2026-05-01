@@ -36,6 +36,13 @@ export const getMyProfile = createServerFn({ method: 'GET' })
     return profile
   })
 
+export const getProfileByUserId = createServerFn({ method: 'GET' })
+  .inputValidator(z.string())
+  .handler(async ({ data: userId }) => {
+    await requireSession()
+    return prisma.profile.findUnique({ where: { userId } })
+  })
+
 export const updateProfile = createServerFn({ method: 'POST' })
   .inputValidator(z.object({
     bio: z.string().max(500).optional(),

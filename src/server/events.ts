@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getRequest } from '@tanstack/react-start/server'
 import { prisma } from '#/db'
 import { auth } from '#/lib/auth'
+import { createNotification } from './notifications.server'
 
 async function requireSession() {
   const request = getRequest()
@@ -462,6 +463,107 @@ export const getMyOrganizerMessages = createServerFn({ method: 'GET' })
       orderBy: { createdAt: 'desc' },
       take: 50,
     })
+  })
+
+async function checkEventChatPermission(eventId: string, userId: string, peerId: string) {
+  const event = await prisma.event.findUnique({ where: { id: eventId } })
+  if (!event) throw new Error('Event not found')
+
+  const [meAttendee, peerAttendee] = await Promise.all([
+    prisma.eventAttendee.findFirst({ where: { eventId, userId, leftAt: null } }),
+    prisma.eventAttendee.findFirst({ where: { eventId, userId: peerId, leftAt: null } }),
+  ])
+
+  if (!meAttendee) throw new Error('You must be attending this event')
+  if (!peerAttendee) throw new Error('The other user is not attending this event')
+
+  const isOrganizer = (id: string) => event.createdById === id
+  if (isOrganizer(userId) || isOrganizer(peerId)) {
+    return { allowed: true, isOrganizer: true, event }
+  }
+
+  const [myLike, theirLike] = await Promise.all([
+    prisma.eventSwipe.findFirst({
+      where: { eventId, swiperId: userId, swipedId: peerId, direction: { in: ['like', 'super'] } },
+    }),
+    prisma.eventSwipe.findFirst({
+      where: { eventId, swiperId: peerId, swipedId: userId, direction: { in: ['like', 'super'] } },
+    }),
+  ])
+
+  if (!myLike || !theirLike) {
+    throw new Error('You can only chat with mutual matches or the event organizer')
+  }
+
+  return { allowed: true, isOrganizer: false, event }
+}
+
+export const getEventChat = createServerFn({ method: 'GET' })
+  .inputValidator(z.object({ eventId: z.string(), peerId: z.string() }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+    await checkEventChatPermission(data.eventId, session.user.id, data.peerId)
+
+    const rows = await prisma.eventOrganizerMessage.findMany({
+      where: {
+        eventId: data.eventId,
+        OR: [
+          { senderId: session.user.id, receiverId: data.peerId },
+          { senderId: data.peerId, receiverId: session.user.id },
+        ],
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    return rows.map((msg) => ({ ...msg, isMine: msg.senderId === session.user.id }))
+  })
+
+export const sendEventChat = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({
+    eventId: z.string(),
+    peerId: z.string(),
+    content: z.string().min(1).max(2000),
+  }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+    await checkEventChatPermission(data.eventId, session.user.id, data.peerId)
+
+    const message = await prisma.eventOrganizerMessage.create({
+      data: {
+        eventId: data.eventId,
+        senderId: session.user.id,
+        receiverId: data.peerId,
+        content: data.content,
+      },
+    })
+
+    await createNotification({
+      userId: data.peerId,
+      type: 'organizer_message',
+      title: 'New Message',
+      body: data.content.slice(0, 100),
+      link: `/events/chat/${data.eventId}/${session.user.id}`,
+    })
+
+    return message
+  })
+
+export const markOrganizerMessagesRead = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ eventId: z.string(), senderId: z.string() }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+
+    await prisma.eventOrganizerMessage.updateMany({
+      where: {
+        eventId: data.eventId,
+        senderId: data.senderId,
+        receiverId: session.user.id,
+        readAt: null,
+      },
+      data: { readAt: new Date() },
+    })
+
+    return { success: true }
   })
 
 export const reportUser = createServerFn({ method: 'POST' })

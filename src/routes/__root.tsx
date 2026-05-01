@@ -1,4 +1,4 @@
-import { HeadContent, Scripts, createRootRouteWithContext, redirect } from '@tanstack/react-router'
+import { HeadContent, Outlet, Scripts, createRootRouteWithContext, redirect } from '@tanstack/react-router'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
@@ -65,8 +65,27 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
     return { session }
   },
+  component: RootLayout,
   shellComponent: RootDocument,
+  notFoundComponent: () => (
+    <div className="flex flex-1 items-center justify-center">
+      <p className="text-lg text-[var(--mag-ink-soft)]">Page not found</p>
+    </div>
+  ),
 })
+
+function RootLayout() {
+  return (
+    <>
+      <Header />
+      <main className="flex flex-1 flex-col bg-[var(--mag-bg)]">
+        <Outlet />
+      </main>
+      <Footer />
+      <BottomNav />
+    </>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -80,12 +99,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body className="font-sans antialiased flex flex-col min-h-[100dvh]">
-        <Header />
-        <main className="flex flex-1 flex-col bg-[var(--mag-bg)]">
-          {children}
-        </main>
-        <Footer />
-        <BottomNav />
+        {children}
         <Scripts />
       </body>
     </html>

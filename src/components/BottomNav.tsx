@@ -5,13 +5,15 @@ export default function BottomNav() {
   const router = useRouterState()
   const path = router.location.pathname
 
-  const mainPaths = ['/discover', '/events', '/likes', '/matches', '/profile']
-  const isMainScreen = mainPaths.some((p) => path === p || path.startsWith(p + '/'))
+  const mainPaths = ['/discover', '/events', '/likes', '/chats', '/matches', '/profile']
+  const isMainScreen = mainPaths.some((p) => path === p || path.startsWith(p + '/')) || path.startsWith('/events/chat/')
 
   if (!isMainScreen) return null
 
   const activeClass = 'text-[var(--mag-green)]'
   const inactiveClass = 'text-[var(--mag-ink-muted)]'
+
+  const isChatActive = path === '/chats' || path.startsWith('/chats/') || path.startsWith('/matches/') || path.startsWith('/events/chat/')
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--mag-line)] bg-[var(--bottom-nav-bg)] backdrop-blur-lg">
@@ -28,8 +30,8 @@ export default function BottomNav() {
           <Heart className="h-6 w-6" strokeWidth={path === '/likes' ? 2.5 : 2} />
           <span className="text-[10px] font-medium">Likes</span>
         </Link>
-        <Link to="/matches" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${path.startsWith('/matches') ? activeClass : inactiveClass}`}>
-          <MessageCircle className="h-6 w-6" strokeWidth={path.startsWith('/matches') ? 2.5 : 2} />
+        <Link to="/chats" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${isChatActive ? activeClass : inactiveClass}`}>
+          <MessageCircle className="h-6 w-6" strokeWidth={isChatActive ? 2.5 : 2} />
           <span className="text-[10px] font-medium">Chat</span>
         </Link>
         <Link to="/profile" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${path.startsWith('/profile') ? activeClass : inactiveClass}`}>

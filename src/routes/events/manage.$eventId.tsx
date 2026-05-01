@@ -17,8 +17,6 @@ import {
   UserX,
   Flag,
   ShieldAlert,
-  Send,
-  X,
 } from 'lucide-react'
 import {
   getEventById,
@@ -29,8 +27,6 @@ import {
   blockEventAttendee,
   unblockEventAttendee,
   getEventBlockedUsers,
-  sendOrganizerMessage,
-  getOrganizerMessages,
   getEventReports,
 } from '#/server/events'
 import { getSession } from '#/server/auth'
@@ -87,12 +83,6 @@ function ManageEventPage() {
   const [savedMsg, setSavedMsg] = useState(false)
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('attendees')
-
-  // Message modal state
-  const [messageModalOpen, setMessageModalOpen] = useState(false)
-  const [messageTarget, setMessageTarget] = useState<any>(null)
-  const [messageContent, setMessageContent] = useState('')
-  const [messageHistory, setMessageHistory] = useState<any[]>([])
 
   useEffect(() => {
     if (event) {
@@ -156,17 +146,6 @@ function ManageEventPage() {
     },
   })
 
-  const sendMessageMutation = useMutation({
-    mutationFn: sendOrganizerMessage,
-    onSuccess: () => {
-      setMessageContent('')
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
-      if (messageTarget) {
-        getOrganizerMessages({ data: { eventId, receiverId: messageTarget.userId } }).then(setMessageHistory)
-      }
-    },
-  })
-
   const handleSave = () => {
     updateMutation.mutate({
       data: {
@@ -205,21 +184,6 @@ function ManageEventPage() {
     navigator.clipboard.writeText(link).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    })
-  }
-
-  const openMessageModal = async (profile: any) => {
-    setMessageTarget(profile)
-    setMessageModalOpen(true)
-    setMessageContent('')
-    const msgs = await getOrganizerMessages({ data: { eventId, receiverId: profile.userId } })
-    setMessageHistory(msgs)
-  }
-
-  const handleSendMessage = () => {
-    if (!messageTarget || !messageContent.trim()) return
-    sendMessageMutation.mutate({
-      data: { eventId, receiverId: messageTarget.userId, content: messageContent.trim() },
     })
   }
 
@@ -482,7 +446,7 @@ function ManageEventPage() {
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
                         <button
-                          onClick={() => openMessageModal(profile)}
+                          onClick={() => navigate({ to: '/events/chat/$eventId/$peerId', params: { eventId, peerId: profile.userId } })}
                           title="Message"
                           className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-green)]/10 text-[var(--mag-green)] transition hover:bg-[var(--mag-green)]/20"
                         >
@@ -543,7 +507,7 @@ function ManageEventPage() {
                         <p className="truncate text-xs font-semibold text-[var(--mag-ink)]">
                           {(report.reported as any)?.name ?? 'Unknown'} reported by {(report.reporter as any)?.name ?? 'Unknown'}
                         </p>
-                        <p className="text-[10px] text-[var(--mag-ink-muted)]">
+                        <p className="text-[10px] text-[var(--mag-ink-muted)]" suppressHydrationWarning>
                           {new Date(report.createdAt).toLocaleString()}
                         </p>
                       </div>
@@ -559,7 +523,7 @@ function ManageEventPage() {
                         <Ban className="h-3 w-3" /> Block user
                       </button>
                       <button
-                        onClick={() => openMessageModal(report.reported)}
+                        onClick={() => navigate({ to: '/events/chat/$eventId/$peerId', params: { eventId, peerId: report.reportedId } })}
                         className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
                       >
                         <MessageCircle className="h-3 w-3" /> Message
@@ -623,70 +587,7 @@ function ManageEventPage() {
         )}
       </section>
 
-      {/* Message Modal */}
-      {messageModalOpen && messageTarget && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 px-4 pb-6 sm:items-center sm:pb-0">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-4 shadow-xl">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 overflow-hidden rounded-full bg-[var(--mag-line)]">
-                  {messageTarget.photos?.[0] ? (
-                    <img src={messageTarget.photos[0]} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[var(--mag-ink-muted)]">
-                      {messageTarget.name?.charAt(0)?.toUpperCase() ?? '?'}
-                    </div>
-                  )}
-                </div>
-                <p className="text-sm font-semibold text-[var(--mag-ink)]">{messageTarget.name ?? 'User'}</p>
-              </div>
-              <button
-                onClick={() => setMessageModalOpen(false)}
-                className="rounded-full p-1 text-[var(--mag-ink-muted)] transition hover:bg-[var(--mag-surface)]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
 
-            <div className="mb-3 max-h-64 space-y-2 overflow-y-auto rounded-xl bg-[var(--mag-surface)] p-3">
-              {messageHistory.length === 0 ? (
-                <p className="text-center text-xs text-[var(--mag-ink-muted)]">No messages yet.</p>
-              ) : (
-                messageHistory.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`max-w-[80%] rounded-xl px-3 py-2 text-xs ${
-                      msg.senderId === session?.user?.id
-                        ? 'ml-auto bg-[var(--mag-green)] text-white'
-                        : 'bg-[var(--mag-card)] text-[var(--mag-ink)]'
-                    }`}
-                  >
-                    {msg.content}
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={messageContent}
-                onChange={(e) => setMessageContent(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Type a message..."
-                className="flex-1 rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-3 py-2.5 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none"
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={!messageContent.trim() || sendMessageMutation.isPending}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--mag-green)] text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50"
-              >
-                <Send className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   )
 }

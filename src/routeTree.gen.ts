@@ -21,6 +21,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LikesRouteImport } from './routes/likes'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as ChatsRouteImport } from './routes/chats'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyIndexRouteImport } from './routes/verify/index'
@@ -106,6 +107,11 @@ const ExploreRoute = ExploreRouteImport.update({
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatsRoute = ChatsRouteImport.update({
+  id: '/chats',
+  path: '/chats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -242,6 +248,7 @@ const EventsChatEventIdPeerIdRoute = EventsChatEventIdPeerIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/chats': typeof ChatsRoute
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
@@ -282,6 +289,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/chats': typeof ChatsRoute
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
@@ -322,6 +330,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/chats': typeof ChatsRoute
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/chats'
     | '/discover'
     | '/explore'
     | '/likes'
@@ -404,6 +414,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/chats'
     | '/discover'
     | '/explore'
     | '/likes'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/chats'
     | '/discover'
     | '/explore'
     | '/likes'
@@ -484,6 +496,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  ChatsRoute: typeof ChatsRoute
   DiscoverRoute: typeof DiscoverRoute
   ExploreRoute: typeof ExploreRoute
   LikesRoute: typeof LikesRoute
@@ -603,6 +616,13 @@ declare module '@tanstack/react-router' {
       path: '/discover'
       fullPath: '/discover'
       preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chats': {
+      id: '/chats'
+      path: '/chats'
+      fullPath: '/chats'
+      preLoaderRoute: typeof ChatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -818,6 +838,7 @@ const EventsJoinRouteWithChildren = EventsJoinRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  ChatsRoute: ChatsRoute,
   DiscoverRoute: DiscoverRoute,
   ExploreRoute: ExploreRoute,
   LikesRoute: LikesRoute,

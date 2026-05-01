@@ -5,7 +5,7 @@ export default function BottomNav() {
   const router = useRouterState()
   const path = router.location.pathname
 
-  const mainPaths = ['/discover', '/events', '/likes', '/matches', '/profile']
+  const mainPaths = ['/discover', '/events', '/likes', '/chats', '/profile']
   const isMainScreen = mainPaths.some((p) => path === p || path.startsWith(p + '/'))
 
   if (!isMainScreen) return null
@@ -28,8 +28,8 @@ export default function BottomNav() {
           <Heart className="h-6 w-6" strokeWidth={path === '/likes' ? 2.5 : 2} />
           <span className="text-[10px] font-medium">Likes</span>
         </Link>
-        <Link to="/matches" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${path.startsWith('/matches') ? activeClass : inactiveClass}`}>
-          <MessageCircle className="h-6 w-6" strokeWidth={path.startsWith('/matches') ? 2.5 : 2} />
+        <Link to="/chats" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${path === '/chats' || path.startsWith('/chats/') ? activeClass : inactiveClass}`}>
+          <MessageCircle className="h-6 w-6" strokeWidth={path === '/chats' || path.startsWith('/chats/') ? 2.5 : 2} />
           <span className="text-[10px] font-medium">Chat</span>
         </Link>
         <Link to="/profile" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${path.startsWith('/profile') ? activeClass : inactiveClass}`}>

@@ -45,6 +45,7 @@ import { Route as EventsCreateRouteImport } from './routes/events/create'
 import { Route as EventsManageEventIdRouteImport } from './routes/events/manage.$eventId'
 import { Route as EventsJoinCodeRouteImport } from './routes/events/join.$code'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as EventsChatEventIdPeerIdRouteImport } from './routes/events/chat.$eventId.$peerId'
 
 const TopPicksRoute = TopPicksRouteImport.update({
   id: '/top-picks',
@@ -226,6 +227,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsChatEventIdPeerIdRoute = EventsChatEventIdPeerIdRouteImport.update({
+  id: '/events/chat/$eventId/$peerId',
+  path: '/events/chat/$eventId/$peerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -264,6 +270,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
+  '/events/chat/$eventId/$peerId': typeof EventsChatEventIdPeerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -301,6 +308,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
+  '/events/chat/$eventId/$peerId': typeof EventsChatEventIdPeerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -340,6 +348,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
+  '/events/chat/$eventId/$peerId': typeof EventsChatEventIdPeerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -380,6 +389,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
+    | '/events/chat/$eventId/$peerId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
+    | '/events/chat/$eventId/$peerId'
   id:
     | '__root__'
     | '/'
@@ -455,6 +466,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
+    | '/events/chat/$eventId/$peerId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -491,6 +503,7 @@ export interface RootRouteChildren {
   VerifyIndexRoute: typeof VerifyIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   EventsManageEventIdRoute: typeof EventsManageEventIdRoute
+  EventsChatEventIdPeerIdRoute: typeof EventsChatEventIdPeerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -747,6 +760,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/chat/$eventId/$peerId': {
+      id: '/events/chat/$eventId/$peerId'
+      path: '/events/chat/$eventId/$peerId'
+      fullPath: '/events/chat/$eventId/$peerId'
+      preLoaderRoute: typeof EventsChatEventIdPeerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -809,6 +829,7 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyIndexRoute: VerifyIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   EventsManageEventIdRoute: EventsManageEventIdRoute,
+  EventsChatEventIdPeerIdRoute: EventsChatEventIdPeerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

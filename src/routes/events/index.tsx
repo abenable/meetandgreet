@@ -79,10 +79,15 @@ function EventsExplorePage() {
           {unreadMessages.length > 0 && (
             <div className="mb-3 space-y-1.5">
               {unreadMessages.map((msg) => (
-                <div key={msg.id} className="flex items-start gap-2 rounded-xl bg-[var(--mag-green)]/10 px-3 py-2">
+                <Link
+                  key={msg.id}
+                  to="/events/chat/$eventId/$peerId"
+                  params={{ eventId: msg.eventId, peerId: msg.senderId }}
+                  className="flex items-start gap-2 rounded-xl bg-[var(--mag-green)]/10 px-3 py-2 no-underline transition hover:bg-[var(--mag-green)]/20"
+                >
                   <MessageCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mag-green)]" />
                   <p className="text-xs text-[var(--mag-ink)]">{msg.content}</p>
-                </div>
+                </Link>
               ))}
             </div>
           )}

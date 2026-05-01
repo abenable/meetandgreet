@@ -27,12 +27,13 @@ function CreateEventPage() {
   const handleCreate = async () => {
     if (!name.trim()) return
     try {
+      const startsAtIso = startsAt ? new Date(startsAt + ':00').toISOString() : undefined
       const event = await createEvent({ data: { 
         name: name.trim(), 
         description: description.trim(), 
         location: location.trim(),
         maxAttendees: maxAttendees ? Number(maxAttendees) : undefined,
-        startsAt: startsAt || undefined,
+        startsAt: startsAtIso,
       } })
       setCode(event.code)
       setTimeout(() => navigate({ to: '/events' }), 1500)

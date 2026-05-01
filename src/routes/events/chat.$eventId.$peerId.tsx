@@ -1,6 +1,5 @@
 import { createFileRoute, useParams, useNavigate } from '@tanstack/react-router'
-import { useEffect } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Send, Check, CheckCheck } from 'lucide-react'
 import { getEventChat, sendEventChat, markOrganizerMessagesRead } from '#/server/events'
@@ -13,6 +12,8 @@ function EventChatPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
 
   const { data: messages = [], isLoading, error } = useQuery({
     queryKey: ['event-chat', eventId, peerId],
@@ -32,11 +33,19 @@ function EventChatPage() {
   }, [eventId, peerId, qc])
 
   const handleSend = async () => {
-    if (!input.trim()) return
-    await sendEventChat({ data: { eventId, peerId, content: input.trim() } })
-    setInput('')
-    qc.invalidateQueries({ queryKey: ['event-chat', eventId, peerId] })
-    qc.invalidateQueries({ queryKey: ['my-organizer-messages'] })
+    if (!input.trim() || sending) return
+    setSending(true)
+    setSendError(null)
+    try {
+      await sendEventChat({ data: { eventId, peerId, content: input.trim() } })
+      setInput('')
+      qc.invalidateQueries({ queryKey: ['event-chat', eventId, peerId] })
+      qc.invalidateQueries({ queryKey: ['my-organizer-messages'] })
+    } catch (e: any) {
+      setSendError(e?.message || 'Failed to send message.')
+    } finally {
+      setSending(false)
+    }
   }
 
   const photo = peerProfile?.photos?.[0]
@@ -109,11 +118,13 @@ function EventChatPage() {
         )}
       </div>
 
+      {sendError && <p className="mb-1 text-xs text-red-500">{sendError}</p>}
       <div className="mt-3 flex items-center gap-2">
         <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Type a message..."
-          className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
-        <button onClick={handleSend} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)] text-white transition hover:bg-[var(--mag-green-dark)]">
+          disabled={sending}
+          className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20 disabled:opacity-60" />
+        <button onClick={handleSend} disabled={sending} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)] text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60">
           <Send className="h-4 w-4" />
         </button>
       </div>

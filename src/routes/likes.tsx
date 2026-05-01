@@ -2,8 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Heart, MessageCircle, Users } from 'lucide-react'
-import { getLikes } from '#/server/swipes'
-import { getMatches } from '#/server/swipes'
+import { getLikes, getMatches } from '#/server/swipes'
 
 export const Route = createFileRoute('/likes')({ component: LikesPage })
 

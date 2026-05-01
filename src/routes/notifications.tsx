@@ -44,7 +44,7 @@ function NotificationsPage() {
       markReadMutation.mutate({ data: n.id })
     }
     if (n.link) {
-      navigate({ to: n.link })
+      navigate({ to: n.link as any })
     }
   }
 

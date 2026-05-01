@@ -528,6 +528,15 @@ export const sendEventChat = createServerFn({ method: 'POST' })
     const session = await requireSession()
     await checkEventChatPermission(data.eventId, session.user.id, data.peerId)
 
+    const message = await prisma.eventOrganizerMessage.create({
+      data: {
+        eventId: data.eventId,
+        senderId: session.user.id,
+        receiverId: data.peerId,
+        content: data.content,
+      },
+    })
+
     await createNotification({
       userId: data.peerId,
       type: 'organizer_message',
@@ -536,14 +545,7 @@ export const sendEventChat = createServerFn({ method: 'POST' })
       link: `/events/chat/${data.eventId}/${session.user.id}`,
     })
 
-    return prisma.eventOrganizerMessage.create({
-      data: {
-        eventId: data.eventId,
-        senderId: session.user.id,
-        receiverId: data.peerId,
-        content: data.content,
-      },
-    })
+    return message
   })
 
 export const markOrganizerMessagesRead = createServerFn({ method: 'POST' })

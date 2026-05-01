@@ -107,15 +107,21 @@ export function usePWAInstall(): UsePWAInstallReturn {
   const prompt = useCallback(async (): Promise<boolean> => {
     const p = deferred.current
     if (!p) return false
-    p.prompt()
-    deferred.current = null
-    setCanInstall(false)
-    const { outcome } = await p.userChoice
-    if (outcome === 'accepted') {
-      setInstalled(true)
-      clearDismissed()
+    try {
+      await p.prompt()
+      deferred.current = null
+      setCanInstall(false)
+      const { outcome } = await p.userChoice
+      if (outcome === 'accepted') {
+        setInstalled(true)
+        clearDismissed()
+      }
+      return outcome === 'accepted'
+    } catch {
+      deferred.current = null
+      setCanInstall(false)
+      return false
     }
-    return outcome === 'accepted'
   }, [])
 
   const dismiss = useCallback(() => {

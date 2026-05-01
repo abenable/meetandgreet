@@ -85,18 +85,22 @@ function RootLayout() {
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       const register = async () => {
-        const { registerSW } = await import('virtual:pwa-register')
-        registerSW({
-          immediate: true,
-          onRegistered(_registration) {
-            // console.log('[PWA] Service Worker registered')
-          },
-          onRegisterError(_error) {
-            // console.error('[PWA] Service Worker registration error')
-          },
-        })
+        try {
+          const { registerSW } = await import('virtual:pwa-register')
+          registerSW({
+            immediate: true,
+            onRegistered(_registration) {
+              // console.log('[PWA] Service Worker registered')
+            },
+            onRegisterError(_error) {
+              // console.error('[PWA] Service Worker registration error')
+            },
+          })
+        } catch (error) {
+          console.error('[PWA] Service Worker registration setup failed', error)
+        }
       }
-      register()
+      void register()
     }
   }, [])
 

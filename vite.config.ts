@@ -49,7 +49,7 @@ const config = defineConfig({
             },
           },
           {
-            urlPattern: /\/api\/.*/i,
+            urlPattern: /\/api\/(?!auth\/).*$/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
@@ -81,7 +81,7 @@ const config = defineConfig({
         cleanupOutdatedCaches: true,
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
         type: 'module',
       },
     }),

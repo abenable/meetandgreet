@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calendar, MapPin, Plus, Search, QrCode, ArrowRight, Users, Clock, History } from 'lucide-react'
-import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents } from '#/server/events'
+import { Calendar, MapPin, Plus, Search, QrCode, ArrowRight, Users, Clock, History, MessageCircle } from 'lucide-react'
+import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents, getMyOrganizerMessages } from '#/server/events'
 import { getSession } from '#/server/auth'
 
 export const Route = createFileRoute('/events/')({ component: EventsExplorePage })
@@ -28,6 +28,13 @@ function EventsExplorePage() {
     queryKey: ['my-created-events'],
     queryFn: () => getMyCreatedEvents(),
   })
+
+  const { data: organizerMessages = [] } = useQuery({
+    queryKey: ['my-organizer-messages'],
+    queryFn: () => getMyOrganizerMessages(),
+  })
+
+  const unreadMessages = (organizerMessages as any[]).filter((m) => !m.readAt && m.eventId === activeEvent?.id)
 
   const handleCopyShareLink = (code: string) => {
     const link = `${window.location.origin}/events/join/${code}`
@@ -69,6 +76,16 @@ function EventsExplorePage() {
               <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{activeEvent.code}</span>
             )}
           </div>
+          {unreadMessages.length > 0 && (
+            <div className="mb-3 space-y-1.5">
+              {unreadMessages.map((msg) => (
+                <div key={msg.id} className="flex items-start gap-2 rounded-xl bg-[var(--mag-green)]/10 px-3 py-2">
+                  <MessageCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mag-green)]" />
+                  <p className="text-xs text-[var(--mag-ink)]">{msg.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="flex gap-2">
             <Link to="/discover" className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-green)] py-2.5 text-xs font-bold !text-white no-underline transition hover:bg-[var(--mag-green-dark)]">
               Discover People <ArrowRight className="h-3 w-3" />

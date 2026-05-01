@@ -137,6 +137,15 @@ export const joinEvent = createServerFn({ method: 'POST' })
       return { success: false, message: 'Event is full' }
     }
 
+    const blocked = await prisma.eventBlockedUser.findUnique({
+      where: {
+        eventId_userId: { eventId: event.id, userId: session.user.id },
+      },
+    })
+    if (blocked) {
+      return { success: false, message: 'You have been blocked from this event' }
+    }
+
     const existing = await prisma.eventAttendee.findUnique({
       where: {
         eventId_userId: { eventId: event.id, userId: session.user.id },
@@ -151,7 +160,7 @@ export const joinEvent = createServerFn({ method: 'POST' })
       where: {
         eventId_userId: { eventId: event.id, userId: session.user.id },
       },
-      update: { leftAt: null },
+      update: { leftAt: null, removedById: null, removedAt: null },
       create: { eventId: event.id, userId: session.user.id },
     })
 
@@ -309,4 +318,212 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
     return prisma.profile.findMany({
       where: { userId: { in: userIds } },
     })
+  })
+
+export const removeEventAttendee = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ eventId: z.string(), userId: z.string() }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+
+    const event = await prisma.event.findUnique({ where: { id: data.eventId } })
+    if (!event) throw new Error('Event not found')
+    if (event.createdById !== session.user.id) throw new Error('Unauthorized')
+
+    await prisma.eventAttendee.update({
+      where: { eventId_userId: { eventId: data.eventId, userId: data.userId } },
+      data: { leftAt: new Date(), removedById: session.user.id, removedAt: new Date() },
+    })
+
+    return { success: true }
+  })
+
+export const blockEventAttendee = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ eventId: z.string(), userId: z.string(), reason: z.string().optional() }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+
+    const event = await prisma.event.findUnique({ where: { id: data.eventId } })
+    if (!event) throw new Error('Event not found')
+    if (event.createdById !== session.user.id) throw new Error('Unauthorized')
+
+    await prisma.eventBlockedUser.upsert({
+      where: { eventId_userId: { eventId: data.eventId, userId: data.userId } },
+      update: { reason: data.reason ?? null, blockedById: session.user.id },
+      create: {
+        eventId: data.eventId,
+        userId: data.userId,
+        blockedById: session.user.id,
+        reason: data.reason,
+      },
+    })
+
+    // Also remove them from attendees if they are still in
+    await prisma.eventAttendee.updateMany({
+      where: { eventId: data.eventId, userId: data.userId, leftAt: null },
+      data: { leftAt: new Date(), removedById: session.user.id, removedAt: new Date() },
+    })
+
+    return { success: true }
+  })
+
+export const unblockEventAttendee = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ eventId: z.string(), userId: z.string() }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+
+    const event = await prisma.event.findUnique({ where: { id: data.eventId } })
+    if (!event) throw new Error('Event not found')
+    if (event.createdById !== session.user.id) throw new Error('Unauthorized')
+
+    await prisma.eventBlockedUser.deleteMany({
+      where: { eventId: data.eventId, userId: data.userId },
+    })
+
+    return { success: true }
+  })
+
+export const getEventBlockedUsers = createServerFn({ method: 'GET' })
+  .inputValidator(z.string())
+  .handler(async ({ data: eventId }) => {
+    const session = await requireSession()
+
+    const event = await prisma.event.findUnique({ where: { id: eventId } })
+    if (!event) throw new Error('Event not found')
+    if (event.createdById !== session.user.id) throw new Error('Unauthorized')
+
+    const blocked = await prisma.eventBlockedUser.findMany({
+      where: { eventId },
+      select: { userId: true, reason: true, blockedAt: true },
+    })
+
+    const userIds = blocked.map((b) => b.userId)
+    if (userIds.length === 0) return []
+
+    const profiles = await prisma.profile.findMany({
+      where: { userId: { in: userIds } },
+    })
+
+    return blocked.map((b) => {
+      const profile = profiles.find((p) => p.userId === b.userId)
+      return { ...b, profile }
+    })
+  })
+
+export const sendOrganizerMessage = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({
+    eventId: z.string(),
+    receiverId: z.string(),
+    content: z.string().min(1).max(2000),
+  }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+
+    const event = await prisma.event.findUnique({ where: { id: data.eventId } })
+    if (!event) throw new Error('Event not found')
+    if (event.createdById !== session.user.id) throw new Error('Unauthorized')
+
+    // Verify receiver is still attending
+    const attendee = await prisma.eventAttendee.findFirst({
+      where: { eventId: data.eventId, userId: data.receiverId, leftAt: null },
+    })
+    if (!attendee) throw new Error('User is not attending this event')
+
+    return prisma.eventOrganizerMessage.create({
+      data: {
+        eventId: data.eventId,
+        senderId: session.user.id,
+        receiverId: data.receiverId,
+        content: data.content,
+      },
+    })
+  })
+
+export const getOrganizerMessages = createServerFn({ method: 'GET' })
+  .inputValidator(z.object({ eventId: z.string(), receiverId: z.string() }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+
+    const event = await prisma.event.findUnique({ where: { id: data.eventId } })
+    if (!event) throw new Error('Event not found')
+    if (event.createdById !== session.user.id) throw new Error('Unauthorized')
+
+    return prisma.eventOrganizerMessage.findMany({
+      where: { eventId: data.eventId, receiverId: data.receiverId },
+      orderBy: { createdAt: 'asc' },
+    })
+  })
+
+export const getMyOrganizerMessages = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    const session = await requireSession()
+
+    return prisma.eventOrganizerMessage.findMany({
+      where: { receiverId: session.user.id },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    })
+  })
+
+export const reportUser = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({
+    eventId: z.string(),
+    reportedId: z.string(),
+    reason: z.string().min(1).max(1000),
+  }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+
+    // Both users should be attending the event
+    const [reporterAttendee, reportedAttendee] = await Promise.all([
+      prisma.eventAttendee.findFirst({
+        where: { eventId: data.eventId, userId: session.user.id, leftAt: null },
+      }),
+      prisma.eventAttendee.findFirst({
+        where: { eventId: data.eventId, userId: data.reportedId, leftAt: null },
+      }),
+    ])
+
+    if (!reporterAttendee) {
+      return { success: false, message: 'You must be attending the event to report someone' }
+    }
+    if (!reportedAttendee) {
+      return { success: false, message: 'Reported user is not attending this event' }
+    }
+
+    await prisma.report.create({
+      data: {
+        eventId: data.eventId,
+        reporterId: session.user.id,
+        reportedId: data.reportedId,
+        reason: data.reason,
+      },
+    })
+
+    return { success: true }
+  })
+
+export const getEventReports = createServerFn({ method: 'GET' })
+  .inputValidator(z.string())
+  .handler(async ({ data: eventId }) => {
+    const session = await requireSession()
+
+    const event = await prisma.event.findUnique({ where: { id: eventId } })
+    if (!event) throw new Error('Event not found')
+    if (event.createdById !== session.user.id) throw new Error('Unauthorized')
+
+    const reports = await prisma.report.findMany({
+      where: { eventId },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    const userIds = [...new Set(reports.flatMap((r) => [r.reporterId, r.reportedId]))]
+    const profiles = await prisma.profile.findMany({
+      where: { userId: { in: userIds } },
+    })
+
+    return reports.map((r) => ({
+      ...r,
+      reporter: profiles.find((p) => p.userId === r.reporterId),
+      reported: profiles.find((p) => p.userId === r.reportedId),
+    }))
   })

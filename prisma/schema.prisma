@@ -77,19 +77,21 @@ model Profile {
 }
 
 model Event {
-  id          String          @id @default(uuid())
-  code        String          @unique
+  id          String                  @id @default(uuid())
+  code        String                  @unique
   name        String
   description String?
   location    String?
   createdById String
-  isActive    Boolean         @default(true)
-  createdAt   DateTime        @default(now())
+  isActive    Boolean                 @default(true)
+  createdAt   DateTime                @default(now())
   expiresAt    DateTime?
   maxAttendees Int?
   startsAt     DateTime?
   endedAt      DateTime?
   attendees    EventAttendee[]
+  blockedUsers EventBlockedUser[]
+  organizerMessages EventOrganizerMessage[]
   swipes      EventSwipe[]
   matches     EventMatch[]
 }
@@ -101,8 +103,33 @@ model EventAttendee {
   userId    String
   joinedAt  DateTime @default(now())
   leftAt    DateTime?
+  removedById String?
+  removedAt   DateTime?
 
   @@unique([eventId, userId])
+}
+
+model EventBlockedUser {
+  id          String   @id @default(uuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId      String
+  blockedById String
+  reason      String?
+  blockedAt   DateTime @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model EventOrganizerMessage {
+  id         String   @id @default(uuid())
+  eventId    String
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  senderId   String
+  receiverId String
+  content    String
+  createdAt  DateTime @default(now())
+  readAt     DateTime?
 }
 
 model EventSwipe {
@@ -139,6 +166,7 @@ model EventMessage {
 
 model Report {
   id         String   @id @default(uuid())
+  eventId    String?
   reporterId String
   reportedId String
   reason     String

@@ -12,11 +12,32 @@ import {
   Calendar,
   CheckCircle2,
   Link2,
+  MessageCircle,
+  Ban,
+  UserX,
+  Flag,
+  ShieldAlert,
+  Send,
+  X,
 } from 'lucide-react'
-import { getEventById, updateEvent, deleteEvent, getEventAttendees } from '#/server/events'
+import {
+  getEventById,
+  updateEvent,
+  deleteEvent,
+  getEventAttendees,
+  removeEventAttendee,
+  blockEventAttendee,
+  unblockEventAttendee,
+  getEventBlockedUsers,
+  sendOrganizerMessage,
+  getOrganizerMessages,
+  getEventReports,
+} from '#/server/events'
 import { getSession } from '#/server/auth'
 
 export const Route = createFileRoute('/events/manage/$eventId')({ component: ManageEventPage })
+
+type Tab = 'attendees' | 'reports' | 'blocked'
 
 function ManageEventPage() {
   const { eventId } = useParams({ from: '/events/manage/$eventId' })
@@ -43,6 +64,18 @@ function ManageEventPage() {
     enabled: !!eventId,
   })
 
+  const { data: reports = [] } = useQuery({
+    queryKey: ['event-reports', eventId],
+    queryFn: () => getEventReports({ data: eventId }),
+    enabled: !!eventId,
+  })
+
+  const { data: blockedUsers = [] } = useQuery({
+    queryKey: ['event-blocked', eventId],
+    queryFn: () => getEventBlockedUsers({ data: eventId }),
+    enabled: !!eventId,
+  })
+
   const attendeeCount = (event as any)?._count?.attendees ?? 0
 
   // Editable form state
@@ -52,8 +85,14 @@ function ManageEventPage() {
   const [maxAttendees, setMaxAttendees] = useState<string>('')
   const [startsAt, setStartsAt] = useState<string>('')
   const [savedMsg, setSavedMsg] = useState(false)
-
   const [copied, setCopied] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>('attendees')
+
+  // Message modal state
+  const [messageModalOpen, setMessageModalOpen] = useState(false)
+  const [messageTarget, setMessageTarget] = useState<any>(null)
+  const [messageContent, setMessageContent] = useState('')
+  const [messageHistory, setMessageHistory] = useState<any[]>([])
 
   useEffect(() => {
     if (event) {
@@ -61,11 +100,7 @@ function ManageEventPage() {
       setDescription(event.description ?? '')
       setLocation(event.location ?? '')
       setMaxAttendees(event.maxAttendees != null ? String(event.maxAttendees) : '')
-      setStartsAt(
-        event.startsAt
-          ? new Date(event.startsAt).toISOString().slice(0, 16)
-          : ''
-      )
+      setStartsAt(event.startsAt ? new Date(event.startsAt).toISOString().slice(0, 16) : '')
     }
   }, [event])
 
@@ -94,6 +129,41 @@ function ManageEventPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
       navigate({ to: '/events' })
+    },
+  })
+
+  const removeMutation = useMutation({
+    mutationFn: removeEventAttendee,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event-attendees', eventId] })
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
+    },
+  })
+
+  const blockMutation = useMutation({
+    mutationFn: blockEventAttendee,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event-attendees', eventId] })
+      queryClient.invalidateQueries({ queryKey: ['event-blocked', eventId] })
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
+    },
+  })
+
+  const unblockMutation = useMutation({
+    mutationFn: unblockEventAttendee,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event-blocked', eventId] })
+    },
+  })
+
+  const sendMessageMutation = useMutation({
+    mutationFn: sendOrganizerMessage,
+    onSuccess: () => {
+      setMessageContent('')
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
+      if (messageTarget) {
+        getOrganizerMessages({ data: { eventId, receiverId: messageTarget.userId } }).then(setMessageHistory)
+      }
     },
   })
 
@@ -136,6 +206,37 @@ function ManageEventPage() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     })
+  }
+
+  const openMessageModal = async (profile: any) => {
+    setMessageTarget(profile)
+    setMessageModalOpen(true)
+    setMessageContent('')
+    const msgs = await getOrganizerMessages({ data: { eventId, receiverId: profile.userId } })
+    setMessageHistory(msgs)
+  }
+
+  const handleSendMessage = () => {
+    if (!messageTarget || !messageContent.trim()) return
+    sendMessageMutation.mutate({
+      data: { eventId, receiverId: messageTarget.userId, content: messageContent.trim() },
+    })
+  }
+
+  const handleRemove = (userId: string, name: string) => {
+    if (!confirm(`Remove ${name || 'this user'} from the event?`)) return
+    removeMutation.mutate({ data: { eventId, userId } })
+  }
+
+  const handleBlock = (userId: string, name: string) => {
+    const reason = prompt(`Why do you want to block ${name || 'this user'}? (optional)`)
+    if (reason === null) return // cancelled
+    blockMutation.mutate({ data: { eventId, userId, reason: reason || undefined } })
+  }
+
+  const handleUnblock = (userId: string) => {
+    if (!confirm('Unblock this user? They will be able to join again.')) return
+    unblockMutation.mutate({ data: { eventId, userId } })
   }
 
   if (eventLoading || !event) {
@@ -312,55 +413,280 @@ function ManageEventPage() {
         </div>
       </section>
 
-      {/* Attendees */}
-      <section className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-[var(--mag-ink)]">Attendees</h2>
-          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-green)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-green)]">
-            <Users className="h-3 w-3" />
-            {attendeeCount} total
-          </span>
-        </div>
+      {/* Tabs */}
+      <div className="mb-4 flex items-center gap-1 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-1">
+        {([
+          { key: 'attendees', label: 'Attendees', count: attendeeCount, icon: Users },
+          { key: 'reports', label: 'Reports', count: reports.length, icon: Flag },
+          { key: 'blocked', label: 'Blocked', count: blockedUsers.length, icon: Ban },
+        ] as const).map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setActiveTab(t.key)}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-semibold transition ${
+              activeTab === t.key
+                ? 'bg-[var(--mag-green)] text-white'
+                : 'text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+            }`}
+          >
+            <t.icon className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t.label}</span>
+            <span className="rounded-full bg-white/20 px-1.5 py-0 text-[10px]">{t.count}</span>
+          </button>
+        ))}
+      </div>
 
-        {profilesLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
-          </div>
-        ) : attendeeProfiles.length === 0 ? (
-          <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No attendees yet.</p>
-        ) : (
-          <div className="space-y-3">
-            {attendeeProfiles.map((profile: any) => {
-              const photo = profile.photos?.[0]
-              return (
-                <div
-                  key={profile.userId}
-                  className="flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3"
-                >
-                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-                    {photo ? (
-                      <img src={photo} alt={profile.name ?? ''} className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[var(--mag-ink-muted)]">
-                        {profile.name?.charAt(0)?.toUpperCase() ?? '?'}
+      {/* Tab Content */}
+      <section className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        {activeTab === 'attendees' && (
+          <>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-[var(--mag-ink)]">Attendees</h2>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-green)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-green)]">
+                <Users className="h-3 w-3" />
+                {attendeeCount} total
+              </span>
+            </div>
+
+            {profilesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+              </div>
+            ) : attendeeProfiles.length === 0 ? (
+              <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No attendees yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {attendeeProfiles.map((profile: any) => {
+                  const photo = profile.photos?.[0]
+                  return (
+                    <div
+                      key={profile.userId}
+                      className="flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3"
+                    >
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
+                        {photo ? (
+                          <img src={photo} alt={profile.name ?? ''} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[var(--mag-ink-muted)]">
+                            {profile.name?.charAt(0)?.toUpperCase() ?? '?'}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-[var(--mag-ink)]">
-                      {profile.name ?? 'Unnamed'}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-[var(--mag-ink)]">
+                          {profile.name ?? 'Unnamed'}
+                        </p>
+                        <p className="truncate text-[10px] text-[var(--mag-ink-muted)]">
+                          {profile.location ?? 'No location'}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <button
+                          onClick={() => openMessageModal(profile)}
+                          title="Message"
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-green)]/10 text-[var(--mag-green)] transition hover:bg-[var(--mag-green)]/20"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleRemove(profile.userId, profile.name)}
+                          title="Remove"
+                          disabled={removeMutation.isPending}
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500/10 text-orange-500 transition hover:bg-orange-500/20 disabled:opacity-50"
+                        >
+                          <UserX className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleBlock(profile.userId, profile.name)}
+                          title="Block"
+                          disabled={blockMutation.isPending}
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500/10 text-red-500 transition hover:bg-red-500/20 disabled:opacity-50"
+                        >
+                          <Ban className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'reports' && (
+          <>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-[var(--mag-ink)]">Reports</h2>
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-500">
+                <ShieldAlert className="h-3 w-3" />
+                {reports.length} total
+              </span>
+            </div>
+
+            {reports.length === 0 ? (
+              <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No reports yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {(reports as any[]).map((report) => (
+                  <div key={report.id} className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3">
+                    <div className="mb-2 flex items-center gap-2">
+                      <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
+                        {(report.reported as any)?.photos?.[0] ? (
+                          <img src={(report.reported as any).photos[0]} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[var(--mag-ink-muted)]">
+                            {(report.reported as any)?.name?.charAt(0)?.toUpperCase() ?? '?'}
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-semibold text-[var(--mag-ink)]">
+                          {(report.reported as any)?.name ?? 'Unknown'} reported by {(report.reporter as any)?.name ?? 'Unknown'}
+                        </p>
+                        <p className="text-[10px] text-[var(--mag-ink-muted)]">
+                          {new Date(report.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="rounded-lg bg-[var(--mag-card)] p-2 text-xs text-[var(--mag-ink-soft)]">
+                      {report.reason}
                     </p>
-                    <p className="truncate text-[10px] text-[var(--mag-ink-muted)]">
-                      {profile.location ?? 'No location'}
-                    </p>
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        onClick={() => handleBlock(report.reportedId, (report.reported as any)?.name)}
+                        className="inline-flex items-center gap-1 rounded-full bg-red-500 px-3 py-1.5 text-[10px] font-bold text-white transition hover:bg-red-600"
+                      >
+                        <Ban className="h-3 w-3" /> Block user
+                      </button>
+                      <button
+                        onClick={() => openMessageModal(report.reported)}
+                        className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                      >
+                        <MessageCircle className="h-3 w-3" /> Message
+                      </button>
+                    </div>
                   </div>
-                  <span className="shrink-0 inline-flex h-2 w-2 rounded-full bg-[var(--mag-green)]" />
-                </div>
-              )
-            })}
-          </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'blocked' && (
+          <>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-[var(--mag-ink)]">Blocked Users</h2>
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-500">
+                <Ban className="h-3 w-3" />
+                {blockedUsers.length} total
+              </span>
+            </div>
+
+            {blockedUsers.length === 0 ? (
+              <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No blocked users.</p>
+            ) : (
+              <div className="space-y-3">
+                {(blockedUsers as any[]).map((b) => {
+                  const photo = b.profile?.photos?.[0]
+                  return (
+                    <div key={b.userId} className="flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3">
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
+                        {photo ? (
+                          <img src={photo} alt={b.profile?.name ?? ''} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[var(--mag-ink-muted)]">
+                            {b.profile?.name?.charAt(0)?.toUpperCase() ?? '?'}
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-[var(--mag-ink)]">
+                          {b.profile?.name ?? 'Unknown'}
+                        </p>
+                        <p className="truncate text-[10px] text-[var(--mag-ink-muted)]">
+                          {b.reason || 'No reason given'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleUnblock(b.userId)}
+                        disabled={unblockMutation.isPending}
+                        className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)] disabled:opacity-50"
+                      >
+                        Unblock
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </>
         )}
       </section>
+
+      {/* Message Modal */}
+      {messageModalOpen && messageTarget && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 px-4 pb-6 sm:items-center sm:pb-0">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-4 shadow-xl">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 overflow-hidden rounded-full bg-[var(--mag-line)]">
+                  {messageTarget.photos?.[0] ? (
+                    <img src={messageTarget.photos[0]} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[var(--mag-ink-muted)]">
+                      {messageTarget.name?.charAt(0)?.toUpperCase() ?? '?'}
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm font-semibold text-[var(--mag-ink)]">{messageTarget.name ?? 'User'}</p>
+              </div>
+              <button
+                onClick={() => setMessageModalOpen(false)}
+                className="rounded-full p-1 text-[var(--mag-ink-muted)] transition hover:bg-[var(--mag-surface)]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mb-3 max-h-64 space-y-2 overflow-y-auto rounded-xl bg-[var(--mag-surface)] p-3">
+              {messageHistory.length === 0 ? (
+                <p className="text-center text-xs text-[var(--mag-ink-muted)]">No messages yet.</p>
+              ) : (
+                messageHistory.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`max-w-[80%] rounded-xl px-3 py-2 text-xs ${
+                      msg.senderId === session?.user?.id
+                        ? 'ml-auto bg-[var(--mag-green)] text-white'
+                        : 'bg-[var(--mag-card)] text-[var(--mag-ink)]'
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Type a message..."
+                className="flex-1 rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-3 py-2.5 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none"
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!messageContent.trim() || sendMessageMutation.isPending}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--mag-green)] text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

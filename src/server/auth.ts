@@ -1,16 +1,46 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
+import { getRequest, getRequestUrl } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { hashPassword } from '@better-auth/utils/password'
 import { auth } from '#/lib/auth'
 import { prisma } from '#/db'
 import { sendOtpEmail } from '#/lib/email'
 
+async function fetchSessionFromAuthHandler(): Promise<{ session: any; user: any } | null> {
+  const request = getRequest()
+  const url = getRequestUrl()
+  // Build a synthetic GET request to better-auth's /get-session endpoint
+  const sessionReq = new Request(new URL('/api/auth/get-session', url.origin), {
+    method: 'GET',
+    headers: request.headers,
+  })
+
+  const response = await auth.handler(sessionReq)
+  if (!response.ok) return null
+
+  const data = await response.json()
+  if (!data || !data.session) return null
+
+  return data
+}
+
 export const getSession = createServerFn({ method: 'GET' })
   .handler(async () => {
-    const request = getRequest()
-    const session = await auth.api.getSession({ headers: request.headers })
-    return session ?? null
+    try {
+      const data = await fetchSessionFromAuthHandler()
+      return data
+    } catch {
+      return null
+    }
+  })
+
+export const requireSession = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    const data = await fetchSessionFromAuthHandler()
+    if (!data?.user?.id) {
+      throw new Error('Unauthorized')
+    }
+    return data
   })
 
 export const sendEmailVerificationOtp = createServerFn({ method: 'POST' })

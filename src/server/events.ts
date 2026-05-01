@@ -1,16 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { getRequest } from '@tanstack/react-start/server'
 import { prisma } from '#/db'
-import { auth } from '#/lib/auth'
+import { requireSession } from '#/server/auth'
 import { createNotification } from './notifications.server'
-
-async function requireSession() {
-  const request = getRequest()
-  const session = await auth.api.getSession({ headers: request.headers })
-  if (!session?.user?.id) throw new Error('Unauthorized')
-  return session
-}
 
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'

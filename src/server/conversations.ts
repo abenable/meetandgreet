@@ -1,14 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
 import { prisma } from '#/db'
-import { auth } from '#/lib/auth'
-
-async function requireSession() {
-  const request = getRequest()
-  const session = await auth.api.getSession({ headers: request.headers })
-  if (!session?.user?.id) throw new Error('Unauthorized')
-  return session
-}
+import { requireSession } from '#/server/auth'
 
 export const getConversations = createServerFn({ method: 'GET' })
   .handler(async () => {

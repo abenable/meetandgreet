@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getRequest } from '@tanstack/react-start/server'
 import { prisma } from '#/db'
 import { auth } from '#/lib/auth'
+import { createNotification } from './notifications'
 
 async function requireSession() {
   const request = getRequest()
@@ -526,6 +527,14 @@ export const sendEventChat = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const session = await requireSession()
     await checkEventChatPermission(data.eventId, session.user.id, data.peerId)
+
+    await createNotification({
+      userId: data.peerId,
+      type: 'organizer_message',
+      title: 'New Message',
+      body: data.content.slice(0, 100),
+      link: `/events/chat/${data.eventId}/${session.user.id}`,
+    })
 
     return prisma.eventOrganizerMessage.create({
       data: {

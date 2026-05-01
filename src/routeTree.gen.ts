@@ -16,6 +16,7 @@ import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LikesRouteImport } from './routes/likes'
 import { Route as ExploreRouteImport } from './routes/explore'
@@ -80,6 +81,11 @@ const PremiumRoute = PremiumRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -318,6 +326,7 @@ export interface FileRoutesById {
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -359,6 +368,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/likes'
     | '/login'
+    | '/notifications'
     | '/onboarding'
     | '/premium'
     | '/privacy'
@@ -398,6 +408,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/likes'
     | '/login'
+    | '/notifications'
     | '/onboarding'
     | '/premium'
     | '/privacy'
@@ -436,6 +447,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/likes'
     | '/login'
+    | '/notifications'
     | '/onboarding'
     | '/premium'
     | '/privacy'
@@ -476,6 +488,7 @@ export interface RootRouteChildren {
   ExploreRoute: typeof ExploreRoute
   LikesRoute: typeof LikesRoute
   LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -555,6 +568,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -802,6 +822,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreRoute: ExploreRoute,
   LikesRoute: LikesRoute,
   LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,
   PrivacyRoute: PrivacyRoute,

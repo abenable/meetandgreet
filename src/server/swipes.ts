@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getRequest } from '@tanstack/react-start/server'
 import { prisma } from '#/db'
 import { auth } from '#/lib/auth'
+import { createNotification } from './notifications'
 
 async function requireSession() {
   const request = getRequest()
@@ -56,14 +57,17 @@ export const recordSwipe = createServerFn({ method: 'POST' })
     })
 
     if (data.direction === 'like' || data.direction === 'super') {
-      const mutual = await prisma.eventSwipe.findFirst({
-        where: {
-          eventId: data.eventId,
-          swiperId: data.swipedId,
-          swipedId: swiperId,
-          direction: { in: ['like', 'super'] },
-        },
-      })
+      const [mutual, swiperProfile] = await Promise.all([
+        prisma.eventSwipe.findFirst({
+          where: {
+            eventId: data.eventId,
+            swiperId: data.swipedId,
+            swipedId: swiperId,
+            direction: { in: ['like', 'super'] },
+          },
+        }),
+        prisma.profile.findUnique({ where: { userId: swiperId }, select: { name: true } }),
+      ])
 
       if (mutual) {
         const [u1, u2] = [swiperId, data.swipedId].sort()
@@ -72,16 +76,43 @@ export const recordSwipe = createServerFn({ method: 'POST' })
         })
 
         if (!existingMatch) {
-          return prisma.eventMatch.create({
+          const match = await prisma.eventMatch.create({
             data: {
               eventId: data.eventId,
               user1Id: u1,
               user2Id: u2,
             },
           })
+          // Notify both users about the match
+          await Promise.all([
+            createNotification({
+              userId: swiperId,
+              type: 'match',
+              title: "It's a Match!",
+              body: 'You matched with someone. Start chatting!',
+              link: `/matches/${match.id}`,
+            }),
+            createNotification({
+              userId: data.swipedId,
+              type: 'match',
+              title: "It's a Match!",
+              body: 'You matched with someone. Start chatting!',
+              link: `/matches/${match.id}`,
+            }),
+          ])
+          return match
         }
         return existingMatch
       }
+
+      // Not mutual yet — notify the swiped user they got a like
+      await createNotification({
+        userId: data.swipedId,
+        type: 'like',
+        title: 'New Like',
+        body: `${swiperProfile?.name ?? 'Someone'} liked you`,
+        link: '/likes',
+      })
     }
 
     return swipe
@@ -189,6 +220,15 @@ export const sendMessage = createServerFn({ method: 'POST' })
       },
     })
     if (!match) throw new Error('Match not found')
+
+    const peerId = match.user1Id === session.user.id ? match.user2Id : match.user1Id
+    await createNotification({
+      userId: peerId,
+      type: 'message',
+      title: 'New Message',
+      body: data.content.slice(0, 100),
+      link: `/matches/${data.matchId}`,
+    })
 
     return prisma.eventMessage.create({
       data: {

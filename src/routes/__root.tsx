@@ -34,6 +34,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       { title: 'Meet & Greet' },
       { name: 'description', content: 'Meet & Greet - Connect with people' },
       { name: 'theme-color', content: '#10B981' },
+      { name: 'mobile-web-app-capable', content: 'yes' },
       { name: 'apple-mobile-web-app-capable', content: 'yes' },
       { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
       { name: 'apple-mobile-web-app-title', content: 'Meet & Greet' },

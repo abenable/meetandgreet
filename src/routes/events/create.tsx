@@ -36,8 +36,10 @@ function CreateEventPage() {
       } })
       setCode(event.code)
       setTimeout(() => navigate({ to: '/events' }), 1500)
-    } catch (e) {
-      alert('Failed to create event. Make sure you are logged in.')
+    } catch (e: any) {
+      console.error('[Create Event] Failed:', e)
+      const message = e?.message || e?.error?.message || 'Failed to create event. Make sure you are logged in.'
+      alert(message)
     }
   }
 

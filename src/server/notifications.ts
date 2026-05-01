@@ -11,16 +11,6 @@ async function requireSession() {
   return session
 }
 
-export async function createNotification(data: {
-  userId: string
-  type: 'like' | 'match' | 'message' | 'organizer_message'
-  title: string
-  body: string
-  link?: string
-}) {
-  return prisma.notification.create({ data })
-}
-
 export const getNotifications = createServerFn({ method: 'GET' })
   .handler(async () => {
     const session = await requireSession()

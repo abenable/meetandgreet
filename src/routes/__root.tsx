@@ -67,6 +67,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   },
   component: RootLayout,
   shellComponent: RootDocument,
+  notFoundComponent: () => (
+    <div className="flex flex-1 items-center justify-center">
+      <p className="text-lg text-[var(--mag-ink-soft)]">Page not found</p>
+    </div>
+  ),
 })
 
 function RootLayout() {

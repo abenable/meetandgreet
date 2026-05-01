@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { getRequest } from '@tanstack/react-start/server'
 import { prisma } from '#/db'
 import { auth } from '#/lib/auth'
-import { createNotification } from './notifications'
+import { createNotification } from './notifications.server'
 
 async function requireSession() {
   const request = getRequest()

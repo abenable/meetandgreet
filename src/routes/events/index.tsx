@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calendar, MapPin, Plus, Search, QrCode, ArrowRight, Users, Clock } from 'lucide-react'
+import { Calendar, MapPin, Plus, Search, QrCode, ArrowRight, Users, Clock, History } from 'lucide-react'
 import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents } from '#/server/events'
 import { getSession } from '#/server/auth'
 
@@ -40,8 +40,9 @@ function EventsExplorePage() {
     queryClient.invalidateQueries({ queryKey: ['active-event'] })
   }
 
-  const currentEvents = events.filter((e) => e.isActive)
-  const upcomingEvents = events.filter((e) => !e.isActive)
+  const currentEvents = events.filter((e) => e.isActive && !e.endedAt)
+  const pastEvents = events.filter((e) => e.endedAt)
+  const upcomingEvents = events.filter((e) => !e.isActive && !e.endedAt)
 
   const attendeeCount = (activeEvent as any)?._count?.attendees ?? 0
 
@@ -74,7 +75,7 @@ function EventsExplorePage() {
             </Link>
             <button onClick={handleLeave} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">Leave</button>
             {activeEvent.createdById === session?.user?.id && (
-              <Link to={`/events/manage/${activeEvent.id}`} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] no-underline">
+              <Link to="/events/manage/$eventId" params={{ eventId: activeEvent.id }} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] no-underline">
                 Manage Event
               </Link>
             )}
@@ -128,7 +129,7 @@ function EventsExplorePage() {
                     </Link>
                   )}
                   {event.createdById === session?.user?.id && (
-                    <Link to={`/events/manage/${event.id}`} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
+                    <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
                       Manage
                     </Link>
                   )}
@@ -159,7 +160,7 @@ function EventsExplorePage() {
                         <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{event.code}</span>
                       </div>
                     </div>
-                    <Link to={`/events/manage/${event.id}`} className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] no-underline">
+                    <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] no-underline">
                       Manage
                     </Link>
                     <button
@@ -195,13 +196,49 @@ function EventsExplorePage() {
                     </div>
                   </div>
                   {event.createdById === session?.user?.id && (
-                    <Link to={`/events/manage/${event.id}`} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
+                    <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
                       Manage
                     </Link>
                   )}
                 </div>
               </div>
             ))}
+          </div>
+        </>
+      )}
+
+      {pastEvents.length > 0 && (
+        <>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--mag-ink)]">History</h3>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><History className="h-3 w-3" />Past events</span>
+          </div>
+          <div className="mb-6 space-y-3">
+            {pastEvents.map((event) => {
+              const count = (event as any)._count?.attendees ?? 0
+              return (
+                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-70">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                        <span className="shrink-0 rounded-full bg-[var(--mag-ink-muted)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink-muted)]">Ended</span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attended</span>
+                      </div>
+                    </div>
+                    {event.createdById === session?.user?.id && (
+                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
+                        Manage
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </>
       )}

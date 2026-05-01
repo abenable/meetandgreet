@@ -10,6 +10,7 @@ function CreateEventPage() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [location, setLocation] = useState('')
+  const [code, setCode] = useState('')
   const [copied, setCopied] = useState(false)
 
   const handleCopyLink = () => {

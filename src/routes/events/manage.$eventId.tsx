@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   Link2,
 } from 'lucide-react'
-import { getEventById, updateEvent, deleteEvent, getEventProfiles } from '#/server/events'
+import { getEventById, updateEvent, deleteEvent, getEventAttendees } from '#/server/events'
 import { getSession } from '#/server/auth'
 
 export const Route = createFileRoute('/events/manage/$eventId')({ component: ManageEventPage })
@@ -38,8 +38,8 @@ function ManageEventPage() {
   })
 
   const { data: attendeeProfiles = [], isLoading: profilesLoading } = useQuery({
-    queryKey: ['event-profiles', eventId],
-    queryFn: () => getEventProfiles({ data: eventId }),
+    queryKey: ['event-attendees', eventId],
+    queryFn: () => getEventAttendees({ data: eventId }),
     enabled: !!eventId,
   })
 

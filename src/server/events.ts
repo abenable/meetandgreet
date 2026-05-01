@@ -25,7 +25,7 @@ export const listEvents = createServerFn({ method: 'GET' })
     return prisma.event.findMany({
       omit: { code: true },
       include: {
-        _count: { select: { attendees: true } },
+        _count: { select: { attendees: { where: { leftAt: null } } } },
       },
       orderBy: { createdAt: 'desc' },
     })
@@ -37,7 +37,7 @@ export const getEventByCode = createServerFn({ method: 'GET' })
     const event = await prisma.event.findUnique({
       where: { code: code.toUpperCase() },
       include: {
-        _count: { select: { attendees: true } },
+        _count: { select: { attendees: { where: { leftAt: null } } } },
       },
     })
 
@@ -59,7 +59,7 @@ export const getEventById = createServerFn({ method: 'GET' })
     const event = await prisma.event.findUnique({
       where: { id },
       include: {
-        _count: { select: { attendees: true } },
+        _count: { select: { attendees: { where: { leftAt: null } } } },
       },
     })
 
@@ -113,7 +113,7 @@ export const joinEvent = createServerFn({ method: 'POST' })
     const event = await prisma.event.findUnique({
       where: { code: code.toUpperCase() },
       include: {
-        _count: { select: { attendees: true } },
+        _count: { select: { attendees: { where: { leftAt: null } } } },
       },
     })
 
@@ -178,7 +178,7 @@ export const getMyCreatedEvents = createServerFn({ method: 'GET' })
     return prisma.event.findMany({
       where: { createdById: session.user.id },
       include: {
-        _count: { select: { attendees: true } },
+        _count: { select: { attendees: { where: { leftAt: null } } } },
       },
     })
   })
@@ -256,7 +256,7 @@ export const getMyActiveEvent = createServerFn({ method: 'GET' })
       include: {
         event: {
           include: {
-            _count: { select: { attendees: true } },
+            _count: { select: { attendees: { where: { leftAt: null } } } },
           },
         },
       },
@@ -290,5 +290,23 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
 
     return prisma.profile.findMany({
       where: { userId: { in: visibleUserIds } },
+    })
+  })
+
+export const getEventAttendees = createServerFn({ method: 'GET' })
+  .inputValidator(z.string())
+  .handler(async ({ data: eventId }) => {
+    await requireSession()
+
+    const rows = await prisma.eventAttendee.findMany({
+      where: { eventId, leftAt: null },
+      select: { userId: true },
+    })
+    const userIds = rows.map((r) => r.userId)
+
+    if (userIds.length === 0) return []
+
+    return prisma.profile.findMany({
+      where: { userId: { in: userIds } },
     })
   })

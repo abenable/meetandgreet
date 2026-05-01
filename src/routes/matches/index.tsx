@@ -22,7 +22,7 @@ function MatchesPage() {
       ) : (
         <div className="space-y-3">
           {matches.map((match: any) => (
-            <Link key={match.id} to={`/matches/${match.id}`} className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 transition hover:border-[var(--mag-green)] no-underline card-shadow">
+            <Link key={match.id} to="/matches/$matchId" params={{ matchId: match.id }} className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 transition hover:border-[var(--mag-green)] no-underline card-shadow">
               <img src={match.peerPhoto || ''} alt={match.peerName} className="h-14 w-14 rounded-full object-cover" />
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-semibold text-[var(--mag-ink)]">{match.peerName}</h3>

@@ -2,6 +2,7 @@ node_modules
 .DS_Store
 dist
 dist-ssr
+dev-dist
 *.local
 .env
 .nitro
@@ -17,3 +18,4 @@ todos.json
 .codex
 .cursorrules
 AGENTS.md
+

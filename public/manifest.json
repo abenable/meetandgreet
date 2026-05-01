@@ -1,6 +1,9 @@
 {
   "short_name": "Meet & Greet",
   "name": "Meet & Greet",
+  "description": "A modern app to connect with people",
+  "scope": "/",
+  "start_url": "/",
   "icons": [
     {
       "src": "favicon.ico",
@@ -18,7 +21,6 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
   "display": "standalone",
   "theme_color": "#10B981",
   "background_color": "#ffffff"

@@ -507,7 +507,7 @@ function ManageEventPage() {
                         <p className="truncate text-xs font-semibold text-[var(--mag-ink)]">
                           {(report.reported as any)?.name ?? 'Unknown'} reported by {(report.reporter as any)?.name ?? 'Unknown'}
                         </p>
-                        <p className="text-[10px] text-[var(--mag-ink-muted)]">
+                        <p className="text-[10px] text-[var(--mag-ink-muted)]" suppressHydrationWarning>
                           {new Date(report.createdAt).toLocaleString()}
                         </p>
                       </div>

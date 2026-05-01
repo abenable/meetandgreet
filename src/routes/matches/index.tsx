@@ -28,7 +28,7 @@ function MatchesPage() {
                 <h3 className="text-sm font-semibold text-[var(--mag-ink)]">{match.peerName}</h3>
                 <p className="truncate text-xs text-[var(--mag-ink-soft)]">{match.lastMessage || 'New match!'}</p>
               </div>
-              <span className="shrink-0 text-[10px] text-[var(--mag-ink-muted)]">{new Date(match.lastMessageAt).toLocaleDateString()}</span>
+              <span className="shrink-0 text-[10px] text-[var(--mag-ink-muted)]" suppressHydrationWarning>{new Date(match.lastMessageAt).toLocaleDateString()}</span>
             </Link>
           ))}
         </div>

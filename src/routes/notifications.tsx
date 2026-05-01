@@ -94,7 +94,7 @@ function NotificationsPage() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-[var(--mag-ink)]">{n.title}</p>
                   <p className="text-xs text-[var(--mag-ink-soft)]">{n.body}</p>
-                  <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">
+                  <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]" suppressHydrationWarning>
                     {new Date(n.createdAt).toLocaleString()}
                   </p>
                 </div>

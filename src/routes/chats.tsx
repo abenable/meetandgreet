@@ -71,7 +71,7 @@ function ChatRow({ convo }: { convo: any }) {
         </p>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
-        <span className="text-[10px] text-[var(--mag-ink-muted)]">
+        <span className="text-[10px] text-[var(--mag-ink-muted)]" suppressHydrationWarning>
           {new Date(convo.lastMessageAt).toLocaleDateString()}
         </span>
         {convo.unreadCount > 0 && (

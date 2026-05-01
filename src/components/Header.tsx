@@ -1,15 +1,16 @@
-import { Link, useRouterState } from '@tanstack/react-router'
+import { Link, useRouterState, getRouteApi } from '@tanstack/react-router'
 import { Flame, Moon, Sun, User, Bell } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getSession } from '#/server/auth'
 import { getUnreadNotificationCount } from '#/server/notifications'
+
+const rootRoute = getRouteApi('__root__')
 
 export default function Header() {
   const router = useRouterState()
   const path = router.location.pathname
   const [dark, setDark] = useState(false)
-  const { data: session } = useQuery({ queryKey: ['session'], queryFn: () => getSession() })
+  const { session } = rootRoute.useRouteContext()
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ['unread-notifications'],
     queryFn: () => getUnreadNotificationCount(),

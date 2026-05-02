@@ -1,16 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState } from 'react'
-import { X, Check, Crown, Zap } from 'lucide-react'
+import { X, Check, Crown } from 'lucide-react'
 
 export const Route = createFileRoute('/premium')({ component: PremiumPage })
 
 function PremiumPage() {
-  const [billing, setBilling] = useState<'monthly' | '6month' | 'annual'>('monthly')
-
-  const prices: Record<string, Record<string, string>> = {
-    free: { monthly: '$0', '6month': '$0', annual: '$0' },
-  }
-
   const features = ['Unlimited Likes', 'See Who Likes You', 'Rewind Last Swipe', 'Super Likes', 'Event Creation', 'Priority Support']
 
   return (

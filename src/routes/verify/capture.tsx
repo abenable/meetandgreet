@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, Camera, CheckCircle, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Camera, CheckCircle } from 'lucide-react'
 
 export const Route = createFileRoute('/verify/capture')({ component: VerifyCapturePage })
 

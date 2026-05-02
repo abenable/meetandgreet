@@ -16,7 +16,7 @@ export default function Footer() {
           <span className="text-[var(--mag-line)]">|</span>
           <Link to="/privacy" className="text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink-soft)]">Privacy</Link>
         </div>
-        <p className="m-0">&copy; {new Date().getFullYear()} Meet & Greet Inc. All rights reserved.</p>
+        <p className="m-0 mb-2">&copy; 2026 Meet & Greet Inc. All rights reserved.</p>
       </div>
     </footer>
   )

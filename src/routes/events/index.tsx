@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calendar, MapPin, Plus, Search, QrCode, ArrowRight, Users, Clock, History, MessageCircle } from 'lucide-react'
+import { Calendar, MapPin, Plus, Search, ArrowRight, Users, Clock, History, MessageCircle, Lock } from 'lucide-react'
 import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents, getMyOrganizerMessages } from '#/server/events'
 import { getSession } from '#/server/auth'
 
@@ -59,11 +59,18 @@ function EventsExplorePage() {
 
       {activeEvent ? (
         <div className="mb-6 rounded-2xl border border-[var(--mag-green)] bg-gradient-to-br from-[var(--mag-green)]/10 to-[var(--mag-green)]/5 p-4">
-          <div className="mb-3 flex items-start justify-between">
-            <div>
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
               <span className="rounded-full bg-[var(--mag-green)] px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide">Active</span>
-              <h2 className="mt-1 text-lg font-bold text-[var(--mag-ink)]">{activeEvent.name}</h2>
-              <p className="text-xs text-[var(--mag-ink-soft)]">{activeEvent.description}</p>
+              <div className="mt-1 flex items-center gap-3">
+                {(activeEvent as any).photo && (
+                  <img src={(activeEvent as any).photo} alt={activeEvent.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
+                )}
+                <div className="min-w-0">
+                  <h2 className="text-lg font-bold text-[var(--mag-ink)]">{activeEvent.name}</h2>
+                  <p className="text-xs text-[var(--mag-ink-soft)]">{activeEvent.description}</p>
+                </div>
+              </div>
             </div>
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)]/15 text-[var(--mag-green)]">
               <Calendar className="h-5 w-5" />
@@ -111,14 +118,10 @@ function EventsExplorePage() {
         </div>
       )}
 
-      <div className="mb-6 grid grid-cols-2 gap-3">
+      <div className="mb-6">
         <Link to="/events/join" className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 transition hover:border-[var(--mag-green)] no-underline card-shadow">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)]/10 text-[var(--mag-green)]"><Search className="h-5 w-5" /></div>
           <div className="min-w-0"><p className="text-sm font-semibold text-[var(--mag-ink)]">Join by Code</p><p className="text-[10px] text-[var(--mag-ink-soft)]">Enter event code</p></div>
-        </Link>
-        <Link to="/events/join" className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 transition hover:border-[var(--mag-green)] no-underline card-shadow">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)]/10 text-[var(--mag-green)]"><QrCode className="h-5 w-5" /></div>
-          <div className="min-w-0"><p className="text-sm font-semibold text-[var(--mag-ink)]">Scan QR</p><p className="text-[10px] text-[var(--mag-ink-soft)]">Point camera at code</p></div>
         </Link>
       </div>
 
@@ -133,15 +136,20 @@ function EventsExplorePage() {
           return (
             <div key={event.id} className={`rounded-2xl border p-4 transition ${isJoined ? 'border-[var(--mag-green)] bg-[var(--mag-green)]/5' : 'border-[var(--mag-line)] bg-[var(--mag-card)]'}`}>
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                    {isJoined && <span className="shrink-0 rounded-full bg-[var(--mag-green)] px-2 py-0.5 text-[10px] font-bold text-white">Joined</span>}
-                  </div>
-                  <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                    <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                    <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
+                <div className="flex min-w-0 flex-1 gap-3">
+                  {(event as any).photo && (
+                    <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                      {isJoined && <span className="shrink-0 rounded-full bg-[var(--mag-green)] px-2 py-0.5 text-[10px] font-bold text-white">Joined</span>}
+                    </div>
+                    <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                      <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                      <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
@@ -173,13 +181,23 @@ function EventsExplorePage() {
               return (
                 <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
-                        <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{event.code}</span>
+                    <div className="flex min-w-0 flex-1 gap-3">
+                      {(event as any).photo && (
+                        <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                        <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
+                          <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{event.code}</span>
+                          {!(event as any).isPublic && (
+                            <span className="inline-flex items-center gap-1 rounded bg-[var(--mag-ink)]/10 px-1.5 py-0.5 font-medium text-[var(--mag-ink)]">
+                              <Lock className="h-3 w-3" /> Private
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] no-underline">
@@ -241,15 +259,20 @@ function EventsExplorePage() {
               return (
                 <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-70">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                        <span className="shrink-0 rounded-full bg-[var(--mag-ink-muted)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink-muted)]">Ended</span>
-                      </div>
-                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attended</span>
+                    <div className="flex min-w-0 flex-1 gap-3">
+                      {(event as any).photo && (
+                        <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                          <span className="shrink-0 rounded-full bg-[var(--mag-ink-muted)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink-muted)]">Ended</span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attended</span>
+                        </div>
                       </div>
                     </div>
                     {event.createdById === session?.user?.id && (

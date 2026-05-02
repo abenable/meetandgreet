@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft,
@@ -17,6 +17,10 @@ import {
   UserX,
   Flag,
   ShieldAlert,
+  X,
+  ImageIcon,
+  Eye,
+  Lock,
 } from 'lucide-react'
 import {
   getEventById,
@@ -34,6 +38,28 @@ import { getSession } from '#/server/auth'
 export const Route = createFileRoute('/events/manage/$eventId')({ component: ManageEventPage })
 
 type Tab = 'attendees' | 'reports' | 'blocked'
+
+function resizeImageToBase64(file: File, maxWidth = 800): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      img.src = e.target?.result as string
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const scale = Math.min(1, maxWidth / img.width)
+        canvas.width = img.width * scale
+        canvas.height = img.height * scale
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
+        resolve(canvas.toDataURL('image/jpeg', 0.85))
+      }
+      img.onerror = reject
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
 
 function ManageEventPage() {
   const { eventId } = useParams({ from: '/events/manage/$eventId' })
@@ -83,6 +109,21 @@ function ManageEventPage() {
   const [savedMsg, setSavedMsg] = useState(false)
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('attendees')
+  const [eventPhoto, setEventPhoto] = useState<string | null>(null)
+  const [eventIsPublic, setEventIsPublic] = useState(true)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const resized = await resizeImageToBase64(file, 800)
+      setEventPhoto(resized)
+    } catch {
+      alert('Failed to process image.')
+    }
+    e.target.value = ''
+  }
 
   useEffect(() => {
     if (event) {
@@ -91,6 +132,8 @@ function ManageEventPage() {
       setLocation(event.location ?? '')
       setMaxAttendees(event.maxAttendees != null ? String(event.maxAttendees) : '')
       setStartsAt(event.startsAt ? new Date(event.startsAt).toISOString().slice(0, 16) : '')
+      setEventPhoto((event as any).photo ?? null)
+      setEventIsPublic((event as any).isPublic ?? true)
     }
   }, [event])
 
@@ -156,6 +199,8 @@ function ManageEventPage() {
           location: location.trim() || undefined,
           maxAttendees: maxAttendees ? Number(maxAttendees) : undefined,
           startsAt: startsAt || undefined,
+          photo: eventPhoto,
+          isPublic: eventIsPublic,
         },
       },
     })
@@ -256,6 +301,9 @@ function ManageEventPage() {
         <p className="text-xs font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Code</p>
         <p className="mt-2 text-4xl font-mono font-bold tracking-widest text-[var(--mag-ink)]">{(event as any).code}</p>
         <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">Share this code so others can join</p>
+        {eventPhoto && (
+          <img src={eventPhoto} alt={name} className="mx-auto mt-3 h-24 w-24 rounded-2xl object-cover" />
+        )}
         <button
           onClick={handleCopyLink}
           className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full border border-[var(--mag-line)] bg-[var(--mag-surface)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
@@ -267,8 +315,35 @@ function ManageEventPage() {
 
       {/* Event Details */}
       <section className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
-        <h2 className="mb-3 text-sm font-bold text-[var(--mag-ink)]">Event Details</h2>
-        <div className="space-y-4">
+        <h2 className="mb-3 text-center text-sm font-bold text-[var(--mag-ink)]">Event Details</h2>
+        <div className="mx-auto max-w-md space-y-4">
+          <div>
+            <label className="mb-1.5 block text-center text-xs font-medium text-[var(--mag-ink)]">Event Photo</label>
+            <div className="flex justify-center">
+              {eventPhoto ? (
+                <div className="relative inline-block">
+                <img src={eventPhoto} alt="Event" className="h-32 w-32 rounded-2xl object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setEventPhoto(null)}
+                  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-sm"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex h-32 w-32 items-center justify-center rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
+              >
+                <ImageIcon className="h-6 w-6" />
+              </button>
+            )}
+              <input type="file" accept="image/*" ref={fileRef} onChange={handleFile} className="hidden" />
+            </div>
+          </div>
+
           <div>
             <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Event Name</label>
             <input
@@ -315,6 +390,39 @@ function ManageEventPage() {
           </div>
 
           <div>
+            <label className="mb-1.5 block text-center text-xs font-medium text-[var(--mag-ink)]">Visibility</label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setEventIsPublic(true)}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                  eventIsPublic
+                    ? 'bg-[var(--mag-green)] text-white'
+                    : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+                }`}
+              >
+                <Eye className="h-3.5 w-3.5" /> Public
+              </button>
+              <button
+                type="button"
+                onClick={() => setEventIsPublic(false)}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                  !eventIsPublic
+                    ? 'bg-[var(--mag-ink)] text-white'
+                    : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+                }`}
+              >
+                <Lock className="h-3.5 w-3.5" /> Private
+              </button>
+            </div>
+            <p className="mt-1 text-center text-[10px] text-[var(--mag-ink-muted)]">
+              {eventIsPublic
+                ? 'Anyone can find this event on the browse page.'
+                : 'Only people with the code or link can join.'}
+            </p>
+          </div>
+
+          <div>
             <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Start Time</label>
             <div className="relative">
               <Calendar className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
@@ -328,11 +436,11 @@ function ManageEventPage() {
           </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-3">
+        <div className="mt-4 flex items-center justify-center gap-3">
           <button
             onClick={handleSave}
             disabled={updateMutation.isPending}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-2.5 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-2.5 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-3.5 w-3.5" />
             {updateMutation.isPending ? 'Saving…' : 'Save Changes'}

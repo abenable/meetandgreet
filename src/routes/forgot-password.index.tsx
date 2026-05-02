@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import { Flame, Mail, ArrowRight } from 'lucide-react'
+import { Mail, ArrowRight } from 'lucide-react'
 import { sendPasswordResetOtp } from '#/server/auth'
+import Logo from '#/components/Logo'
 
 export const Route = createFileRoute('/forgot-password/')({ component: ForgotPasswordPage })
 
@@ -34,7 +35,7 @@ function ForgotPasswordPage() {
   if (sent) {
     return (
       <main className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8 text-center">
-        <Flame className="mb-4 inline-block h-14 w-14 fill-[var(--mag-green)] text-[var(--mag-green)]" />
+        <Logo className="mx-auto mb-4 h-20 w-auto" />
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Check your email</h1>
         <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
           We sent a 6-digit code to <strong className="text-[var(--mag-ink)]">{email}</strong>.
@@ -52,7 +53,7 @@ function ForgotPasswordPage() {
   return (
     <main className="page-wrap flex min-h-[90vh] flex-col items-center px-4 py-8">
       <div className="mb-8 text-center">
-        <Flame className="mb-4 inline-block h-14 w-14 fill-[var(--mag-green)] text-[var(--mag-green)]" />
+        <Logo className="mx-auto mb-4 h-20 w-auto" />
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Forgot password?</h1>
         <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">Enter your email and we will send you a reset code.</p>
       </div>

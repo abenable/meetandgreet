@@ -1,24 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
-import { Search, Pizza, BookOpen, Music, Plane, Dumbbell, Palette, X, MapPin } from 'lucide-react'
-
-const iconMap: Record<string, React.ReactNode> = {
-  pizza: <Pizza className="h-6 w-6" />,
-  book: <BookOpen className="h-6 w-6" />,
-  music: <Music className="h-6 w-6" />,
-  plane: <Plane className="h-6 w-6" />,
-  dumbbell: <Dumbbell className="h-6 w-6" />,
-  palette: <Palette className="h-6 w-6" />,
-}
-
-const exploreCategories = [
-  { id: '1', name: 'Foodies', icon: 'pizza', count: 85, color: '#10B981' },
-  { id: '2', name: 'Bookworms', icon: 'book', count: 32, color: '#4F46E5' },
-  { id: '3', name: 'Musicians', icon: 'music', count: 60, color: '#7C3AED' },
-  { id: '4', name: 'Travelers', icon: 'plane', count: 120, color: '#059669' },
-  { id: '5', name: 'Fitness', icon: 'dumbbell', count: 95, color: '#DC2626' },
-  { id: '6', name: 'Creatives', icon: 'palette', count: 48, color: '#D97706' },
-]
+import { Search, X, MapPin } from 'lucide-react'
 
 const mockProfiles = [
   { id: 'p1', name: 'Maya', age: 27, bio: 'Architect by day, pottery enthusiast by night.', photos: ['https://picsum.photos/seed/maya1/400/600'], gender: 'Female', location: 'Seattle, WA', distance: '2 miles away', interests: ['Coffee', 'Hiking', 'Indie Music', 'Pottery'] },

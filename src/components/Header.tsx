@@ -1,8 +1,9 @@
 import { Link, useRouterState, getRouteApi } from '@tanstack/react-router'
-import { Flame, Moon, Sun, User, Bell } from 'lucide-react'
+import { Moon, Sun, User, Bell } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getUnreadNotificationCount } from '#/server/notifications'
+import Logo from './Logo'
 
 const rootRoute = getRouteApi('__root__')
 
@@ -58,7 +59,7 @@ export default function Header() {
           <div className="w-9" />
         )}
         <Link to="/" className="flex items-center gap-1.5 text-[var(--mag-green)] no-underline">
-          <Flame className="h-6 w-6 fill-[var(--mag-green)] text-[var(--mag-green)]" />
+          <Logo className="h-6 w-auto" />
           <span className="text-lg font-bold tracking-tight text-[var(--mag-ink)]">Meet & Greet</span>
         </Link>
         <div className="flex items-center gap-1">

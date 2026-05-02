@@ -51,7 +51,7 @@ function EditProfilePage() {
         ))}
       </div>
 
-      <div className="space-y-4">
+      <div className="mx-auto max-w-md space-y-4">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Bio</label>
           <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} className="w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
@@ -78,7 +78,9 @@ function EditProfilePage() {
         </div>
       </div>
 
-      <button onClick={handleSave} className="mt-6 inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[var(--mag-green)] py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[var(--mag-green-dark)]">Save Changes</button>
+      <div className="mt-6 flex justify-center">
+        <button onClick={handleSave} className="inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[var(--mag-green)] py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[var(--mag-green-dark)]">Save Changes</button>
+      </div>
     </main>
   )
 }

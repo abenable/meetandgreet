@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { MessageCircle, Calendar } from 'lucide-react'
 import { getConversations } from '#/server/conversations'
+import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/chats')({ component: ChatsPage })
 
@@ -44,13 +45,7 @@ function ChatRow({ convo }: { convo: any }) {
       className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 transition hover:border-[var(--mag-green)] no-underline card-shadow"
     >
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-        {convo.peerPhoto ? (
-          <img src={convo.peerPhoto} alt={convo.peerName} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-sm font-bold text-[var(--mag-ink-muted)]">
-            {convo.peerName?.charAt(0)?.toUpperCase() ?? '?'}
-          </div>
-        )}
+        <AvatarImage src={convo.peerPhoto} alt={convo.peerName} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">

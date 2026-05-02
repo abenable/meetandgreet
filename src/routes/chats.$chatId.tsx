@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Send, Check, CheckCheck } from 'lucide-react'
 import { getChatMessages, sendChatMessage, markChatRead } from '#/server/conversations'
 import { getProfileByUserId } from '#/server/profiles'
+import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/chats/$chatId')({ component: UnifiedChatPage })
 
@@ -52,7 +53,6 @@ function UnifiedChatPage() {
   }
 
   const photo = peerProfile?.photos?.[0]
-  const initials = peerProfile?.name?.charAt(0)?.toUpperCase() ?? '?'
 
   if (error) {
     return (
@@ -77,13 +77,7 @@ function UnifiedChatPage() {
         </button>
         <div className="flex flex-1 items-center justify-center gap-2">
           <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-            {photo ? (
-              <img src={photo} alt={peerProfile?.name ?? ''} className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-xs font-bold text-[var(--mag-ink-muted)]">
-                {initials}
-              </div>
-            )}
+            <AvatarImage src={photo} alt={peerProfile?.name ?? ''} />
           </div>
           <div className="min-w-0 text-center">
             <p className="truncate text-sm font-semibold text-[var(--mag-ink)]">

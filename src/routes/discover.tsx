@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { X, Heart, MapPin, Users, ArrowRight, Flag } from 'lucide-react'
 import { getMyActiveEvent, getEventProfiles, reportUser } from '#/server/events'
 import { recordSwipe } from '#/server/swipes'
+import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/discover')({ component: DiscoverPage })
 
@@ -172,17 +173,24 @@ function DiscoverPage() {
           {flatProfiles.map((profile, index) => {
             const photoIdx = photoIndices[profile.id] ?? 0
             const pic = profile.photos[photoIdx] ?? ''
+            const hasPhotos = profile.photos.length > 0
             return (
               <section key={profile.id} data-index={index} className="relative h-full w-full shrink-0 snap-start snap-always overflow-hidden">
-                <img src={pic} alt={profile.name ?? ''} className="h-full w-full object-cover" loading={index < 3 ? 'eager' : 'lazy'} />
-                <div className="gradient-overlay absolute inset-0" />
-                <div className="absolute top-4 left-4 right-4 flex gap-1.5">
-                  {profile.photos.map((_, i) => (
-                    <div key={i} className={`h-1 flex-1 rounded-full transition ${i === photoIdx ? 'bg-white' : 'bg-white/40'}`} />
-                  ))}
+                <div className="h-full w-full">
+                  <AvatarImage src={pic} alt={profile.name ?? ''} />
                 </div>
-                <button onClick={() => prevPhoto(profile.id)} className="absolute left-0 top-0 h-[40%] w-1/4" aria-label="Previous photo" />
-                <button onClick={() => nextPhoto(profile.id, profile.photos.length)} className="absolute right-0 top-0 h-[40%] w-1/4" aria-label="Next photo" />
+                <div className="gradient-overlay absolute inset-0" />
+                {hasPhotos && (
+                  <>
+                    <div className="absolute top-4 left-4 right-4 flex gap-1.5">
+                      {profile.photos.map((_, i) => (
+                        <div key={i} className={`h-1 flex-1 rounded-full transition ${i === photoIdx ? 'bg-white' : 'bg-white/40'}`} />
+                      ))}
+                    </div>
+                    <button onClick={() => prevPhoto(profile.id)} className="absolute left-0 top-0 h-[40%] w-1/4" aria-label="Previous photo" />
+                    <button onClick={() => nextPhoto(profile.id, profile.photos.length)} className="absolute right-0 top-0 h-[40%] w-1/4" aria-label="Next photo" />
+                  </>
+                )}
                 <div className="absolute bottom-0 left-0 right-0 p-5 pb-28">
                   <h2 className="text-3xl font-bold text-white">{formatNameWithGender(profile.name, profile.gender)}</h2>
                   <div className="mt-1 flex items-center gap-1.5 text-sm text-white/80"><MapPin className="h-4 w-4" /><span>{profile.location}</span></div>

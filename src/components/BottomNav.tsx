@@ -5,15 +5,15 @@ export default function BottomNav() {
   const router = useRouterState()
   const path = router.location.pathname
 
-  const mainPaths = ['/discover', '/events', '/likes', '/chats', '/matches', '/profile']
-  const isMainScreen = mainPaths.some((p) => path === p || path.startsWith(p + '/')) || path.startsWith('/events/chat/')
+  const mainPaths = ['/discover', '/events', '/likes', '/chats', '/profile']
+  const isMainScreen = mainPaths.some((p) => path === p || path.startsWith(p + '/'))
 
   if (!isMainScreen) return null
 
   const activeClass = 'text-[var(--mag-green)]'
   const inactiveClass = 'text-[var(--mag-ink-muted)]'
 
-  const isChatActive = path === '/chats' || path.startsWith('/chats/') || path.startsWith('/matches/') || path.startsWith('/events/chat/')
+  const isChatActive = path === '/chats' || path.startsWith('/chats/')
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--mag-line)] bg-[var(--bottom-nav-bg)] backdrop-blur-lg">

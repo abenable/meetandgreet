@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calendar, MapPin, Plus, Search, ArrowRight, Users, Clock, History, MessageCircle, Lock } from 'lucide-react'
+import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, MessageCircle, Lock } from 'lucide-react'
 import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents, getMyOrganizerMessages } from '#/server/events'
 import { getSession } from '#/server/auth'
 
@@ -88,8 +88,8 @@ function EventsExplorePage() {
               {unreadMessages.map((msg) => (
                 <Link
                   key={msg.id}
-                  to="/events/chat/$eventId/$peerId"
-                  params={{ eventId: msg.eventId, peerId: msg.senderId }}
+                  to="/chats/$chatId"
+                  params={{ chatId: `org_${msg.eventId}_${msg.senderId}` }}
                   className="flex items-start gap-2 rounded-xl bg-[var(--mag-green)]/10 px-3 py-2 no-underline transition hover:bg-[var(--mag-green)]/20"
                 >
                   <MessageCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mag-green)]" />
@@ -117,13 +117,6 @@ function EventsExplorePage() {
           <p className="mt-1 text-xs text-[var(--mag-ink-soft)]">Join an event below to start meeting people nearby.</p>
         </div>
       )}
-
-      <div className="mb-6">
-        <Link to="/events/join" className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 transition hover:border-[var(--mag-green)] no-underline card-shadow">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)]/10 text-[var(--mag-green)]"><Search className="h-5 w-5" /></div>
-          <div className="min-w-0"><p className="text-sm font-semibold text-[var(--mag-ink)]">Join by Code</p><p className="text-[10px] text-[var(--mag-ink-soft)]">Enter event code</p></div>
-        </Link>
-      </div>
 
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-sm font-bold text-[var(--mag-ink)]">Current Events</h3>
@@ -153,11 +146,6 @@ function EventsExplorePage() {
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
-                  {!isJoined && (
-                    <Link to="/events/join" className="rounded-full bg-[var(--mag-green)] px-4 py-1.5 text-xs font-semibold !text-white transition hover:bg-[var(--mag-green-dark)] no-underline">
-                      Enter Code to Join
-                    </Link>
-                  )}
                   {event.createdById === session?.user?.id && (
                     <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
                       Manage

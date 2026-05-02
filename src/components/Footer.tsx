@@ -4,7 +4,7 @@ export default function Footer() {
   const router = useRouterState()
   const path = router.location.pathname
 
-  const mainPaths = ['/discover', '/events', '/likes', '/matches', '/profile']
+  const mainPaths = ['/discover', '/events', '/likes', '/chats', '/profile']
   const isMainScreen = mainPaths.some((p) => path === p || path.startsWith(p + '/'))
 
   return (

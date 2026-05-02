@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Heart, MessageCircle, Users } from 'lucide-react'
 import { getLikes, getMatches } from '#/server/swipes'
+import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/likes')({ component: LikesPage })
 
@@ -62,7 +63,9 @@ function LikesPage() {
           <div className="grid grid-cols-2 gap-3">
             {likes.map((like: any) => (
               <div key={like.id} className="relative overflow-hidden rounded-2xl">
-                <img src={(like.photos || [])[0] || ''} alt={like.name} className="aspect-[3/4] w-full object-cover" />
+                <div className="aspect-[3/4] w-full">
+                  <AvatarImage src={(like.photos || [])[0]} alt={like.name} />
+                </div>
                 <div className="absolute inset-0 bg-black/20" />
                 <div className="absolute bottom-0 left-0 right-0 p-3">
                   <h3 className="text-sm font-bold text-white">{like.name}</h3>
@@ -86,18 +89,12 @@ function LikesPage() {
             {matches.map((match: any) => (
               <Link
                 key={match.id}
-                to="/matches/$matchId"
-                params={{ matchId: match.id }}
+                to="/chats/$chatId"
+                params={{ chatId: `match_${match.id}` }}
                 className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 transition hover:border-[var(--mag-green)] no-underline card-shadow"
               >
                 <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-                  {match.peerPhoto ? (
-                    <img src={match.peerPhoto} alt={match.peerName} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-sm font-bold text-[var(--mag-ink-muted)]">
-                      {match.peerName?.charAt(0)?.toUpperCase() ?? '?'}
-                    </div>
-                  )}
+                  <AvatarImage src={match.peerPhoto} alt={match.peerName} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-sm font-semibold text-[var(--mag-ink)]">{match.peerName}</h3>

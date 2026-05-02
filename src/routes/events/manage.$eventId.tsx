@@ -34,6 +34,7 @@ import {
   getEventReports,
 } from '#/server/events'
 import { getSession } from '#/server/auth'
+import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/events/manage/$eventId')({ component: ManageEventPage })
 
@@ -536,13 +537,7 @@ function ManageEventPage() {
                       className="flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3"
                     >
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-                        {photo ? (
-                          <img src={photo} alt={profile.name ?? ''} className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[var(--mag-ink-muted)]">
-                            {profile.name?.charAt(0)?.toUpperCase() ?? '?'}
-                          </div>
-                        )}
+                        <AvatarImage src={photo} alt={profile.name ?? ''} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-[var(--mag-ink)]">
@@ -554,7 +549,7 @@ function ManageEventPage() {
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
                         <button
-                          onClick={() => navigate({ to: '/events/chat/$eventId/$peerId', params: { eventId, peerId: profile.userId } })}
+                          onClick={() => navigate({ to: '/chats/$chatId', params: { chatId: `org_${eventId}_${profile.userId}` } })}
                           title="Message"
                           className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-green)]/10 text-[var(--mag-green)] transition hover:bg-[var(--mag-green)]/20"
                         >
@@ -600,16 +595,10 @@ function ManageEventPage() {
             ) : (
               <div className="space-y-3">
                 {(reports as any[]).map((report) => (
-                  <div key={report.id} className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3">
+                    <div key={report.id} className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3">
                     <div className="mb-2 flex items-center gap-2">
                       <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-                        {(report.reported as any)?.photos?.[0] ? (
-                          <img src={(report.reported as any).photos[0]} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[var(--mag-ink-muted)]">
-                            {(report.reported as any)?.name?.charAt(0)?.toUpperCase() ?? '?'}
-                          </div>
-                        )}
+                        <AvatarImage src={(report.reported as any)?.photos?.[0]} alt="" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-xs font-semibold text-[var(--mag-ink)]">
@@ -631,7 +620,7 @@ function ManageEventPage() {
                         <Ban className="h-3 w-3" /> Block user
                       </button>
                       <button
-                        onClick={() => navigate({ to: '/events/chat/$eventId/$peerId', params: { eventId, peerId: report.reportedId } })}
+                        onClick={() => navigate({ to: '/chats/$chatId', params: { chatId: `org_${eventId}_${report.reportedId}` } })}
                         className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
                       >
                         <MessageCircle className="h-3 w-3" /> Message
@@ -658,18 +647,12 @@ function ManageEventPage() {
               <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No blocked users.</p>
             ) : (
               <div className="space-y-3">
-                {(blockedUsers as any[]).map((b) => {
+                  {(blockedUsers as any[]).map((b) => {
                   const photo = b.profile?.photos?.[0]
                   return (
                     <div key={b.userId} className="flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3">
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-                        {photo ? (
-                          <img src={photo} alt={b.profile?.name ?? ''} className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[var(--mag-ink-muted)]">
-                            {b.profile?.name?.charAt(0)?.toUpperCase() ?? '?'}
-                          </div>
-                        )}
+                        <AvatarImage src={photo} alt={b.profile?.name ?? ''} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-[var(--mag-ink)]">

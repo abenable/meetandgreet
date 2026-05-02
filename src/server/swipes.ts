@@ -31,6 +31,22 @@ export const recordSwipe = createServerFn({ method: 'POST' })
       throw new Error('Both users must be active attendees of the event')
     }
 
+    // Check for existing swipe to avoid duplicate side effects
+    const existing = await prisma.eventSwipe.findUnique({
+      where: {
+        eventId_swiperId_swipedId: {
+          eventId: data.eventId,
+          swiperId,
+          swipedId: data.swipedId,
+        },
+      },
+    })
+
+    if (existing && existing.direction === data.direction) {
+      // Same direction already recorded — do nothing
+      return existing
+    }
+
     const swipe = await prisma.eventSwipe.upsert({
       where: {
         eventId_swiperId_swipedId: {
@@ -82,14 +98,14 @@ export const recordSwipe = createServerFn({ method: 'POST' })
               type: 'match',
               title: "It's a Match!",
               body: 'You matched with someone. Start chatting!',
-              link: `/matches/${match.id}`,
+              link: `/chats/match_${match.id}`,
             }),
             createNotification({
               userId: data.swipedId,
               type: 'match',
               title: "It's a Match!",
               body: 'You matched with someone. Start chatting!',
-              link: `/matches/${match.id}`,
+              link: `/chats/match_${match.id}`,
             }),
           ])
           return match
@@ -219,7 +235,7 @@ export const sendMessage = createServerFn({ method: 'POST' })
       type: 'message',
       title: 'New Message',
       body: data.content.slice(0, 100),
-      link: `/matches/${data.matchId}`,
+      link: `/chats/match_${data.matchId}`,
     })
 
     return prisma.eventMessage.create({

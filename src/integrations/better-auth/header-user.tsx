@@ -1,5 +1,6 @@
 import { authClient } from '#/lib/auth-client'
 import { Link } from '@tanstack/react-router'
+import AvatarImage from '#/components/AvatarImage'
 
 export default function BetterAuthHeader() {
   const { data: session, isPending } = authClient.useSession()
@@ -13,15 +14,9 @@ export default function BetterAuthHeader() {
   if (session?.user) {
     return (
       <div className="flex items-center gap-2">
-        {session.user.image ? (
-          <img src={session.user.image} alt="" className="h-8 w-8" />
-        ) : (
-          <div className="h-8 w-8 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
-            <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
-              {session.user.name?.charAt(0).toUpperCase() || 'U'}
-            </span>
-          </div>
-        )}
+        <div className="h-8 w-8">
+          <AvatarImage src={session.user.image} />
+        </div>
         <button
           onClick={() => {
             void authClient.signOut()

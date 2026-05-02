@@ -1,6 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
+import { z } from 'zod'
 import { prisma } from '#/db'
 import { requireSession } from '#/server/auth'
+import { createNotification } from './notifications.server'
 
 export const getConversations = createServerFn({ method: 'GET' })
   .handler(async () => {
@@ -75,7 +77,8 @@ export const getConversations = createServerFn({ method: 'GET' })
       const peerId = match.user1Id === myId ? match.user2Id : match.user1Id
       const profile = profiles.find((p) => p.userId === peerId)
       return {
-        id: `match:${match.id}`,
+        id: `${match.id}`,
+        chatId: `match_${match.id}`,
         type: 'match' as const,
         matchId: match.id,
         eventId: match.eventId,
@@ -93,7 +96,8 @@ export const getConversations = createServerFn({ method: 'GET' })
       const profile = profiles.find((p) => p.userId === convo.peerId)
       const event = events.find((e) => e.id === convo.eventId)
       return {
-        id: `org:${convo.eventId}:${convo.peerId}`,
+        id: `${convo.eventId}:${convo.peerId}`,
+        chatId: `org_${convo.eventId}_${convo.peerId}`,
         type: 'organizer' as const,
         eventId: convo.eventId,
         eventName: event?.name ?? 'Event',
@@ -111,4 +115,159 @@ export const getConversations = createServerFn({ method: 'GET' })
     all.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime())
 
     return all
+  })
+
+// ── Unified Chat API ──
+
+export const getChatMessages = createServerFn({ method: 'GET' })
+  .inputValidator(z.string())
+  .handler(async ({ data: chatId }) => {
+    const session = await requireSession()
+    const myId = session.user.id
+
+    if (chatId.startsWith('match_')) {
+      const matchId = chatId.slice('match_'.length)
+      const match = await prisma.eventMatch.findFirst({
+        where: { id: matchId, OR: [{ user1Id: myId }, { user2Id: myId }] },
+      })
+      if (!match) throw new Error('Match not found')
+
+      const msgs = await prisma.eventMessage.findMany({
+        where: { matchId },
+        orderBy: { createdAt: 'asc' },
+      })
+
+      return {
+        type: 'match' as const,
+        peerId: match.user1Id === myId ? match.user2Id : match.user1Id,
+        messages: msgs.map((m) => ({ ...m, isMine: m.senderId === myId })),
+      }
+    }
+
+    if (chatId.startsWith('org_')) {
+      const [, eventId, peerId] = chatId.split('_')
+      if (!eventId || !peerId) throw new Error('Invalid chat id')
+
+      const event = await prisma.event.findUnique({ where: { id: eventId } })
+      if (!event) throw new Error('Event not found')
+
+      const isOrganizer = event.createdById === myId
+      if (!isOrganizer && peerId !== event.createdById) {
+        throw new Error('Unauthorized')
+      }
+
+      const msgs = await prisma.eventOrganizerMessage.findMany({
+        where: {
+          eventId,
+          OR: [
+            { senderId: myId, receiverId: peerId },
+            { senderId: peerId, receiverId: myId },
+          ],
+        },
+        orderBy: { createdAt: 'asc' },
+      })
+
+      return {
+        type: 'organizer' as const,
+        peerId,
+        eventId,
+        messages: msgs.map((m) => ({ ...m, isMine: m.senderId === myId })),
+      }
+    }
+
+    throw new Error('Unknown chat type')
+  })
+
+export const sendChatMessage = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({
+    chatId: z.string(),
+    content: z.string().min(1).max(2000),
+  }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+    const myId = session.user.id
+    const { chatId, content } = data
+
+    if (chatId.startsWith('match_')) {
+      const matchId = chatId.slice('match_'.length)
+      const match = await prisma.eventMatch.findFirst({
+        where: { id: matchId, OR: [{ user1Id: myId }, { user2Id: myId }] },
+      })
+      if (!match) throw new Error('Match not found')
+
+      const peerId = match.user1Id === myId ? match.user2Id : match.user1Id
+      const message = await prisma.eventMessage.create({
+        data: { matchId, senderId: myId, content },
+      })
+
+      await createNotification({
+        userId: peerId,
+        type: 'message',
+        title: 'New Message',
+        body: content.slice(0, 100),
+        link: `/chats/${chatId}`,
+      })
+
+      return { ...message, isMine: true }
+    }
+
+    if (chatId.startsWith('org_')) {
+      const [, eventId, peerId] = chatId.split('_')
+      if (!eventId || !peerId) throw new Error('Invalid chat id')
+
+      const event = await prisma.event.findUnique({ where: { id: eventId } })
+      if (!event) throw new Error('Event not found')
+
+      const isOrganizer = event.createdById === myId
+      if (!isOrganizer && peerId !== event.createdById) {
+        throw new Error('Unauthorized')
+      }
+
+      const message = await prisma.eventOrganizerMessage.create({
+        data: { eventId, senderId: myId, receiverId: peerId, content },
+      })
+
+      await createNotification({
+        userId: peerId,
+        type: 'organizer_message',
+        title: 'New Message',
+        body: content.slice(0, 100),
+        link: `/chats/${chatId}`,
+      })
+
+      return { ...message, isMine: true }
+    }
+
+    throw new Error('Unknown chat type')
+  })
+
+export const markChatRead = createServerFn({ method: 'POST' })
+  .inputValidator(z.string())
+  .handler(async ({ data: chatId }) => {
+    const session = await requireSession()
+    const myId = session.user.id
+
+    if (chatId.startsWith('match_')) {
+      // Match messages don't have readAt yet; nothing to mark
+      return { success: true }
+    }
+
+    if (chatId.startsWith('org_')) {
+      const [, eventId, peerId] = chatId.split('_')
+      if (!eventId || !peerId) throw new Error('Invalid chat id')
+
+      await prisma.eventOrganizerMessage.updateMany({
+        where: {
+          eventId,
+          senderId: peerId,
+          receiverId: myId,
+          readAt: null,
+        },
+        data: { readAt: new Date() },
+      })
+
+      return { success: true }
+    }
+
+    throw new Error('Unknown chat type')
   })

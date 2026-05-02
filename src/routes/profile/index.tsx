@@ -3,18 +3,9 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { MapPin, Camera, Link2, Pencil } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
+import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/profile/')({ component: ProfilePage })
-
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-}
 
 function resizeImageToBase64(file: File, maxWidth = 600): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -119,20 +110,13 @@ function ProfilePage() {
   }
 
   const avatarPhoto = (profile.photos || [])[0]
-  const initials = getInitials(profile.name || 'You')
 
   return (
     <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       {/* Profile Avatar */}
       <div className="mb-4 flex flex-col items-center">
         <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-[var(--mag-card)] shadow-md">
-          {avatarPhoto ? (
-            <img src={avatarPhoto} alt="Profile" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[var(--mag-green)] text-lg font-bold text-white">
-              {initials}
-            </div>
-          )}
+          <AvatarImage src={avatarPhoto} alt="Profile" />
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploadingAvatar}

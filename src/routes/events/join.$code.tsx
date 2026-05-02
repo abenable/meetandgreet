@@ -20,9 +20,10 @@ export const Route = createFileRoute('/events/join/$code')({
 function ShareJoinPage() {
   const { code } = useParams({ from: '/events/join/$code' })
   const navigate = useNavigate()
-  const [status, setStatus] = useState<'loading' | 'joining' | 'success' | 'error'>('loading')
+  const [status, setStatus] = useState<'loading' | 'ready' | 'joining' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
   const [alreadyJoined, setAlreadyJoined] = useState(false)
+  const [confirmInfo, setConfirmInfo] = useState<{ currentEventName: string; eventName: string } | null>(null)
 
   const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ['session'],
@@ -37,13 +38,10 @@ function ShareJoinPage() {
   useEffect(() => {
     if (sessionLoading || eventLoading) return
 
-    // Session is explicitly null when not authenticated — redirect to login with redirect param
     if (session === null) {
       navigate({ to: '/login', search: { redirect: `/events/join/${code}` } })
       return
     }
-
-    if (status !== 'loading') return
 
     if (!session?.user) {
       setStatus('error')
@@ -57,23 +55,32 @@ function ShareJoinPage() {
       return
     }
 
+    setStatus('ready')
+  }, [session, sessionLoading, event, eventLoading, code, navigate])
+
+  const doJoin = async (force = false) => {
     setStatus('joining')
-    joinEvent({ data: code })
-      .then((result) => {
-        if (result.success) {
-          setAlreadyJoined((result as any).alreadyJoined === true)
-          setStatus('success')
-          setTimeout(() => navigate({ to: '/events' }), 1800)
-        } else {
-          setStatus('error')
-          setMessage(result.message || 'Could not join event.')
-        }
-      })
-      .catch(() => {
+    try {
+      const result = await joinEvent({ data: { code, force } })
+      if (result.success) {
+        setAlreadyJoined((result as any).alreadyJoined === true)
+        setStatus('success')
+        setTimeout(() => navigate({ to: '/events' }), 1800)
+      } else if ((result as any).needsConfirm) {
+        setStatus('ready')
+        setConfirmInfo({
+          currentEventName: (result as any).currentEvent.name,
+          eventName: (result as any).eventName,
+        })
+      } else {
         setStatus('error')
-        setMessage('Something went wrong. Please try again.')
-      })
-  }, [session, sessionLoading, event, eventLoading, code, status, navigate])
+        setMessage(result.message || 'Could not join event.')
+      }
+    } catch {
+      setStatus('error')
+      setMessage('Something went wrong. Please try again.')
+    }
+  }
 
   return (
     <main className="page-wrap px-4 py-4">
@@ -104,9 +111,8 @@ function ShareJoinPage() {
             {event?.name} — redirecting…
           </p>
         </div>
-      ) : (
+      ) : status === 'error' ? (
         <div className="space-y-4">
-          {/* Event preview */}
           {event && (
             <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
               <div className="flex items-start gap-3">
@@ -170,6 +176,70 @@ function ShareJoinPage() {
           >
             Browse Events
           </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {event && (
+            <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+              <div className="flex items-start gap-3">
+                {(event as any).photo && (
+                  <img src={(event as any).photo} alt={event.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base font-bold text-[var(--mag-ink)]">
+                    {event.name}
+                  </h2>
+                  <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">
+                    {event.description}
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {event.location}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {(event as any)._count?.attendees ?? 0} attending
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {confirmInfo ? (
+            <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+              <h3 className="mb-2 text-sm font-bold text-[var(--mag-ink)]">Leave current event?</h3>
+              <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+                You are already checked into <strong className="text-[var(--mag-ink)]">{confirmInfo.currentEventName}</strong>. You can only be in one event at a time.
+              </p>
+              <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+                Join <strong className="text-[var(--mag-ink)]">{confirmInfo.eventName}</strong> anyway?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setConfirmInfo(null); navigate({ to: '/events' }) }}
+                  className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => doJoin(true)}
+                  className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+                >
+                  Switch Event
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => doJoin()}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-3 text-sm font-bold !text-white transition hover:bg-[var(--mag-green-dark)]"
+            >
+              <LogIn className="h-4 w-4" />
+              Join Event
+            </button>
+          )}
         </div>
       )}
     </main>

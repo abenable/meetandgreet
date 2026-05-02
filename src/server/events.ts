@@ -75,6 +75,14 @@ async function leaveAllActiveEvents(userId: string, tx?: typeof prisma) {
   })
 }
 
+async function getCurrentActiveEvent(userId: string) {
+  const attendee = await prisma.eventAttendee.findFirst({
+    where: { userId, leftAt: null },
+    include: { event: { select: { id: true, name: true } } },
+  })
+  return attendee?.event ?? null
+}
+
 export const createEvent = createServerFn({ method: 'POST' })
   .inputValidator(z.object({
     name: z.string().min(1).max(100),
@@ -84,9 +92,17 @@ export const createEvent = createServerFn({ method: 'POST' })
     maxAttendees: z.number().int().min(1).max(1000).optional(),
     startsAt: z.string().datetime().optional(),
     isPublic: z.boolean().optional(),
+    force: z.boolean().optional(),
   }))
   .handler(async ({ data }) => {
     const session = await requireSession()
+
+    if (!data.force) {
+      const currentEvent = await getCurrentActiveEvent(session.user.id)
+      if (currentEvent) {
+        return { success: false, needsConfirm: true as const, currentEvent }
+      }
+    }
 
     return prisma.$transaction(async (tx) => {
       await leaveAllActiveEvents(session.user.id, tx)
@@ -107,18 +123,21 @@ export const createEvent = createServerFn({ method: 'POST' })
       await tx.eventAttendee.create({
         data: { eventId: event.id, userId: session.user.id },
       })
-      return event
+      return { success: true as const, event }
     })
   })
 
 export const joinEvent = createServerFn({ method: 'POST' })
-  .inputValidator(z.string())
-  .handler(async ({ data: code }) => {
+  .inputValidator(z.object({
+    code: z.string(),
+    force: z.boolean().optional(),
+  }))
+  .handler(async ({ data }) => {
     const session = await requireSession()
     const now = new Date()
 
     const event = await prisma.event.findUnique({
-      where: { code: code.toUpperCase() },
+      where: { code: data.code.toUpperCase() },
       include: {
         _count: { select: { attendees: { where: { leftAt: null } } } },
       },
@@ -161,6 +180,13 @@ export const joinEvent = createServerFn({ method: 'POST' })
 
     if (existing && existing.leftAt === null) {
       return { success: true, alreadyJoined: true }
+    }
+
+    if (!data.force) {
+      const currentEvent = await getCurrentActiveEvent(session.user.id)
+      if (currentEvent && currentEvent.id !== event.id) {
+        return { success: false, needsConfirm: true as const, currentEvent, eventName: event.name }
+      }
     }
 
     await prisma.$transaction(async (tx) => {

@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, Lock } from 'lucide-react'
-import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents } from '#/server/events'
+import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, Lock, LogIn } from 'lucide-react'
+import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents, joinEvent } from '#/server/events'
 import { getSession } from '#/server/auth'
 
 export const Route = createFileRoute('/events/')({ component: EventsExplorePage })
@@ -29,6 +30,8 @@ function EventsExplorePage() {
     queryFn: () => getMyCreatedEvents(),
   })
 
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; eventName: string; code: string; currentEventName: string } | null>(null)
+
   const handleCopyShareLink = (code: string) => {
     const link = `${window.location.origin}/events/join/${code}`
     navigator.clipboard.writeText(link)
@@ -38,6 +41,29 @@ function EventsExplorePage() {
     if (!activeEvent) return
     await leaveEvent({ data: activeEvent.id })
     queryClient.invalidateQueries({ queryKey: ['active-event'] })
+  }
+
+  const handleJoin = async (code: string, force = false) => {
+    const result = await joinEvent({ data: { code, force } })
+    if (result.success) {
+      queryClient.invalidateQueries({ queryKey: ['active-event'] })
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+    } else if ((result as any).needsConfirm) {
+      setConfirmModal({
+        open: true,
+        eventName: (result as any).eventName,
+        code,
+        currentEventName: (result as any).currentEvent.name,
+      })
+    } else {
+      alert(result.message || 'Could not join event.')
+    }
+  }
+
+  const confirmJoin = async () => {
+    if (!confirmModal) return
+    setConfirmModal(null)
+    await handleJoin(confirmModal.code, true)
   }
 
   const currentEvents = events.filter((e) => e.isActive && !e.endedAt)
@@ -124,6 +150,14 @@ function EventsExplorePage() {
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  {!isJoined && (
+                    <button
+                      onClick={() => handleJoin(event.code)}
+                      className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-green)] px-3 py-1.5 text-[10px] font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+                    >
+                      <LogIn className="h-3 w-3" /> Join
+                    </button>
+                  )}
                   {event.createdById === session?.user?.id && (
                     <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
                       Manage
@@ -262,6 +296,35 @@ function EventsExplorePage() {
       <Link to="/events/create" className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] py-4 text-sm font-medium text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)] no-underline">
         <Plus className="h-4 w-4" />Create New Event
       </Link>
+
+      {/* Confirm leave + join modal */}
+      {confirmModal?.open && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+            <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Leave current event?</h3>
+            <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+              You are already checked into <strong className="text-[var(--mag-ink)]">{confirmModal.currentEventName}</strong>. You can only be in one event at a time.
+            </p>
+            <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+              Join <strong className="text-[var(--mag-ink)]">{confirmModal.eventName}</strong> anyway?
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmModal(null)}
+                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmJoin}
+                className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+              >
+                Switch Event
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

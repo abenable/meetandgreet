@@ -1,6 +1,6 @@
-import { getPresignedImageUploadUrl, deleteImage } from '#/server/images'
+import { uploadImage, deleteImage } from '#/server/images'
 
-export function resizeImageToBlob(file: File, maxWidth = 800): Promise<Blob> {
+export function resizeImageToBase64(file: File, maxWidth = 800): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     const reader = new FileReader()
@@ -13,14 +13,7 @@ export function resizeImageToBlob(file: File, maxWidth = 800): Promise<Blob> {
         canvas.height = img.height * scale
         const ctx = canvas.getContext('2d')
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
-        canvas.toBlob(
-          (blob) => {
-            if (blob) resolve(blob)
-            else reject(new Error('Canvas toBlob failed'))
-          },
-          'image/jpeg',
-          0.85,
-        )
+        resolve(canvas.toDataURL('image/jpeg', 0.85))
       }
       img.onerror = reject
     }
@@ -29,24 +22,10 @@ export function resizeImageToBlob(file: File, maxWidth = 800): Promise<Blob> {
   })
 }
 
-export async function uploadImageToR2(blob: Blob, key: string): Promise<string> {
-  const { presignedUrl, publicUrl } = await getPresignedImageUploadUrl({
-    data: { key, contentType: 'image/jpeg' },
-  })
-
-  const response = await fetch(presignedUrl, {
-    method: 'PUT',
-    body: blob,
-    headers: {
-      'Content-Type': 'image/jpeg',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error(`R2 upload failed: ${response.status} ${response.statusText}`)
-  }
-
-  return publicUrl
+export async function uploadImageToR2(file: File, key: string, maxWidth?: number): Promise<string> {
+  const base64 = await resizeImageToBase64(file, maxWidth)
+  const { url } = await uploadImage({ data: { key, imageBase64: base64 } })
+  return url
 }
 
 export async function maybeDeleteR2Image(url: string) {

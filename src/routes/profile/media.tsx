@@ -3,7 +3,7 @@ import { useState, useRef } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { ArrowLeft, Upload, X, GripVertical } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
-import { resizeImageToBlob, uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
+import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
 export const Route = createFileRoute('/profile/media')({ component: MediaPage })
 
@@ -30,9 +30,8 @@ function MediaPage() {
 
     const urls = await Promise.all(
       files.slice(0, remaining).map(async (f) => {
-        const blob = await resizeImageToBlob(f, 800)
         const key = `profiles/${profile.userId}/photo-${crypto.randomUUID()}.jpg`
-        return uploadImageToR2(blob, key)
+        return uploadImageToR2(f, key)
       }),
     )
     updateMutation.mutate([...existing, ...urls])

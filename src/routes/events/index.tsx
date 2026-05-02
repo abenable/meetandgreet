@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, Lock } from 'lucide-react'
-import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents } from '#/server/events'
+import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, Lock, LogIn } from 'lucide-react'
+import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents, joinEvent } from '#/server/events'
 import { getSession } from '#/server/auth'
 
 export const Route = createFileRoute('/events/')({ component: EventsExplorePage })
@@ -29,6 +30,8 @@ function EventsExplorePage() {
     queryFn: () => getMyCreatedEvents(),
   })
 
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; eventName: string; code: string; currentEventName: string } | null>(null)
+
   const handleCopyShareLink = (code: string) => {
     const link = `${window.location.origin}/events/join/${code}`
     navigator.clipboard.writeText(link)
@@ -38,6 +41,29 @@ function EventsExplorePage() {
     if (!activeEvent) return
     await leaveEvent({ data: activeEvent.id })
     queryClient.invalidateQueries({ queryKey: ['active-event'] })
+  }
+
+  const handleJoin = async (code: string, force = false) => {
+    const result = await joinEvent({ data: { code, force } })
+    if (result.success) {
+      queryClient.invalidateQueries({ queryKey: ['active-event'] })
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+    } else if ((result as any).needsConfirm) {
+      setConfirmModal({
+        open: true,
+        eventName: (result as any).eventName,
+        code,
+        currentEventName: (result as any).currentEvent.name,
+      })
+    } else {
+      alert(result.message || 'Could not join event.')
+    }
+  }
+
+  const confirmJoin = async () => {
+    if (!confirmModal) return
+    setConfirmModal(null)
+    await handleJoin(confirmModal.code, true)
   }
 
   const currentEvents = events.filter((e) => e.isActive && !e.endedAt)
@@ -56,8 +82,8 @@ function EventsExplorePage() {
             <div className="min-w-0 flex-1">
               <span className="rounded-full bg-[var(--mag-green)] px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide">Active</span>
               <div className="mt-1 flex items-center gap-3">
-                {(activeEvent as any).photo && (
-                  <img src={(activeEvent as any).photo} alt={activeEvent.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
+                {activeEvent.photo && (
+                  <img src={activeEvent.photo} alt={activeEvent.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
                 )}
                 <div className="min-w-0">
                   <h2 className="text-lg font-bold text-[var(--mag-ink)]">{activeEvent.name}</h2>
@@ -108,8 +134,8 @@ function EventsExplorePage() {
             <div key={event.id} className={`rounded-2xl border p-4 transition ${isJoined ? 'border-[var(--mag-green)] bg-[var(--mag-green)]/5' : 'border-[var(--mag-line)] bg-[var(--mag-card)]'}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 flex-1 gap-3">
-                  {(event as any).photo && (
-                    <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                  {event.photo && (
+                    <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -124,6 +150,14 @@ function EventsExplorePage() {
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  {!isJoined && (
+                    <button
+                      onClick={() => handleJoin(event.code)}
+                      className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-green)] px-3 py-1.5 text-[10px] font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+                    >
+                      <LogIn className="h-3 w-3" /> Join
+                    </button>
+                  )}
                   {event.createdById === session?.user?.id && (
                     <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
                       Manage
@@ -148,8 +182,8 @@ function EventsExplorePage() {
                 <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-1 gap-3">
-                      {(event as any).photo && (
-                        <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                      {event.photo && (
+                        <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
                       )}
                       <div className="min-w-0 flex-1">
                         <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
@@ -158,7 +192,7 @@ function EventsExplorePage() {
                           <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
                           <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
                           <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{event.code}</span>
-                          {!(event as any).isPublic && (
+                          {!event.isPublic && (
                             <span className="inline-flex items-center gap-1 rounded bg-[var(--mag-ink)]/10 px-1.5 py-0.5 font-medium text-[var(--mag-ink)]">
                               <Lock className="h-3 w-3" /> Private
                             </span>
@@ -193,12 +227,17 @@ function EventsExplorePage() {
             {upcomingEvents.map((event) => (
               <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-80">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                    <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                      <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                      <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{0} interested</span>
+                  <div className="flex min-w-0 flex-1 gap-3">
+                    {event.photo && (
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{0} interested</span>
+                      </div>
                     </div>
                   </div>
                   {event.createdById === session?.user?.id && (
@@ -226,8 +265,8 @@ function EventsExplorePage() {
                 <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-70">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-1 gap-3">
-                      {(event as any).photo && (
-                        <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                      {event.photo && (
+                        <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
@@ -257,6 +296,35 @@ function EventsExplorePage() {
       <Link to="/events/create" className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] py-4 text-sm font-medium text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)] no-underline">
         <Plus className="h-4 w-4" />Create New Event
       </Link>
+
+      {/* Confirm leave + join modal */}
+      {confirmModal?.open && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+            <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Leave current event?</h3>
+            <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+              You are already checked into <strong className="text-[var(--mag-ink)]">{confirmModal.currentEventName}</strong>. You can only be in one event at a time.
+            </p>
+            <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+              Join <strong className="text-[var(--mag-ink)]">{confirmModal.eventName}</strong> anyway?
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmModal(null)}
+                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmJoin}
+                className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+              >
+                Switch Event
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

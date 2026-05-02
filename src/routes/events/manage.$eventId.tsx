@@ -35,7 +35,7 @@ import {
 } from '#/server/events'
 import { getSession } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
-import { resizeImageToBlob, uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
+import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
 export const Route = createFileRoute('/events/manage/$eventId')({ component: ManageEventPage })
 
@@ -95,9 +95,8 @@ function ManageEventPage() {
     const file = e.target.files?.[0]
     if (!file) return
     try {
-      const blob = await resizeImageToBlob(file, 800)
       const key = `events/${eventId}/photo-${crypto.randomUUID()}.jpg`
-      const url = await uploadImageToR2(blob, key)
+      const url = await uploadImageToR2(file, key)
 
       if (eventPhoto?.startsWith('http')) {
         await maybeDeleteR2Image(eventPhoto).catch(() => {})
@@ -117,7 +116,7 @@ function ManageEventPage() {
       setLocation(event.location ?? '')
       setMaxAttendees(event.maxAttendees != null ? String(event.maxAttendees) : '')
       setStartsAt(event.startsAt ? new Date(event.startsAt).toISOString().slice(0, 16) : '')
-      setEventPhoto((event as any).photo ?? null)
+      setEventPhoto(event.photo ?? null)
       setEventIsPublic((event as any).isPublic ?? true)
     }
   }, [event])
@@ -131,6 +130,10 @@ function ManageEventPage() {
       queryClient.invalidateQueries({ queryKey: ['events'] })
       setSavedMsg(true)
       setTimeout(() => setSavedMsg(false), 2000)
+    },
+    onError: (err: any) => {
+      const message = err?.message || err?.error?.message || 'Failed to save changes.'
+      alert(message)
     },
   })
 
@@ -175,6 +178,7 @@ function ManageEventPage() {
   })
 
   const handleSave = () => {
+    const startsAtIso = startsAt ? new Date(startsAt + ':00').toISOString() : undefined
     updateMutation.mutate({
       data: {
         eventId,
@@ -183,7 +187,7 @@ function ManageEventPage() {
           description: description.trim() || undefined,
           location: location.trim() || undefined,
           maxAttendees: maxAttendees ? Number(maxAttendees) : undefined,
-          startsAt: startsAt || undefined,
+          startsAt: startsAtIso,
           photo: eventPhoto,
           isPublic: eventIsPublic,
         },

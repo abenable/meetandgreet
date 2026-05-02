@@ -4,30 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { MapPin, Camera, Link2, Pencil } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import AvatarImage from '#/components/AvatarImage'
+import { resizeImageToBlob, uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
 export const Route = createFileRoute('/profile/')({ component: ProfilePage })
-
-function resizeImageToBase64(file: File, maxWidth = 600): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      img.src = e.target?.result as string
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const scale = Math.min(1, maxWidth / img.width)
-        canvas.width = img.width * scale
-        canvas.height = img.height * scale
-        const ctx = canvas.getContext('2d')
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
-        resolve(canvas.toDataURL('image/jpeg', 0.85))
-      }
-      img.onerror = reject
-    }
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
 
 function formatNameWithGender(name: string | null, gender: string | null): string {
   const initial = gender === 'Male' ? 'M' : gender === 'Female' ? 'F' : ''
@@ -89,8 +68,16 @@ function ProfilePage() {
     if (!file || !profile) return
     setUploadingAvatar(true)
     try {
-      const base64 = await resizeImageToBase64(file)
-      const photos = [base64, ...(profile.photos || []).filter((p: string) => p !== base64)]
+      const blob = await resizeImageToBlob(file, 600)
+      const key = `profiles/${profile.userId}/avatar-${crypto.randomUUID()}.jpg`
+      const url = await uploadImageToR2(blob, key)
+
+      const oldAvatar = (profile.photos || [])[0]
+      if (oldAvatar?.startsWith('http')) {
+        await maybeDeleteR2Image(oldAvatar).catch(() => {})
+      }
+
+      const photos = [url, ...(profile.photos || []).slice(1)]
       await updateProfile({ data: { photos } })
       qc.invalidateQueries({ queryKey: ['my-profile'] })
     } catch {

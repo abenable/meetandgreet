@@ -9,7 +9,6 @@ const typeConfig: Record<string, { icon: typeof Heart; color: string; bg: string
   like: { icon: Heart, color: 'text-red-500', bg: 'bg-red-500/10' },
   match: { icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
   message: { icon: MessageCircle, color: 'text-[var(--mag-green)]', bg: 'bg-[var(--mag-green)]/10' },
-  organizer_message: { icon: MessageCircle, color: 'text-[var(--mag-green)]', bg: 'bg-[var(--mag-green)]/10' },
 }
 
 function NotificationsPage() {

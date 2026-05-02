@@ -65,7 +65,7 @@ function LoginPage() {
   }
 
   return (
-    <main className="page-wrap flex min-h-[90vh] flex-col items-center px-4 py-8">
+    <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8">
       <div className="mb-8 text-center">
         <Logo className="mx-auto mb-4 h-20 w-auto" />
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Welcome Back</h1>
@@ -144,16 +144,6 @@ function LoginPage() {
           </Link>
         </div>
       </div>
-
-      <div className="mt-auto flex justify-center gap-4 pt-6 text-[10px] text-[var(--mag-ink-muted)]">
-        <Link to="/terms" className="no-underline hover:text-[var(--mag-ink-soft)]">
-          Terms of Service
-        </Link>
-        <Link to="/privacy" className="no-underline hover:text-[var(--mag-ink-soft)]">
-          Privacy Policy
-        </Link>
-        <span className="text-[var(--mag-ink-muted)]">Cookie Policy</span>
-      </div>
-    </main>
+    </div>
   )
 }

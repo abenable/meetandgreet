@@ -3,30 +3,9 @@ import { useState, useRef } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { ArrowLeft, Upload, X, GripVertical } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
+import { resizeImageToBlob, uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
 export const Route = createFileRoute('/profile/media')({ component: MediaPage })
-
-function resizeImageToBase64(file: File, maxWidth = 800): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      img.src = e.target?.result as string
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const scale = Math.min(1, maxWidth / img.width)
-        canvas.width = img.width * scale
-        canvas.height = img.height * scale
-        const ctx = canvas.getContext('2d')
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
-        resolve(canvas.toDataURL('image/jpeg', 0.85))
-      }
-      img.onerror = reject
-    }
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
 
 function MediaPage() {
   const navigate = useNavigate()
@@ -49,17 +28,25 @@ function MediaPage() {
     const remaining = Math.max(0, 6 - existing.length)
     if (remaining === 0) return
 
-    const base64s = await Promise.all(
-      files.slice(0, remaining).map((f) => resizeImageToBase64(f))
+    const urls = await Promise.all(
+      files.slice(0, remaining).map(async (f) => {
+        const blob = await resizeImageToBlob(f, 800)
+        const key = `profiles/${profile.userId}/photo-${crypto.randomUUID()}.jpg`
+        return uploadImageToR2(blob, key)
+      }),
     )
-    updateMutation.mutate([...existing, ...base64s])
+    updateMutation.mutate([...existing, ...urls])
     if (fileRef.current) fileRef.current.value = ''
   }
 
-  const removePhoto = (index: number) => {
+  const removePhoto = async (index: number) => {
     if (!profile) return
+    const removed = profile.photos[index]
     const photos = (profile.photos || []).filter((_, i) => i !== index)
     updateMutation.mutate(photos)
+    if (removed?.startsWith('http')) {
+      await maybeDeleteR2Image(removed).catch(() => {})
+    }
   }
 
   const movePhoto = (from: number, to: number) => {

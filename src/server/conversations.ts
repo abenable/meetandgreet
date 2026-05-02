@@ -151,10 +151,13 @@ export const getChatMessages = createServerFn({ method: 'GET' })
       const event = await prisma.event.findUnique({ where: { id: eventId } })
       if (!event) throw new Error('Event not found')
 
-      const isOrganizer = event.createdById === myId
-      if (!isOrganizer && peerId !== event.createdById) {
-        throw new Error('Unauthorized')
-      }
+      const [meAttendee, peerAttendee] = await Promise.all([
+        prisma.eventAttendee.findFirst({ where: { eventId, userId: myId, leftAt: null } }),
+        prisma.eventAttendee.findFirst({ where: { eventId, userId: peerId, leftAt: null } }),
+      ])
+
+      if (!meAttendee) throw new Error('You must be attending this event')
+      if (!peerAttendee) throw new Error('The other user is not attending this event')
 
       const msgs = await prisma.eventOrganizerMessage.findMany({
         where: {
@@ -218,10 +221,13 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
       const event = await prisma.event.findUnique({ where: { id: eventId } })
       if (!event) throw new Error('Event not found')
 
-      const isOrganizer = event.createdById === myId
-      if (!isOrganizer && peerId !== event.createdById) {
-        throw new Error('Unauthorized')
-      }
+      const [meAttendee, peerAttendee] = await Promise.all([
+        prisma.eventAttendee.findFirst({ where: { eventId, userId: myId, leftAt: null } }),
+        prisma.eventAttendee.findFirst({ where: { eventId, userId: peerId, leftAt: null } }),
+      ])
+
+      if (!meAttendee) throw new Error('You must be attending this event')
+      if (!peerAttendee) throw new Error('The other user is not attending this event')
 
       const message = await prisma.eventOrganizerMessage.create({
         data: { eventId, senderId: myId, receiverId: peerId, content },
@@ -229,7 +235,7 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
 
       await createNotification({
         userId: peerId,
-        type: 'organizer_message',
+        type: 'message',
         title: 'New Message',
         body: content.slice(0, 100),
         link: `/chats/${chatId}`,

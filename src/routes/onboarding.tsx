@@ -17,7 +17,7 @@ function OnboardingPage() {
   }
 
   return (
-    <main className="page-wrap flex min-h-[90vh] flex-col px-4 py-6">
+    <div className="page-wrap flex min-h-[90vh] flex-col px-4 py-6">
       <div className="mb-6 flex items-center justify-between">
         <span className="text-xs font-medium text-[var(--mag-ink-muted)]">
           Step {step} of {totalSteps}
@@ -169,6 +169,6 @@ function OnboardingPage() {
           )}
         </div>
       </div>
-    </main>
+    </div>
   )
 }

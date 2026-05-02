@@ -39,7 +39,7 @@ function VerifyOtpPage() {
 
   if (!email) {
     return (
-      <main className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8 text-center">
+      <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8 text-center">
         <Logo className="mx-auto mb-4 h-20 w-auto" />
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Something went wrong</h1>
         <p className="mt-2 text-sm text-[var(--mag-ink-soft)]">Please start the password reset flow again.</p>
@@ -49,12 +49,12 @@ function VerifyOtpPage() {
         >
           Start over <ArrowRight className="h-4 w-4" />
         </button>
-      </main>
+      </div>
     )
   }
 
   return (
-    <main className="page-wrap flex min-h-[90vh] flex-col items-center px-4 py-8">
+    <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8">
       <div className="mb-8 text-center">
         <Logo className="mx-auto mb-4 h-20 w-auto" />
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Enter code</h1>
@@ -98,6 +98,6 @@ function VerifyOtpPage() {
           </button>
         </form>
       </div>
-    </main>
+    </div>
   )
 }

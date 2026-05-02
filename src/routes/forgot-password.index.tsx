@@ -34,7 +34,7 @@ function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <main className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8 text-center">
+      <div className="page-wrap flex flex-1 flex-col items-center justify-center px-4 py-8 text-center">
         <Logo className="mx-auto mb-4 h-20 w-auto" />
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Check your email</h1>
         <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
@@ -46,12 +46,12 @@ function ForgotPasswordPage() {
         >
           Enter code <ArrowRight className="h-4 w-4" />
         </button>
-      </main>
+      </div>
     )
   }
 
   return (
-    <main className="page-wrap flex min-h-[90vh] flex-col items-center px-4 py-8">
+    <div className="page-wrap flex flex-1 flex-col items-center justify-center px-4 py-8">
       <div className="mb-8 text-center">
         <Logo className="mx-auto mb-4 h-20 w-auto" />
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Forgot password?</h1>
@@ -94,6 +94,6 @@ function ForgotPasswordPage() {
           </button>
         </form>
       </div>
-    </main>
+    </div>
   )
 }

@@ -8,7 +8,7 @@ function VerifyCapturePage() {
   const [step, setStep] = useState<'pose' | 'capture' | 'review' | 'success'>('pose')
 
   return (
-    <div className="page-wrap flex flex-1 flex-col px-4 py-4">
+    <div className="page-wrap flex min-h-[90vh] flex-col px-4 py-4">
       <div className="mb-4 flex items-center gap-2">
         <button onClick={() => history.back()} className="rounded-full p-2 text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]">
           <ArrowLeft className="h-5 w-5" />

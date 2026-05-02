@@ -118,7 +118,7 @@ function RootLayout() {
   return (
     <>
       <Header />
-      <main className="flex flex-1 flex-col items-center justify-center bg-[var(--mag-bg)]">
+      <main className="flex flex-1 flex-col bg-[var(--mag-bg)]">
         <Outlet />
       </main>
       <Footer />

@@ -193,12 +193,17 @@ function EventsExplorePage() {
             {upcomingEvents.map((event) => (
               <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-80">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                    <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                      <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                      <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{0} interested</span>
+                  <div className="flex min-w-0 flex-1 gap-3">
+                    {(event as any).photo && (
+                      <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{0} interested</span>
+                      </div>
                     </div>
                   </div>
                   {event.createdById === session?.user?.id && (

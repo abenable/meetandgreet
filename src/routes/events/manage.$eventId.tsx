@@ -131,6 +131,10 @@ function ManageEventPage() {
       setSavedMsg(true)
       setTimeout(() => setSavedMsg(false), 2000)
     },
+    onError: (err: any) => {
+      const message = err?.message || err?.error?.message || 'Failed to save changes.'
+      alert(message)
+    },
   })
 
   const toggleActiveMutation = useMutation({
@@ -174,6 +178,7 @@ function ManageEventPage() {
   })
 
   const handleSave = () => {
+    const startsAtIso = startsAt ? new Date(startsAt + ':00').toISOString() : undefined
     updateMutation.mutate({
       data: {
         eventId,
@@ -182,7 +187,7 @@ function ManageEventPage() {
           description: description.trim() || undefined,
           location: location.trim() || undefined,
           maxAttendees: maxAttendees ? Number(maxAttendees) : undefined,
-          startsAt: startsAt || undefined,
+          startsAt: startsAtIso,
           photo: eventPhoto,
           isPublic: eventIsPublic,
         },

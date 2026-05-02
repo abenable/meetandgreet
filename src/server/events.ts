@@ -289,13 +289,13 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
 
     if (userIds.length === 0) return []
 
-    // Exclude people the current user has passed on
-    const passes = await prisma.eventSwipe.findMany({
-      where: { eventId, swiperId: myUserId, direction: 'pass' },
-      select: { swipedId: true },
+    // Exclude people the current user has already swiped on (passed or liked)
+    const mySwipes = await prisma.eventSwipe.findMany({
+      where: { eventId, swiperId: myUserId },
+      select: { swipedId: true, direction: true },
     })
-    const passedIds = passes.map((p) => p.swipedId)
-    const visibleUserIds = userIds.filter((id) => !passedIds.includes(id))
+    const swipedIds = mySwipes.map((s) => s.swipedId)
+    const visibleUserIds = userIds.filter((id) => !swipedIds.includes(id))
 
     if (visibleUserIds.length === 0) return []
 
@@ -569,7 +569,7 @@ export const sendEventChat = createServerFn({ method: 'POST' })
       type: 'organizer_message',
       title: 'New Message',
       body: data.content.slice(0, 100),
-      link: `/events/chat/${data.eventId}/${session.user.id}`,
+      link: `/chats/org_${data.eventId}_${session.user.id}`,
     })
 
     return message

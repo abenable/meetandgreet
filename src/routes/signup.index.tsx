@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Check, X } from 'lucide-react'
@@ -11,6 +11,8 @@ export const Route = createFileRoute('/signup/')({ component: SignupPage })
 
 function SignupPage() {
   const navigate = useNavigate()
+  const search = useSearch({ from: '/signup/' })
+  const redirect = typeof (search as any)?.redirect === 'string' ? (search as any).redirect : ''
   const sendEmailVerificationOtpFn = useServerFn(sendEmailVerificationOtp)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -57,7 +59,7 @@ function SignupPage() {
         // Non-fatal: still redirect to verify page
         console.warn('OTP send warning:', otpRes.message)
       }
-      navigate({ to: '/signup/verify', search: { email: normalizedEmail } })
+      navigate({ to: '/signup/verify', search: { email: normalizedEmail, redirect } })
     } catch (err: any) {
       setError(normalizeAuthError(err?.message || ''))
       setLoading(false)
@@ -155,7 +157,7 @@ function SignupPage() {
 
         <div className="text-center text-xs text-[var(--mag-ink-muted)]">
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-[var(--mag-green)] no-underline hover:underline">
+          <Link to="/login" search={redirect ? { redirect } : undefined} className="font-semibold text-[var(--mag-green)] no-underline hover:underline">
             Log in
           </Link>
         </div>

@@ -28,7 +28,6 @@ import { Route as VerifyIndexRouteImport } from './routes/verify/index'
 import { Route as SignupIndexRouteImport } from './routes/signup.index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile/index'
-import { Route as MatchesIndexRouteImport } from './routes/matches/index'
 import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password.index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as VerifyCaptureRouteImport } from './routes/verify/capture'
@@ -39,15 +38,14 @@ import { Route as SettingsDiscoveryRouteImport } from './routes/settings/discove
 import { Route as SettingsAccountRouteImport } from './routes/settings/account'
 import { Route as ProfileMediaRouteImport } from './routes/profile/media'
 import { Route as ProfileEditRouteImport } from './routes/profile/edit'
-import { Route as MatchesMatchIdRouteImport } from './routes/matches/$matchId'
 import { Route as ForgotPasswordVerifyRouteImport } from './routes/forgot-password.verify'
 import { Route as ForgotPasswordResetRouteImport } from './routes/forgot-password.reset'
 import { Route as EventsJoinRouteImport } from './routes/events/join'
 import { Route as EventsCreateRouteImport } from './routes/events/create'
+import { Route as ChatsChatIdRouteImport } from './routes/chats.$chatId'
 import { Route as EventsManageEventIdRouteImport } from './routes/events/manage.$eventId'
 import { Route as EventsJoinCodeRouteImport } from './routes/events/join.$code'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as EventsChatEventIdPeerIdRouteImport } from './routes/events/chat.$eventId.$peerId'
 
 const TopPicksRoute = TopPicksRouteImport.update({
   id: '/top-picks',
@@ -144,11 +142,6 @@ const ProfileIndexRoute = ProfileIndexRouteImport.update({
   path: '/profile/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MatchesIndexRoute = MatchesIndexRouteImport.update({
-  id: '/matches/',
-  path: '/matches/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
   id: '/forgot-password/',
   path: '/forgot-password/',
@@ -199,11 +192,6 @@ const ProfileEditRoute = ProfileEditRouteImport.update({
   path: '/profile/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MatchesMatchIdRoute = MatchesMatchIdRouteImport.update({
-  id: '/matches/$matchId',
-  path: '/matches/$matchId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ForgotPasswordVerifyRoute = ForgotPasswordVerifyRouteImport.update({
   id: '/forgot-password/verify',
   path: '/forgot-password/verify',
@@ -224,6 +212,11 @@ const EventsCreateRoute = EventsCreateRouteImport.update({
   path: '/events/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatsChatIdRoute = ChatsChatIdRouteImport.update({
+  id: '/$chatId',
+  path: '/$chatId',
+  getParentRoute: () => ChatsRoute,
+} as any)
 const EventsManageEventIdRoute = EventsManageEventIdRouteImport.update({
   id: '/events/manage/$eventId',
   path: '/events/manage/$eventId',
@@ -239,16 +232,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EventsChatEventIdPeerIdRoute = EventsChatEventIdPeerIdRouteImport.update({
-  id: '/events/chat/$eventId/$peerId',
-  path: '/events/chat/$eventId/$peerId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/chats': typeof ChatsRoute
+  '/chats': typeof ChatsRouteWithChildren
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
@@ -261,11 +249,11 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRouteWithChildren
   '/terms': typeof TermsRoute
   '/top-picks': typeof TopPicksRoute
+  '/chats/$chatId': typeof ChatsChatIdRoute
   '/events/create': typeof EventsCreateRoute
   '/events/join': typeof EventsJoinRouteWithChildren
   '/forgot-password/reset': typeof ForgotPasswordResetRoute
   '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
-  '/matches/$matchId': typeof MatchesMatchIdRoute
   '/profile/edit': typeof ProfileEditRoute
   '/profile/media': typeof ProfileMediaRoute
   '/settings/account': typeof SettingsAccountRoute
@@ -276,7 +264,6 @@ export interface FileRoutesByFullPath {
   '/verify/capture': typeof VerifyCaptureRoute
   '/events/': typeof EventsIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
-  '/matches/': typeof MatchesIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/signup/': typeof SignupIndexRoute
@@ -284,12 +271,11 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
-  '/events/chat/$eventId/$peerId': typeof EventsChatEventIdPeerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/chats': typeof ChatsRoute
+  '/chats': typeof ChatsRouteWithChildren
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
@@ -301,11 +287,11 @@ export interface FileRoutesByTo {
   '/safety': typeof SafetyRoute
   '/terms': typeof TermsRoute
   '/top-picks': typeof TopPicksRoute
+  '/chats/$chatId': typeof ChatsChatIdRoute
   '/events/create': typeof EventsCreateRoute
   '/events/join': typeof EventsJoinRouteWithChildren
   '/forgot-password/reset': typeof ForgotPasswordResetRoute
   '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
-  '/matches/$matchId': typeof MatchesMatchIdRoute
   '/profile/edit': typeof ProfileEditRoute
   '/profile/media': typeof ProfileMediaRoute
   '/settings/account': typeof SettingsAccountRoute
@@ -316,7 +302,6 @@ export interface FileRoutesByTo {
   '/verify/capture': typeof VerifyCaptureRoute
   '/events': typeof EventsIndexRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
-  '/matches': typeof MatchesIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/signup': typeof SignupIndexRoute
@@ -324,13 +309,12 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
-  '/events/chat/$eventId/$peerId': typeof EventsChatEventIdPeerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/chats': typeof ChatsRoute
+  '/chats': typeof ChatsRouteWithChildren
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/likes': typeof LikesRoute
@@ -343,11 +327,11 @@ export interface FileRoutesById {
   '/signup': typeof SignupRouteWithChildren
   '/terms': typeof TermsRoute
   '/top-picks': typeof TopPicksRoute
+  '/chats/$chatId': typeof ChatsChatIdRoute
   '/events/create': typeof EventsCreateRoute
   '/events/join': typeof EventsJoinRouteWithChildren
   '/forgot-password/reset': typeof ForgotPasswordResetRoute
   '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
-  '/matches/$matchId': typeof MatchesMatchIdRoute
   '/profile/edit': typeof ProfileEditRoute
   '/profile/media': typeof ProfileMediaRoute
   '/settings/account': typeof SettingsAccountRoute
@@ -358,7 +342,6 @@ export interface FileRoutesById {
   '/verify/capture': typeof VerifyCaptureRoute
   '/events/': typeof EventsIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
-  '/matches/': typeof MatchesIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/signup/': typeof SignupIndexRoute
@@ -366,7 +349,6 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
-  '/events/chat/$eventId/$peerId': typeof EventsChatEventIdPeerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -386,11 +368,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/top-picks'
+    | '/chats/$chatId'
     | '/events/create'
     | '/events/join'
     | '/forgot-password/reset'
     | '/forgot-password/verify'
-    | '/matches/$matchId'
     | '/profile/edit'
     | '/profile/media'
     | '/settings/account'
@@ -401,7 +383,6 @@ export interface FileRouteTypes {
     | '/verify/capture'
     | '/events/'
     | '/forgot-password/'
-    | '/matches/'
     | '/profile/'
     | '/settings/'
     | '/signup/'
@@ -409,7 +390,6 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
-    | '/events/chat/$eventId/$peerId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -426,11 +406,11 @@ export interface FileRouteTypes {
     | '/safety'
     | '/terms'
     | '/top-picks'
+    | '/chats/$chatId'
     | '/events/create'
     | '/events/join'
     | '/forgot-password/reset'
     | '/forgot-password/verify'
-    | '/matches/$matchId'
     | '/profile/edit'
     | '/profile/media'
     | '/settings/account'
@@ -441,7 +421,6 @@ export interface FileRouteTypes {
     | '/verify/capture'
     | '/events'
     | '/forgot-password'
-    | '/matches'
     | '/profile'
     | '/settings'
     | '/signup'
@@ -449,7 +428,6 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
-    | '/events/chat/$eventId/$peerId'
   id:
     | '__root__'
     | '/'
@@ -467,11 +445,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/top-picks'
+    | '/chats/$chatId'
     | '/events/create'
     | '/events/join'
     | '/forgot-password/reset'
     | '/forgot-password/verify'
-    | '/matches/$matchId'
     | '/profile/edit'
     | '/profile/media'
     | '/settings/account'
@@ -482,7 +460,6 @@ export interface FileRouteTypes {
     | '/verify/capture'
     | '/events/'
     | '/forgot-password/'
-    | '/matches/'
     | '/profile/'
     | '/settings/'
     | '/signup/'
@@ -490,13 +467,12 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
-    | '/events/chat/$eventId/$peerId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  ChatsRoute: typeof ChatsRoute
+  ChatsRoute: typeof ChatsRouteWithChildren
   DiscoverRoute: typeof DiscoverRoute
   ExploreRoute: typeof ExploreRoute
   LikesRoute: typeof LikesRoute
@@ -513,7 +489,6 @@ export interface RootRouteChildren {
   EventsJoinRoute: typeof EventsJoinRouteWithChildren
   ForgotPasswordResetRoute: typeof ForgotPasswordResetRoute
   ForgotPasswordVerifyRoute: typeof ForgotPasswordVerifyRoute
-  MatchesMatchIdRoute: typeof MatchesMatchIdRoute
   ProfileEditRoute: typeof ProfileEditRoute
   ProfileMediaRoute: typeof ProfileMediaRoute
   SettingsAccountRoute: typeof SettingsAccountRoute
@@ -523,13 +498,11 @@ export interface RootRouteChildren {
   VerifyCaptureRoute: typeof VerifyCaptureRoute
   EventsIndexRoute: typeof EventsIndexRoute
   ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
-  MatchesIndexRoute: typeof MatchesIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
   VerifyIndexRoute: typeof VerifyIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   EventsManageEventIdRoute: typeof EventsManageEventIdRoute
-  EventsChatEventIdPeerIdRoute: typeof EventsChatEventIdPeerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -667,13 +640,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/matches/': {
-      id: '/matches/'
-      path: '/matches'
-      fullPath: '/matches/'
-      preLoaderRoute: typeof MatchesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/forgot-password/': {
       id: '/forgot-password/'
       path: '/forgot-password'
@@ -744,13 +710,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileEditRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/matches/$matchId': {
-      id: '/matches/$matchId'
-      path: '/matches/$matchId'
-      fullPath: '/matches/$matchId'
-      preLoaderRoute: typeof MatchesMatchIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/forgot-password/verify': {
       id: '/forgot-password/verify'
       path: '/forgot-password/verify'
@@ -779,6 +738,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chats/$chatId': {
+      id: '/chats/$chatId'
+      path: '/$chatId'
+      fullPath: '/chats/$chatId'
+      preLoaderRoute: typeof ChatsChatIdRouteImport
+      parentRoute: typeof ChatsRoute
+    }
     '/events/manage/$eventId': {
       id: '/events/manage/$eventId'
       path: '/events/manage/$eventId'
@@ -800,15 +766,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/events/chat/$eventId/$peerId': {
-      id: '/events/chat/$eventId/$peerId'
-      path: '/events/chat/$eventId/$peerId'
-      fullPath: '/events/chat/$eventId/$peerId'
-      preLoaderRoute: typeof EventsChatEventIdPeerIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
+
+interface ChatsRouteChildren {
+  ChatsChatIdRoute: typeof ChatsChatIdRoute
+}
+
+const ChatsRouteChildren: ChatsRouteChildren = {
+  ChatsChatIdRoute: ChatsChatIdRoute,
+}
+
+const ChatsRouteWithChildren = ChatsRoute._addFileChildren(ChatsRouteChildren)
 
 interface SignupRouteChildren {
   SignupVerifyRoute: typeof SignupVerifyRoute
@@ -838,7 +807,7 @@ const EventsJoinRouteWithChildren = EventsJoinRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  ChatsRoute: ChatsRoute,
+  ChatsRoute: ChatsRouteWithChildren,
   DiscoverRoute: DiscoverRoute,
   ExploreRoute: ExploreRoute,
   LikesRoute: LikesRoute,
@@ -855,7 +824,6 @@ const rootRouteChildren: RootRouteChildren = {
   EventsJoinRoute: EventsJoinRouteWithChildren,
   ForgotPasswordResetRoute: ForgotPasswordResetRoute,
   ForgotPasswordVerifyRoute: ForgotPasswordVerifyRoute,
-  MatchesMatchIdRoute: MatchesMatchIdRoute,
   ProfileEditRoute: ProfileEditRoute,
   ProfileMediaRoute: ProfileMediaRoute,
   SettingsAccountRoute: SettingsAccountRoute,
@@ -865,13 +833,11 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyCaptureRoute: VerifyCaptureRoute,
   EventsIndexRoute: EventsIndexRoute,
   ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
-  MatchesIndexRoute: MatchesIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
   VerifyIndexRoute: VerifyIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   EventsManageEventIdRoute: EventsManageEventIdRoute,
-  EventsChatEventIdPeerIdRoute: EventsChatEventIdPeerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -554,7 +554,7 @@ function ManageEventPage() {
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
                         <button
-                          onClick={() => navigate({ to: '/events/chat/$eventId/$peerId', params: { eventId, peerId: profile.userId } })}
+                          onClick={() => navigate({ to: '/chats/$chatId', params: { chatId: `org_${eventId}_${profile.userId}` } })}
                           title="Message"
                           className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-green)]/10 text-[var(--mag-green)] transition hover:bg-[var(--mag-green)]/20"
                         >
@@ -631,7 +631,7 @@ function ManageEventPage() {
                         <Ban className="h-3 w-3" /> Block user
                       </button>
                       <button
-                        onClick={() => navigate({ to: '/events/chat/$eventId/$peerId', params: { eventId, peerId: report.reportedId } })}
+                        onClick={() => navigate({ to: '/chats/$chatId', params: { chatId: `org_${eventId}_${report.reportedId}` } })}
                         className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
                       >
                         <MessageCircle className="h-3 w-3" /> Message

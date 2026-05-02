@@ -37,14 +37,10 @@ function ChatsPage() {
 }
 
 function ChatRow({ convo }: { convo: any }) {
-  const to =
-    convo.type === 'match'
-      ? { to: '/matches/$matchId' as const, params: { matchId: convo.matchId } }
-      : { to: '/events/chat/$eventId/$peerId' as const, params: { eventId: convo.eventId, peerId: convo.peerId } }
-
   return (
     <Link
-      {...to}
+      to="/chats/$chatId"
+      params={{ chatId: convo.chatId }}
       className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 transition hover:border-[var(--mag-green)] no-underline card-shadow"
     >
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">

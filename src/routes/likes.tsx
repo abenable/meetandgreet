@@ -86,8 +86,8 @@ function LikesPage() {
             {matches.map((match: any) => (
               <Link
                 key={match.id}
-                to="/matches/$matchId"
-                params={{ matchId: match.id }}
+                to="/chats/$chatId"
+                params={{ chatId: `match_${match.id}` }}
                 className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 transition hover:border-[var(--mag-green)] no-underline card-shadow"
               >
                 <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">

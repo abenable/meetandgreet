@@ -7,10 +7,15 @@ import Logo from '#/components/Logo'
 
 export const Route = createFileRoute('/signup/verify')({ component: SignupVerifyPage })
 
+function isSafeRedirect(url: string) {
+  return url.startsWith('/') && !url.startsWith('//')
+}
+
 function SignupVerifyPage() {
   const navigate = useNavigate()
   const search = useSearch({ from: '/signup/verify' })
   const email = (search as any)?.email || ''
+  const redirect = typeof (search as any)?.redirect === 'string' ? (search as any).redirect : ''
   const verifyEmailOtpFn = useServerFn(verifyEmailOtp)
   const sendEmailVerificationOtpFn = useServerFn(sendEmailVerificationOtp)
 
@@ -59,7 +64,7 @@ function SignupVerifyPage() {
         setLoading(false)
         return
       }
-      navigate({ to: '/discover' })
+      navigate({ to: isSafeRedirect(redirect) ? redirect : '/discover' })
     } catch (err: any) {
       setError(err?.message || 'Something went wrong')
     } finally {
@@ -74,7 +79,7 @@ function SignupVerifyPage() {
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Something went wrong</h1>
         <p className="mt-2 text-sm text-[var(--mag-ink-soft)]">Please sign up again to verify your email.</p>
         <button
-          onClick={() => navigate({ to: '/signup' })}
+          onClick={() => navigate({ to: '/signup', search: redirect ? { redirect } : undefined })}
           className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-green)] px-6 py-3 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
         >
           Sign up <ArrowRight className="h-4 w-4" />

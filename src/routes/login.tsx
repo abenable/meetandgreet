@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
@@ -9,8 +9,14 @@ import Logo from '#/components/Logo'
 
 export const Route = createFileRoute('/login')({ component: LoginPage })
 
+function isSafeRedirect(url: string) {
+  return url.startsWith('/') && !url.startsWith('//')
+}
+
 function LoginPage() {
   const navigate = useNavigate()
+  const search = useSearch({ from: '/login' })
+  const redirect = typeof (search as any)?.redirect === 'string' ? (search as any).redirect : ''
   const isEmailVerifiedFn = useServerFn(isEmailVerified)
   const sendEmailVerificationOtpFn = useServerFn(sendEmailVerificationOtp)
   const [email, setEmail] = useState('')
@@ -46,11 +52,11 @@ function LoginPage() {
         if (!otpRes.success && otpRes.message) {
           console.warn('OTP send warning:', otpRes.message)
         }
-        navigate({ to: '/signup/verify', search: { email: normalizedEmail } })
+        navigate({ to: '/signup/verify', search: { email: normalizedEmail, redirect } })
         return
       }
 
-      navigate({ to: '/discover' })
+      navigate({ to: isSafeRedirect(redirect) ? redirect : '/discover' })
     } catch (err: any) {
       setError(normalizeAuthError(err?.message || ''))
     } finally {
@@ -133,7 +139,7 @@ function LoginPage() {
 
         <div className="text-center text-xs text-[var(--mag-ink-muted)]">
           Don't have an account?{' '}
-          <Link to="/signup" className="font-semibold text-[var(--mag-green)] no-underline hover:underline">
+          <Link to="/signup" search={redirect ? { redirect } : undefined} className="font-semibold text-[var(--mag-green)] no-underline hover:underline">
             Sign up
           </Link>
         </div>

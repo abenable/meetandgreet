@@ -153,14 +153,29 @@ function DiscoverPage() {
     setPhotoIndices((prev) => ({ ...prev, [profileId]: Math.max((prev[profileId] ?? 0) - 1, 0) }))
   }
 
-  if (!activeEvent || baseProfiles.length === 0) {
+  if (!activeEvent) {
     return (
-      <div className="page-wrap flex flex-1 flex-col items-center justify-center px-4 py-16 text-center">
+      <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-16 text-center">
         <Users className="mb-4 h-16 w-16 text-[var(--mag-ink-muted)]" />
         <h2 className="text-xl font-bold text-[var(--mag-ink)]">Join an Event First</h2>
         <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">Discover is only available when you are checked into an event.</p>
         <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-green)] px-6 py-3 text-sm font-bold !text-white no-underline transition hover:bg-[var(--mag-green-dark)]">
           Browse Events <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    )
+  }
+
+  if (baseProfiles.length === 0) {
+    return (
+      <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-16 text-center">
+        <Users className="mb-4 h-16 w-16 text-[var(--mag-ink-muted)]" />
+        <h2 className="text-xl font-bold text-[var(--mag-ink)]">Nobody Here Yet</h2>
+        <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
+          Other attendees haven't joined, or you've already swiped through everyone in this event.
+        </p>
+        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-green)] px-6 py-3 text-sm font-bold !text-white no-underline transition hover:bg-[var(--mag-green-dark)]">
+          Browse More Events <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     )

@@ -144,16 +144,6 @@ function LoginPage() {
           </Link>
         </div>
       </div>
-
-      <div className="mt-auto flex justify-center gap-4 pt-6 text-[10px] text-[var(--mag-ink-muted)]">
-        <Link to="/terms" className="no-underline hover:text-[var(--mag-ink-soft)]">
-          Terms of Service
-        </Link>
-        <Link to="/privacy" className="no-underline hover:text-[var(--mag-ink-soft)]">
-          Privacy Policy
-        </Link>
-        <span className="text-[var(--mag-ink-muted)]">Cookie Policy</span>
-      </div>
     </main>
   )
 }

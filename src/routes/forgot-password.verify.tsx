@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import { Flame, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { verifyPasswordResetOtp } from '#/server/auth'
+import Logo from '#/components/Logo'
 
 export const Route = createFileRoute('/forgot-password/verify')({ component: VerifyOtpPage })
 
@@ -39,7 +40,7 @@ function VerifyOtpPage() {
   if (!email) {
     return (
       <main className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8 text-center">
-        <Flame className="mb-4 inline-block h-14 w-14 fill-[var(--mag-green)] text-[var(--mag-green)]" />
+        <Logo className="mx-auto mb-4 h-20 w-auto" />
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Something went wrong</h1>
         <p className="mt-2 text-sm text-[var(--mag-ink-soft)]">Please start the password reset flow again.</p>
         <button
@@ -55,7 +56,7 @@ function VerifyOtpPage() {
   return (
     <main className="page-wrap flex min-h-[90vh] flex-col items-center px-4 py-8">
       <div className="mb-8 text-center">
-        <Flame className="mb-4 inline-block h-14 w-14 fill-[var(--mag-green)] text-[var(--mag-green)]" />
+        <Logo className="mx-auto mb-4 h-20 w-auto" />
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Enter code</h1>
         <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">
           We sent a 6-digit code to <strong className="text-[var(--mag-ink)]">{email}</strong>.

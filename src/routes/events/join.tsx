@@ -21,6 +21,7 @@ function JoinEventPage() {
       const result = await joinEvent({ data: trimmed })
       if (result.success) {
         setStatus('success')
+        setMessage(result.alreadyJoined ? 'You are already in this event!' : 'You are in!')
         setTimeout(() => navigate({ to: '/events' }), 1500)
       } else {
         setStatus('error')
@@ -41,8 +42,8 @@ function JoinEventPage() {
         <h1 className="text-lg font-bold text-[var(--mag-ink)]">Join Event</h1>
       </div>
 
-      <div className="mb-6">
-        <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Enter Event Code</label>
+      <div className="mx-auto mb-6 max-w-md">
+        <label className="mb-1.5 block text-center text-xs font-medium text-[var(--mag-ink)]">Enter Event Code</label>
         <div className="flex gap-2">
           <input type="text" value={code} onChange={(e) => { setCode(e.target.value.toUpperCase()); if (status !== 'idle') setStatus('idle') }} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
             placeholder="e.g. ARTWALK" maxLength={8}
@@ -55,7 +56,7 @@ function JoinEventPage() {
       </div>
 
       {status === 'success' && (
-        <div className="rounded-2xl border border-[var(--mag-green)] bg-[var(--mag-green)]/5 p-6 text-center">
+        <div className="mx-auto max-w-md rounded-2xl border border-[var(--mag-green)] bg-[var(--mag-green)]/5 p-6 text-center">
           <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-[var(--mag-green)]" />
           <h2 className="text-lg font-bold text-[var(--mag-ink)]">You are in!</h2>
           <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">Redirecting to events…</p>
@@ -63,7 +64,7 @@ function JoinEventPage() {
       )}
 
       {status === 'error' && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-900/10">
+        <div className="mx-auto max-w-md rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-900/10">
           <div className="flex items-center gap-3">
             <XCircle className="h-6 w-6 shrink-0 text-red-500" />
             <div>

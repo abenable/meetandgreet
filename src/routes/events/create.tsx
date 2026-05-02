@@ -1,9 +1,31 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { ArrowLeft, Calendar, MapPin, Plus, Users } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { ArrowLeft, Calendar, MapPin, Plus, Users, X, ImageIcon, Eye, EyeOff } from 'lucide-react'
 import { createEvent } from '#/server/events'
 
 export const Route = createFileRoute('/events/create')({ component: CreateEventPage })
+
+function resizeImageToBase64(file: File, maxWidth = 800): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      img.src = e.target?.result as string
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const scale = Math.min(1, maxWidth / img.width)
+        canvas.width = img.width * scale
+        canvas.height = img.height * scale
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
+        resolve(canvas.toDataURL('image/jpeg', 0.85))
+      }
+      img.onerror = reject
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
 
 function CreateEventPage() {
   const navigate = useNavigate()
@@ -12,6 +34,21 @@ function CreateEventPage() {
   const [location, setLocation] = useState('')
   const [code, setCode] = useState('')
   const [copied, setCopied] = useState(false)
+  const [photo, setPhoto] = useState<string | null>(null)
+  const [isPublic, setIsPublic] = useState(true)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const resized = await resizeImageToBase64(file, 800)
+      setPhoto(resized)
+    } catch {
+      alert('Failed to process image.')
+    }
+    e.target.value = ''
+  }
 
   const handleCopyLink = () => {
     if (!code) return
@@ -34,6 +71,8 @@ function CreateEventPage() {
         location: location.trim(),
         maxAttendees: maxAttendees ? Number(maxAttendees) : undefined,
         startsAt: startsAtIso,
+        photo: photo || undefined,
+        isPublic,
       } })
       setCode(event.code)
       setTimeout(() => navigate({ to: '/events' }), 1500)
@@ -67,12 +106,73 @@ function CreateEventPage() {
         </div>
       ) : null}
 
-      <div className="space-y-4">
+      <div className="mx-auto max-w-md space-y-4">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Event Name</label>
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Fremont Friday Night"
             className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
         </div>
+
+        <div>
+          <label className="mb-1.5 block text-center text-xs font-medium text-[var(--mag-ink)]">Event Photo</label>
+          <div className="flex justify-center">
+            {photo ? (
+              <div className="relative inline-block">
+              <img src={photo} alt="Event" className="h-32 w-32 rounded-2xl object-cover" />
+              <button
+                type="button"
+                onClick={() => setPhoto(null)}
+                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-sm"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="flex h-32 w-32 items-center justify-center rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
+            >
+              <ImageIcon className="h-6 w-6" />
+            </button>
+          )}
+          <input type="file" accept="image/*" ref={fileRef} onChange={handleFile} className="hidden" />
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Visibility</label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsPublic(true)}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                isPublic
+                  ? 'bg-[var(--mag-green)] text-white'
+                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+              }`}
+            >
+              <Eye className="h-3.5 w-3.5" /> Public
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPublic(false)}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                !isPublic
+                  ? 'bg-[var(--mag-ink)] text-white'
+                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+              }`}
+            >
+              <EyeOff className="h-3.5 w-3.5" /> Private
+            </button>
+          </div>
+          <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">
+            {isPublic 
+              ? 'Anyone can find this event on the browse page.' 
+              : 'Only people with the code or link can join.'}
+          </p>
+        </div>
+
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Description</label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What is this event about?" rows={3}
@@ -104,10 +204,12 @@ function CreateEventPage() {
         </div>
       </div>
 
-      <button onClick={handleCreate} disabled={!name.trim() || !!code}
-        className="mt-6 inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed">
-        <Plus className="h-4 w-4" />Create Event
-      </button>
+      <div className="mt-6 flex justify-center">
+        <button onClick={handleCreate} disabled={!name.trim() || !!code}
+          className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed">
+          <Plus className="h-4 w-4" />Create Event
+        </button>
+      </div>
     </main>
   )
 }

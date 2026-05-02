@@ -11,12 +11,6 @@ async function main() {
   // First, we need to create users via Better Auth or directly
   // For seeding, we'll create placeholder user IDs
 
-  const userIds = [
-    'u1', 'u2', 'u3', 'u4', 'u5',
-    'u6', 'u7', 'u8', 'u9', 'u10',
-    'u11', 'u12', 'u13', 'u14', 'u15',
-  ]
-
   const profiles = [
     { userId: 'u1', name: 'Maya', bio: 'Architect by day, pottery enthusiast by night.', photos: [pic('maya', 1), pic('maya', 2)], gender: 'Female', location: 'Seattle, WA', interests: ['Coffee', 'Hiking', 'Indie Music', 'Pottery'], job: 'Architect at Studio North' },
     { userId: 'u2', name: 'Jordan', bio: 'Dog lover and weekend hiker.', photos: [pic('jordan', 1), pic('jordan', 2)], gender: 'Male', location: 'Seattle, WA', interests: ['Dogs', 'Hiking', 'Coffee', 'Photography'], job: 'Marketing Coordinator' },

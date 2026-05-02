@@ -22,22 +22,30 @@ function ShareJoinPage() {
   const navigate = useNavigate()
   const [status, setStatus] = useState<'loading' | 'joining' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
+  const [alreadyJoined, setAlreadyJoined] = useState(false)
 
-  const { data: session } = useQuery({
+  const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ['session'],
     queryFn: () => getSession(),
   })
 
-  const { data: event } = useQuery({
+  const { data: event, isLoading: eventLoading } = useQuery({
     queryKey: ['event-by-code', code],
     queryFn: () => getEventByCode({ data: code }),
   })
 
   useEffect(() => {
-    if (!session) return
+    if (sessionLoading || eventLoading) return
+
+    // Session is explicitly null when not authenticated — redirect to login with redirect param
+    if (session === null) {
+      navigate({ to: '/login', search: { redirect: `/events/join/${code}` } })
+      return
+    }
+
     if (status !== 'loading') return
 
-    if (!session.user) {
+    if (!session?.user) {
       setStatus('error')
       setMessage('Log in to join this event.')
       return
@@ -53,6 +61,7 @@ function ShareJoinPage() {
     joinEvent({ data: code })
       .then((result) => {
         if (result.success) {
+          setAlreadyJoined((result as any).alreadyJoined === true)
           setStatus('success')
           setTimeout(() => navigate({ to: '/events' }), 1800)
         } else {
@@ -64,7 +73,7 @@ function ShareJoinPage() {
         setStatus('error')
         setMessage('Something went wrong. Please try again.')
       })
-  }, [session, event, code, status, navigate])
+  }, [session, sessionLoading, event, eventLoading, code, status, navigate])
 
   return (
     <main className="page-wrap px-4 py-4">
@@ -89,7 +98,7 @@ function ShareJoinPage() {
         <div className="rounded-2xl border border-[var(--mag-green)] bg-[var(--mag-green)]/5 p-6 text-center">
           <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-[var(--mag-green)]" />
           <h2 className="text-lg font-bold text-[var(--mag-ink)]">
-            You are in!
+            {alreadyJoined ? 'You are already in!' : 'You are in!'}
           </h2>
           <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">
             {event?.name} — redirecting…
@@ -100,21 +109,28 @@ function ShareJoinPage() {
           {/* Event preview */}
           {event && (
             <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
-              <h2 className="text-base font-bold text-[var(--mag-ink)]">
-                {event.name}
-              </h2>
-              <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">
-                {event.description}
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {event.location}
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <Users className="h-3 w-3" />
-                  {(event as any)._count?.attendees ?? 0} attending
-                </span>
+              <div className="flex items-start gap-3">
+                {(event as any).photo && (
+                  <img src={(event as any).photo} alt={event.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base font-bold text-[var(--mag-ink)]">
+                    {event.name}
+                  </h2>
+                  <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">
+                    {event.description}
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {event.location}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {(event as any)._count?.attendees ?? 0} attending
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           )}

@@ -16,6 +16,7 @@ function generateCode(): string {
 export const listEvents = createServerFn({ method: 'GET' })
   .handler(async () => {
     return prisma.event.findMany({
+      where: { isPublic: true },
       omit: { code: true },
       include: {
         _count: { select: { attendees: { where: { leftAt: null } } } },
@@ -70,10 +71,12 @@ export const getEventById = createServerFn({ method: 'GET' })
 export const createEvent = createServerFn({ method: 'POST' })
   .inputValidator(z.object({
     name: z.string().min(1).max(100),
+    photo: z.string().optional(),
     description: z.string().max(500).optional(),
     location: z.string().max(200).optional(),
     maxAttendees: z.number().int().min(1).max(1000).optional(),
     startsAt: z.string().datetime().optional(),
+    isPublic: z.boolean().optional(),
   }))
   .handler(async ({ data }) => {
     const session = await requireSession()
@@ -83,11 +86,13 @@ export const createEvent = createServerFn({ method: 'POST' })
         data: {
           code: generateCode(),
           name: data.name,
+          photo: data.photo,
           description: data.description,
           location: data.location,
           maxAttendees: data.maxAttendees,
           startsAt: data.startsAt ? new Date(data.startsAt) : null,
           createdById: session.user.id,
+          isPublic: data.isPublic ?? true,
         },
       })
       await tx.eventAttendee.create({
@@ -146,7 +151,7 @@ export const joinEvent = createServerFn({ method: 'POST' })
     })
 
     if (existing && existing.leftAt === null) {
-      return { success: false, message: 'You are already attending this event' }
+      return { success: true, alreadyJoined: true }
     }
 
     await prisma.eventAttendee.upsert({
@@ -190,12 +195,14 @@ export const updateEvent = createServerFn({ method: 'POST' })
     eventId: z.string(),
     data: z.object({
       name: z.string().min(1).max(100).optional(),
+      photo: z.string().optional().nullable(),
       description: z.string().max(500).optional(),
       location: z.string().max(200).optional(),
       maxAttendees: z.number().int().min(1).max(1000).optional(),
       startsAt: z.string().datetime().optional(),
       endedAt: z.string().datetime().optional(),
       isActive: z.boolean().optional(),
+      isPublic: z.boolean().optional(),
     }),
   }))
   .handler(async ({ data }) => {
@@ -217,12 +224,14 @@ export const updateEvent = createServerFn({ method: 'POST' })
       where: { id: data.eventId },
       data: {
         name: data.data.name,
+        photo: data.data.photo,
         description: data.data.description,
         location: data.data.location,
         maxAttendees: data.data.maxAttendees,
         startsAt: data.data.startsAt ? new Date(data.data.startsAt) : undefined,
         endedAt: data.data.endedAt ? new Date(data.data.endedAt) : undefined,
         isActive: data.data.isActive,
+        isPublic: data.data.isPublic,
       },
     })
   })
@@ -308,8 +317,34 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
 
     if (userIds.length === 0) return []
 
-    return prisma.profile.findMany({
-      where: { userId: { in: userIds } },
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({
+        where: { userId: { in: userIds } },
+      }),
+      prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, name: true, image: true, email: true },
+      }),
+    ])
+
+    return userIds.map((userId) => {
+      const profile = profiles.find((p) => p.userId === userId)
+      if (profile) return profile
+      const user = users.find((u) => u.id === userId)
+      return {
+        id: user?.id ?? userId,
+        userId,
+        name: user?.name || user?.email?.split('@')[0] || 'Unnamed',
+        bio: '',
+        photos: user?.image ? [user.image] : [],
+        gender: '',
+        birthDate: '',
+        location: '',
+        interests: [],
+        job: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any
     })
   })
 

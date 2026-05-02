@@ -80,10 +80,12 @@ model Event {
   id          String                  @id @default(uuid())
   code        String                  @unique
   name        String
+  photo       String?
   description String?
   location    String?
   createdById String
   isActive    Boolean                 @default(true)
+  isPublic    Boolean                 @default(true)
   createdAt   DateTime                @default(now())
   expiresAt    DateTime?
   maxAttendees Int?

@@ -1,3 +1,4 @@
+declare const Bun: any
 import './dist/server/instrument.server.mjs'
 
 import { stat } from 'fs/promises'
@@ -32,7 +33,7 @@ function getMimeType(path: string): string {
 Bun.serve({
   port,
   hostname: '0.0.0.0',
-  async fetch(request) {
+  async fetch(request: Request) {
     const url = new URL(request.url)
     const pathname = url.pathname
 

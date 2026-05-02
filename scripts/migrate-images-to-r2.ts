@@ -1,10 +1,15 @@
 import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { config } from 'dotenv'
 
 config({ path: '.env.local' })
 
-const prisma = new PrismaClient()
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+})
+
+const prisma = new PrismaClient({ adapter })
 
 const accountId = process.env.R2_ACCOUNT_ID
 const accessKeyId = process.env.R2_ACCESS_KEY_ID

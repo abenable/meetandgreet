@@ -35,32 +35,9 @@ import {
 } from '#/server/events'
 import { getSession } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
+import { resizeImageToBlob, uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
 export const Route = createFileRoute('/events/manage/$eventId')({ component: ManageEventPage })
-
-type Tab = 'attendees' | 'reports' | 'blocked'
-
-function resizeImageToBase64(file: File, maxWidth = 800): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      img.src = e.target?.result as string
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const scale = Math.min(1, maxWidth / img.width)
-        canvas.width = img.width * scale
-        canvas.height = img.height * scale
-        const ctx = canvas.getContext('2d')
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
-        resolve(canvas.toDataURL('image/jpeg', 0.85))
-      }
-      img.onerror = reject
-    }
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
 
 function ManageEventPage() {
   const { eventId } = useParams({ from: '/events/manage/$eventId' })
@@ -118,8 +95,15 @@ function ManageEventPage() {
     const file = e.target.files?.[0]
     if (!file) return
     try {
-      const resized = await resizeImageToBase64(file, 800)
-      setEventPhoto(resized)
+      const blob = await resizeImageToBlob(file, 800)
+      const key = `events/${eventId}/photo-${crypto.randomUUID()}.jpg`
+      const url = await uploadImageToR2(blob, key)
+
+      if (eventPhoto?.startsWith('http')) {
+        await maybeDeleteR2Image(eventPhoto).catch(() => {})
+      }
+
+      setEventPhoto(url)
     } catch {
       alert('Failed to process image.')
     }
@@ -326,7 +310,12 @@ function ManageEventPage() {
                 <img src={eventPhoto} alt="Event" className="h-32 w-32 rounded-2xl object-cover" />
                 <button
                   type="button"
-                  onClick={() => setEventPhoto(null)}
+                  onClick={() => {
+                    if (eventPhoto?.startsWith('http')) {
+                      maybeDeleteR2Image(eventPhoto).catch(() => {})
+                    }
+                    setEventPhoto(null)
+                  }}
                   className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-sm"
                 >
                   <X className="h-3 w-3" />

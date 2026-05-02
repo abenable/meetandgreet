@@ -82,8 +82,8 @@ function EventsExplorePage() {
             <div className="min-w-0 flex-1">
               <span className="rounded-full bg-[var(--mag-green)] px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide">Active</span>
               <div className="mt-1 flex items-center gap-3">
-                {(activeEvent as any).photo && (
-                  <img src={(activeEvent as any).photo} alt={activeEvent.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
+                {activeEvent.photo && (
+                  <img src={activeEvent.photo} alt={activeEvent.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
                 )}
                 <div className="min-w-0">
                   <h2 className="text-lg font-bold text-[var(--mag-ink)]">{activeEvent.name}</h2>
@@ -134,8 +134,8 @@ function EventsExplorePage() {
             <div key={event.id} className={`rounded-2xl border p-4 transition ${isJoined ? 'border-[var(--mag-green)] bg-[var(--mag-green)]/5' : 'border-[var(--mag-line)] bg-[var(--mag-card)]'}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 flex-1 gap-3">
-                  {(event as any).photo && (
-                    <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                  {event.photo && (
+                    <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -182,8 +182,8 @@ function EventsExplorePage() {
                 <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-1 gap-3">
-                      {(event as any).photo && (
-                        <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                      {event.photo && (
+                        <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
                       )}
                       <div className="min-w-0 flex-1">
                         <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
@@ -192,7 +192,7 @@ function EventsExplorePage() {
                           <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
                           <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
                           <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{event.code}</span>
-                          {!(event as any).isPublic && (
+                          {!event.isPublic && (
                             <span className="inline-flex items-center gap-1 rounded bg-[var(--mag-ink)]/10 px-1.5 py-0.5 font-medium text-[var(--mag-ink)]">
                               <Lock className="h-3 w-3" /> Private
                             </span>
@@ -228,8 +228,8 @@ function EventsExplorePage() {
               <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-80">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 flex-1 gap-3">
-                    {(event as any).photo && (
-                      <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                    {event.photo && (
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
                     )}
                     <div className="min-w-0 flex-1">
                       <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
@@ -265,8 +265,8 @@ function EventsExplorePage() {
                 <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-70">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-1 gap-3">
-                      {(event as any).photo && (
-                        <img src={(event as any).photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                      {event.photo && (
+                        <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">

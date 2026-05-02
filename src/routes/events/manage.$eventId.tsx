@@ -116,7 +116,7 @@ function ManageEventPage() {
       setLocation(event.location ?? '')
       setMaxAttendees(event.maxAttendees != null ? String(event.maxAttendees) : '')
       setStartsAt(event.startsAt ? new Date(event.startsAt).toISOString().slice(0, 16) : '')
-      setEventPhoto((event as any).photo ?? null)
+      setEventPhoto(event.photo ?? null)
       setEventIsPublic((event as any).isPublic ?? true)
     }
   }, [event])

@@ -22,8 +22,8 @@ export function resizeImageToBase64(file: File, maxWidth = 800): Promise<string>
   })
 }
 
-export async function uploadImageToR2(file: File, key: string): Promise<string> {
-  const base64 = await resizeImageToBase64(file)
+export async function uploadImageToR2(file: File, key: string, maxWidth?: number): Promise<string> {
+  const base64 = await resizeImageToBase64(file, maxWidth)
   const { url } = await uploadImage({ data: { key, imageBase64: base64 } })
   return url
 }

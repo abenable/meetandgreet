@@ -35,7 +35,7 @@ import {
 } from '#/server/events'
 import { getSession } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
-import { resizeImageToBlob, uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
+import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
 export const Route = createFileRoute('/events/manage/$eventId')({ component: ManageEventPage })
 
@@ -95,9 +95,8 @@ function ManageEventPage() {
     const file = e.target.files?.[0]
     if (!file) return
     try {
-      const blob = await resizeImageToBlob(file, 800)
       const key = `events/${eventId}/photo-${crypto.randomUUID()}.jpg`
-      const url = await uploadImageToR2(blob, key)
+      const url = await uploadImageToR2(file, key)
 
       if (eventPhoto?.startsWith('http')) {
         await maybeDeleteR2Image(eventPhoto).catch(() => {})

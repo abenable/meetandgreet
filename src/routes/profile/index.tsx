@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { MapPin, Camera, Link2, Pencil } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import AvatarImage from '#/components/AvatarImage'
-import { resizeImageToBlob, uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
+import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
 export const Route = createFileRoute('/profile/')({ component: ProfilePage })
 
@@ -68,9 +68,8 @@ function ProfilePage() {
     if (!file || !profile) return
     setUploadingAvatar(true)
     try {
-      const blob = await resizeImageToBlob(file, 600)
       const key = `profiles/${profile.userId}/avatar-${crypto.randomUUID()}.jpg`
-      const url = await uploadImageToR2(blob, key)
+      const url = await uploadImageToR2(file, key)
 
       const oldAvatar = (profile.photos || [])[0]
       if (oldAvatar?.startsWith('http')) {

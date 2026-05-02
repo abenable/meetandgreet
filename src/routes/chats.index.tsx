@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { MessageCircle, Calendar } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import { getConversations } from '#/server/conversations'
 import AvatarImage from '#/components/AvatarImage'
 
@@ -50,12 +50,6 @@ function ChatRow({ convo }: { convo: any }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">{convo.peerName}</h3>
-          {convo.type === 'organizer' && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-green)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--mag-green)]">
-              <Calendar className="h-2.5 w-2.5" />
-              {convo.eventName}
-            </span>
-          )}
         </div>
         <p className={`truncate text-xs ${convo.unreadCount > 0 ? 'font-medium text-[var(--mag-ink)]' : 'text-[var(--mag-ink-soft)]'}`}>
           {convo.lastMessage}

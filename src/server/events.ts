@@ -67,6 +67,14 @@ export const getEventById = createServerFn({ method: 'GET' })
     return event
   })
 
+async function leaveAllActiveEvents(userId: string, tx?: typeof prisma) {
+  const db = tx || prisma
+  await db.eventAttendee.updateMany({
+    where: { userId, leftAt: null },
+    data: { leftAt: new Date() },
+  })
+}
+
 export const createEvent = createServerFn({ method: 'POST' })
   .inputValidator(z.object({
     name: z.string().min(1).max(100),
@@ -81,6 +89,8 @@ export const createEvent = createServerFn({ method: 'POST' })
     const session = await requireSession()
 
     return prisma.$transaction(async (tx) => {
+      await leaveAllActiveEvents(session.user.id, tx)
+
       const event = await tx.event.create({
         data: {
           code: generateCode(),
@@ -153,12 +163,16 @@ export const joinEvent = createServerFn({ method: 'POST' })
       return { success: true, alreadyJoined: true }
     }
 
-    await prisma.eventAttendee.upsert({
-      where: {
-        eventId_userId: { eventId: event.id, userId: session.user.id },
-      },
-      update: { leftAt: null, removedById: null, removedAt: null },
-      create: { eventId: event.id, userId: session.user.id },
+    await prisma.$transaction(async (tx) => {
+      await leaveAllActiveEvents(session.user.id, tx)
+
+      await tx.eventAttendee.upsert({
+        where: {
+          eventId_userId: { eventId: event.id, userId: session.user.id },
+        },
+        update: { leftAt: null, removedById: null, removedAt: null },
+        create: { eventId: event.id, userId: session.user.id },
+      })
     })
 
     return { success: true }

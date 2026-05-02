@@ -232,7 +232,7 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
         type: 'organizer_message',
         title: 'New Message',
         body: content.slice(0, 100),
-        link: `/chats/${chatId}`,
+        link: `/chats/org_${eventId}_${myId}`,
       })
 
       return { ...message, isMine: true }

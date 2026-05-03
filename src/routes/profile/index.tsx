@@ -69,7 +69,7 @@ function ProfilePage() {
     setUploadingAvatar(true)
     try {
       const key = `profiles/${profile.userId}/avatar-${crypto.randomUUID()}.jpg`
-      const url = await uploadImageToR2(file, key)
+      const url = await uploadImageToR2(file, key, 600)
 
       const oldAvatar = (profile.photos || [])[0]
       if (oldAvatar?.startsWith('http')) {

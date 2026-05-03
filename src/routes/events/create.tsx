@@ -37,6 +37,8 @@ function CreateEventPage() {
   const [copied, setCopied] = useState(false)
   const [photo, setPhoto] = useState<string | null>(null)
   const [isPublic, setIsPublic] = useState(true)
+  const [photoError, setPhotoError] = useState('')
+  const [createError, setCreateError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; currentEventName: string } | null>(null)
 
@@ -48,11 +50,12 @@ function CreateEventPage() {
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    setPhotoError('')
     try {
       const resized = await resizeImageToBase64(file, 800)
       setPhoto(resized)
     } catch {
-      alert('Failed to process image.')
+      setPhotoError('Failed to process image.')
     }
     e.target.value = ''
   }
@@ -70,6 +73,7 @@ function CreateEventPage() {
 
   const handleCreate = async (force = false) => {
     if (!name.trim()) return
+    setCreateError('')
     try {
       const startsAtIso = startsAt ? new Date(startsAt + ':00').toISOString() : undefined
       const result = await createEvent({ data: { 
@@ -98,7 +102,7 @@ function CreateEventPage() {
     } catch (e: any) {
       console.error('[Create Event] Failed:', e)
       const message = e?.message || e?.error?.message || 'Failed to create event. Make sure you are logged in.'
-      alert(message)
+      setCreateError(message)
     }
   }
 
@@ -162,6 +166,9 @@ function CreateEventPage() {
           )}
           <input type="file" accept="image/*" ref={fileRef} onChange={handleFile} className="hidden" />
           </div>
+          {photoError && (
+            <p className="mt-2 text-center text-xs font-semibold text-red-500">{photoError}</p>
+          )}
         </div>
 
         <div>
@@ -228,6 +235,9 @@ function CreateEventPage() {
         </div>
       </div>
 
+      {createError && (
+        <p className="mt-4 text-center text-xs font-semibold text-red-500">{createError}</p>
+      )}
       <div className="mt-6 flex justify-center">
         <button onClick={() => handleCreate()} disabled={!name.trim() || !!code}
           className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed">

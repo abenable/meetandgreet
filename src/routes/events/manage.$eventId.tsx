@@ -89,11 +89,14 @@ function ManageEventPage() {
   const [activeTab, setActiveTab] = useState<Tab>('attendees')
   const [eventPhoto, setEventPhoto] = useState<string | null>(null)
   const [eventIsPublic, setEventIsPublic] = useState(true)
+  const [photoError, setPhotoError] = useState('')
+  const [saveError, setSaveError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    setPhotoError('')
     try {
       const key = `events/${eventId}/photo-${crypto.randomUUID()}.jpg`
       const url = await uploadImageToR2(file, key)
@@ -104,7 +107,7 @@ function ManageEventPage() {
 
       setEventPhoto(url)
     } catch {
-      alert('Failed to process image.')
+      setPhotoError('Failed to process image.')
     }
     e.target.value = ''
   }
@@ -128,12 +131,13 @@ function ManageEventPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['event', eventId] })
       queryClient.invalidateQueries({ queryKey: ['events'] })
+      setSaveError('')
       setSavedMsg(true)
       setTimeout(() => setSavedMsg(false), 2000)
     },
     onError: (err: any) => {
       const message = err?.message || err?.error?.message || 'Failed to save changes.'
-      alert(message)
+      setSaveError(message)
     },
   })
 
@@ -290,9 +294,6 @@ function ManageEventPage() {
         <p className="text-xs font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Code</p>
         <p className="mt-2 text-4xl font-mono font-bold tracking-widest text-[var(--mag-ink)]">{(event as any).code}</p>
         <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">Share this code so others can join</p>
-        {eventPhoto && (
-          <img src={eventPhoto} alt={name} className="mx-auto mt-3 h-24 w-24 rounded-2xl object-cover" />
-        )}
         <button
           onClick={handleCopyLink}
           className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full border border-[var(--mag-line)] bg-[var(--mag-surface)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
@@ -336,6 +337,9 @@ function ManageEventPage() {
             )}
               <input type="file" accept="image/*" ref={fileRef} onChange={handleFile} className="hidden" />
             </div>
+            {photoError && (
+              <p className="mt-2 text-center text-xs font-semibold text-red-500">{photoError}</p>
+            )}
           </div>
 
           <div>
@@ -430,6 +434,9 @@ function ManageEventPage() {
           </div>
         </div>
 
+        {saveError && (
+          <p className="mt-2 text-center text-xs font-semibold text-red-500">{saveError}</p>
+        )}
         <div className="mt-4 flex items-center justify-center gap-3">
           <button
             onClick={handleSave}

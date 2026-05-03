@@ -31,6 +31,9 @@ function EventsExplorePage() {
   })
 
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; eventName: string; code: string; currentEventName: string } | null>(null)
+  const [joinCodeModal, setJoinCodeModal] = useState<{ open: boolean; eventName: string } | null>(null)
+  const [enteredCode, setEnteredCode] = useState('')
+  const [joinError, setJoinError] = useState('')
 
   const handleCopyShareLink = (code: string) => {
     const link = `${window.location.origin}/events/join/${code}`
@@ -44,11 +47,16 @@ function EventsExplorePage() {
   }
 
   const handleJoin = async (code: string, force = false) => {
+    setJoinError('')
     const result = await joinEvent({ data: { code, force } })
     if (result.success) {
+      setJoinCodeModal(null)
+      setConfirmModal(null)
       queryClient.invalidateQueries({ queryKey: ['active-event'] })
       queryClient.invalidateQueries({ queryKey: ['events'] })
     } else if ((result as any).needsConfirm) {
+      setJoinCodeModal(null)
+      setJoinError('')
       setConfirmModal({
         open: true,
         eventName: (result as any).eventName,
@@ -56,13 +64,12 @@ function EventsExplorePage() {
         currentEventName: (result as any).currentEvent.name,
       })
     } else {
-      alert(result.message || 'Could not join event.')
+      setJoinError(result.message || 'Could not join event.')
     }
   }
 
   const confirmJoin = async () => {
     if (!confirmModal) return
-    setConfirmModal(null)
     await handleJoin(confirmModal.code, true)
   }
 
@@ -152,7 +159,7 @@ function EventsExplorePage() {
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
                   {!isJoined && (
                     <button
-                      onClick={() => handleJoin(event.code)}
+                      onClick={() => { setEnteredCode(''); setJoinError(''); setJoinCodeModal({ open: true, eventName: event.name }) }}
                       className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-green)] px-3 py-1.5 text-[10px] font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
                     >
                       <LogIn className="h-3 w-3" /> Join
@@ -297,20 +304,64 @@ function EventsExplorePage() {
         <Plus className="h-4 w-4" />Create New Event
       </Link>
 
+      {/* Enter event code modal */}
+      {joinCodeModal?.open && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+            <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Join {joinCodeModal.eventName}</h3>
+            <p className="mb-3 text-xs text-[var(--mag-ink-soft)]">Enter the event code to join.</p>
+            <input
+              type="text"
+              value={enteredCode}
+              onChange={(e) => { setJoinError(''); setEnteredCode(e.target.value.toUpperCase()) }}
+              placeholder="Enter code"
+              maxLength={10}
+              autoFocus
+              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-center text-sm font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+            />
+            {joinError && (
+              <p className="mt-2 text-xs font-semibold text-red-500">{joinError}</p>
+            )}
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => { setJoinError(''); setJoinCodeModal(null) }}
+                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const code = enteredCode.trim()
+                  if (!code) return
+                  handleJoin(code)
+                }}
+                disabled={!enteredCode.trim()}
+                className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Join
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Confirm leave + join modal */}
       {confirmModal?.open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
           <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
             <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Leave current event?</h3>
-            <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+            <p className="mb-3 text-xs text-[var(--mag-ink-soft)]">
               You are already checked into <strong className="text-[var(--mag-ink)]">{confirmModal.currentEventName}</strong>. You can only be in one event at a time.
             </p>
-            <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+            <p className="mb-3 text-xs text-[var(--mag-ink-soft)]">
               Join <strong className="text-[var(--mag-ink)]">{confirmModal.eventName}</strong> anyway?
             </p>
+            {joinError && (
+              <p className="mb-3 text-xs font-semibold text-red-500">{joinError}</p>
+            )}
             <div className="flex gap-2">
               <button
-                onClick={() => setConfirmModal(null)}
+                onClick={() => { setJoinError(''); setConfirmModal(null) }}
                 className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
               >
                 Cancel

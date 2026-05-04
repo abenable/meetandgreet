@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { prisma } from '#/db'
 import { requireSession } from '#/server/auth'
+import type { Profile } from '@prisma/client'
 
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -346,15 +347,15 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
       }),
     ])
 
-    // Filter out disabled accounts
-    const activeUserIds = visibleUserIds.filter((id) => {
-      const user = users.find((u) => u.id === id)
-      return !user?.disabledAt
-    })
+    const userById = new Map(users.map((u) => [u.id, u]))
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
 
-    return activeUserIds.map((userId) => {
-      const profile = profiles.find((p) => p.userId === userId)
-      const user = users.find((u) => u.id === userId)
+    // Filter out disabled accounts
+    const activeUserIds = visibleUserIds.filter((id) => !userById.get(id)?.disabledAt)
+
+    return activeUserIds.map((userId): Profile => {
+      const profile = profileByUserId.get(userId)
+      const user = userById.get(userId)
       if (profile) {
         return {
           ...profile,
@@ -380,7 +381,7 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
         job: '',
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as any
+      }
     })
   })
 
@@ -407,16 +408,15 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
       }),
     ])
 
-    // Filter out disabled accounts
-    const activeUserIds = userIds.filter((id) => {
-      const user = users.find((u) => u.id === id)
-      return !user?.disabledAt
-    })
+    const userById = new Map(users.map((u) => [u.id, u]))
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
 
-    return activeUserIds.map((userId) => {
-      const profile = profiles.find((p) => p.userId === userId)
+    const activeUserIds = userIds.filter((id) => !userById.get(id)?.disabledAt)
+
+    return activeUserIds.map((userId): Profile => {
+      const profile = profileByUserId.get(userId)
       if (profile) return profile
-      const user = users.find((u) => u.id === userId)
+      const user = userById.get(userId)
       return {
         id: user?.id ?? userId,
         userId,
@@ -430,7 +430,7 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
         job: '',
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as any
+      }
     })
   })
 
@@ -521,13 +521,13 @@ export const getEventBlockedUsers = createServerFn({ method: 'GET' })
       }),
     ])
 
+    const userById = new Map(users.map((u) => [u.id, u]))
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
+
     return blocked
-      .filter((b) => {
-        const user = users.find((u) => u.id === b.userId)
-        return !user?.disabledAt
-      })
+      .filter((b) => !userById.get(b.userId)?.disabledAt)
       .map((b) => {
-        const profile = profiles.find((p) => p.userId === b.userId)
+        const profile = profileByUserId.get(b.userId)
         return { ...b, profile }
       })
   })
@@ -593,18 +593,18 @@ export const getEventReports = createServerFn({ method: 'GET' })
       }),
     ])
 
+    const userById = new Map(users.map((u) => [u.id, u]))
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
+
     const activeUserIds = new Set(
-      userIds.filter((id) => {
-        const user = users.find((u) => u.id === id)
-        return !user?.disabledAt
-      })
+      userIds.filter((id) => !userById.get(id)?.disabledAt)
     )
 
     return reports
       .filter((r) => activeUserIds.has(r.reporterId) && activeUserIds.has(r.reportedId))
       .map((r) => ({
         ...r,
-        reporter: profiles.find((p) => p.userId === r.reporterId),
-        reported: profiles.find((p) => p.userId === r.reportedId),
+        reporter: profileByUserId.get(r.reporterId),
+        reported: profileByUserId.get(r.reportedId),
       }))
   })

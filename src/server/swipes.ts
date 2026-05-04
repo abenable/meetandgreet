@@ -154,19 +154,19 @@ export const getLikes = createServerFn({ method: 'GET' })
       }),
     ])
 
-    const activeSwiperIds = swiperIds.filter((id) => {
-      const user = users.find((u) => u.id === id)
-      return !user?.disabledAt
-    })
+    const userById = new Map(users.map((u) => [u.id, u]))
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
+
+    const activeSwiperIds = swiperIds.filter((id) => !userById.get(id)?.disabledAt)
 
     return activeSwiperIds.map((userId) => {
-      const profile = profiles.find((p) => p.userId === userId)
-      const user = users.find((u) => u.id === userId)
+      const profile = profileByUserId.get(userId)
+      const user = userById.get(userId)
       return {
         ...(profile || {}),
         id: profile?.id ?? userId,
         userId,
-        name: profile?.name || user?.name || 'Unnamed',
+        name: profile?.name || user?.name || user?.email?.split('@')[0] || 'Unnamed',
         photos:
           profile?.photos && profile.photos.length > 0
             ? profile.photos
@@ -214,11 +214,11 @@ export const getMatches = createServerFn({ method: 'GET' })
       }),
     ])
 
+    const userById = new Map(users.map((u) => [u.id, u]))
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
+
     const activePeerIds = new Set(
-      peerIds.filter((id) => {
-        const user = users.find((u) => u.id === id)
-        return !user?.disabledAt
-      })
+      peerIds.filter((id) => !userById.get(id)?.disabledAt)
     )
 
     return matches
@@ -228,8 +228,8 @@ export const getMatches = createServerFn({ method: 'GET' })
       })
       .map((match) => {
         const peerId = match.user1Id === session.user.id ? match.user2Id : match.user1Id
-        const profile = profiles.find((p) => p.userId === peerId)
-        const user = users.find((u) => u.id === peerId)
+        const profile = profileByUserId.get(peerId)
+        const user = userById.get(peerId)
         const photos =
           profile?.photos && profile.photos.length > 0
             ? profile.photos

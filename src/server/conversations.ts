@@ -76,24 +76,23 @@ export const getConversations = createServerFn({ method: 'GET' })
       }),
     ])
 
-    // Filter out disabled accounts
+    const userById = new Map(users.map((u) => [u.id, u]))
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
+
     const activePeerIds = new Set(
-      allPeerIds.filter((id) => {
-        const user = users.find((u) => u.id === id)
-        return !user?.disabledAt
-      })
+      allPeerIds.filter((id) => !userById.get(id)?.disabledAt)
     )
 
     const getPeerPhoto = (peerId: string) => {
-      const profile = profiles.find((p) => p.userId === peerId)
-      const user = users.find((u) => u.id === peerId)
+      const profile = profileByUserId.get(peerId)
+      const user = userById.get(peerId)
       if (profile?.photos && profile.photos.length > 0) return profile.photos[0]
       return user?.image
     }
 
     const getPeerName = (peerId: string) => {
-      const profile = profiles.find((p) => p.userId === peerId)
-      const user = users.find((u) => u.id === peerId)
+      const profile = profileByUserId.get(peerId)
+      const user = userById.get(peerId)
       return profile?.name || user?.name || 'Unknown'
     }
 

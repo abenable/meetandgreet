@@ -57,22 +57,19 @@ export const disableMyAccount = createServerFn({ method: 'POST' })
     const session = await requireSession()
     const userId = session.user.id
 
-    // Disable user
-    await prisma.user.update({
-      where: { id: userId },
-      data: { disabledAt: new Date() },
-    })
-
-    // Remove from all active events
-    await prisma.eventAttendee.updateMany({
-      where: { userId, leftAt: null },
-      data: { leftAt: new Date() },
-    })
-
-    // Delete all sessions (force logout everywhere)
-    await prisma.session.deleteMany({
-      where: { userId },
-    })
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: { disabledAt: new Date() },
+      }),
+      prisma.eventAttendee.updateMany({
+        where: { userId, leftAt: null },
+        data: { leftAt: new Date() },
+      }),
+      prisma.session.deleteMany({
+        where: { userId },
+      }),
+    ])
 
     return { success: true }
   })

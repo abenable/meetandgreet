@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { X, Heart, MapPin, Users, ArrowRight, Flag } from 'lucide-react'
 import { getMyActiveEvent, getEventProfiles, reportUser } from '#/server/events'
@@ -7,17 +7,6 @@ import { recordSwipe } from '#/server/swipes'
 import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/discover')({ component: DiscoverPage })
-
-interface Profile {
-  id: string
-  userId: string
-  name: string | null
-  bio: string | null
-  photos: string[]
-  location: string | null
-  interests: string[]
-  gender: string | null
-}
 
 const REPORT_REASONS = [
   'Inappropriate behaviour',
@@ -44,11 +33,8 @@ function DiscoverPage() {
     enabled: !!eventId,
   })
 
-  const [pages, setPages] = useState<Profile[][]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [photoIndices, setPhotoIndices] = useState<Record<string, number>>({})
-  const [loadingMore, setLoadingMore] = useState(false)
-  const isLoadingRef = useRef(false)
   const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set())
 
   // Report modal state
@@ -56,50 +42,6 @@ function DiscoverPage() {
   const [reportReason, setReportReason] = useState('')
   const [reportCustom, setReportCustom] = useState('')
   const [reportSuccess, setReportSuccess] = useState('')
-
-  useEffect(() => {
-    if (baseProfiles.length > 0 && pages.length === 0) {
-      setPages([baseProfiles.map((p) => ({ ...p, id: p.userId }))])
-    }
-  }, [baseProfiles, pages.length])
-
-  const flatProfiles = pages.flat()
-  const totalItems = flatProfiles.length
-
-  const loadMore = useCallback(() => {
-    if (isLoadingRef.current || baseProfiles.length === 0) return
-    isLoadingRef.current = true
-    setLoadingMore(true)
-    setTimeout(() => {
-      setPages((prev) => {
-        const nextPage = prev.length
-        return [...prev, baseProfiles.map((p) => ({ ...p, id: `${p.userId}_p${nextPage}` }))]
-      })
-      isLoadingRef.current = false
-      setLoadingMore(false)
-    }, 800)
-  }, [baseProfiles])
-
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const idx = Number((entry.target as HTMLElement).dataset.index)
-            if (!Number.isNaN(idx)) {
-              setCurrentIndex(idx)
-              if (idx >= totalItems - 3) loadMore()
-            }
-          }
-        })
-      },
-      { threshold: 0.6 }
-    )
-    Array.from(container.children).forEach((child) => observer.observe(child))
-    return () => observer.disconnect()
-  }, [flatProfiles.length, totalItems, loadMore])
 
   const swipeMutation = useMutation({
     mutationFn: recordSwipe,
@@ -127,7 +69,7 @@ function DiscoverPage() {
   })
 
   const handleAction = useCallback((direction: 'like' | 'pass') => {
-    const profile = flatProfiles[currentIndex]
+    const profile = baseProfiles[currentIndex]
     if (!profile || !eventId) return
     if (swipedIds.has(profile.userId)) return
 
@@ -140,11 +82,10 @@ function DiscoverPage() {
     if (next < container.children.length) {
       ;(container.children[next] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
-    if (next >= totalItems - 3) loadMore()
-  }, [currentIndex, eventId, flatProfiles, loadMore, swipeMutation, totalItems, swipedIds])
+  }, [currentIndex, eventId, baseProfiles, swipeMutation, swipedIds])
 
   const handleReport = () => {
-    const profile = flatProfiles[currentIndex]
+    const profile = baseProfiles[currentIndex]
     if (!profile || !eventId) return
     const reason = reportReason === 'Other' ? reportCustom.trim() : reportReason
     if (!reason) return
@@ -157,6 +98,13 @@ function DiscoverPage() {
   const prevPhoto = (profileId: string) => {
     setPhotoIndices((prev) => ({ ...prev, [profileId]: Math.max((prev[profileId] ?? 0) - 1, 0) }))
   }
+
+  const onScroll = useCallback(() => {
+    const container = containerRef.current
+    if (!container) return
+    const idx = Math.round(container.scrollTop / container.clientHeight)
+    setCurrentIndex(Math.min(idx, baseProfiles.length - 1))
+  }, [baseProfiles.length])
 
   if (!activeEvent) {
     return (
@@ -187,71 +135,116 @@ function DiscoverPage() {
   }
 
   return (
-    <div className="relative flex-1 overflow-hidden bg-[var(--mag-bg)]">
-      <div ref={containerRef} className="hide-scrollbar absolute inset-0 snap-y snap-mandatory overflow-y-auto" style={{ scrollBehavior: 'smooth' }}>
-        {flatProfiles.map((profile, index) => {
-          const photoIdx = photoIndices[profile.id] ?? 0
+    <div className="flex-1 overflow-hidden bg-[var(--mag-bg)]">
+      <div
+        ref={containerRef}
+        onScroll={onScroll}
+        className="hide-scrollbar h-full w-full snap-y snap-mandatory overflow-y-auto"
+        style={{ scrollBehavior: 'smooth' }}
+      >
+        {baseProfiles.map((profile, index) => {
+          const photoIdx = photoIndices[profile.userId] ?? 0
           const pic = profile.photos[photoIdx] ?? ''
           const hasPhotos = profile.photos.length > 0
           return (
-            <section key={profile.id} data-index={index} className="relative h-full w-full shrink-0 snap-start snap-always overflow-hidden">
+            <section
+              key={profile.userId}
+              data-index={index}
+              className="relative h-full w-full shrink-0 snap-start snap-stop overflow-hidden"
+            >
               <div className="h-full w-full">
                 <AvatarImage src={pic} alt={profile.name ?? ''} />
               </div>
-                <div className="gradient-overlay absolute inset-0" />
-                {hasPhotos && (
-                  <>
-                    <div className="absolute top-4 left-4 right-4 flex gap-1.5">
-                      {profile.photos.map((_, i) => (
-                        <div key={i} className={`h-1 flex-1 rounded-full transition ${i === photoIdx ? 'bg-white' : 'bg-white/40'}`} />
-                      ))}
-                    </div>
-                    <button onClick={() => prevPhoto(profile.id)} className="absolute left-0 top-0 h-[40%] w-1/4" aria-label="Previous photo" />
-                    <button onClick={() => nextPhoto(profile.id, profile.photos.length)} className="absolute right-0 top-0 h-[40%] w-1/4" aria-label="Next photo" />
-                  </>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 p-5 pb-28">
-                  <h2 className="text-3xl font-bold text-white">{formatNameWithGender(profile.name, profile.gender)}</h2>
-                  <div className="mt-1 flex items-center gap-1.5 text-sm text-white/80"><MapPin className="h-4 w-4" /><span>{profile.location}</span></div>
-                  <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">{profile.bio}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {profile.interests.slice(0, 5).map((interest) => (
-                      <span key={interest} className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">{interest}</span>
+              <div className="gradient-overlay absolute inset-0" />
+              {hasPhotos && (
+                <>
+                  <div className="absolute top-4 left-4 right-4 flex gap-1.5">
+                    {profile.photos.map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-1 flex-1 rounded-full transition ${i === photoIdx ? 'bg-white' : 'bg-white/40'}`}
+                      />
                     ))}
                   </div>
+                  <button
+                    onClick={() => prevPhoto(profile.userId)}
+                    className="absolute left-0 top-0 h-[40%] w-1/4"
+                    aria-label="Previous photo"
+                  />
+                  <button
+                    onClick={() => nextPhoto(profile.userId, profile.photos.length)}
+                    className="absolute right-0 top-0 h-[40%] w-1/4"
+                    aria-label="Next photo"
+                  />
+                </>
+              )}
+              <div className="absolute bottom-0 left-0 right-0 p-5 pb-28">
+                <h2 className="text-3xl font-bold text-white">
+                  {formatNameWithGender(profile.name, profile.gender)}
+                </h2>
+                <div className="mt-1 flex items-center gap-1.5 text-sm text-white/80">
+                  <MapPin className="h-4 w-4" />
+                  <span>{profile.location}</span>
                 </div>
-                <div className="absolute right-3 bottom-28 flex flex-col items-center gap-3">
-                  <button
-                    onClick={() => handleAction('like')}
-                    disabled={swipedIds.has(profile.userId)}
-                    className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${swipedIds.has(profile.userId) ? 'bg-[var(--mag-green)]' : 'bg-black/30'}`}
-                  >
-                    <Heart className={`h-6 w-6 ${swipedIds.has(profile.userId) ? 'fill-white text-white' : 'fill-transparent text-[var(--mag-green)]'}`} />
-                  </button>
-                  <button
-                    onClick={() => handleAction('pass')}
-                    disabled={swipedIds.has(profile.userId)}
-                    className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${swipedIds.has(profile.userId) ? 'bg-red-500' : 'bg-black/30'}`}
-                  >
-                    <X className={`h-6 w-6 ${swipedIds.has(profile.userId) ? 'text-white' : 'text-red-400'}`} strokeWidth={2.5} />
-                  </button>
-                  <button
-                    onClick={() => { setReportModalOpen(true); setReportReason(''); setReportCustom(''); setReportSuccess('') }}
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110"
-                    title="Report user"
-                  >
-                    <Flag className="h-4 w-4 text-yellow-400" />
-                  </button>
+                <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">{profile.bio}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {profile.interests.slice(0, 5).map((interest) => (
+                    <span
+                      key={interest}
+                      className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
+                    >
+                      {interest}
+                    </span>
+                  ))}
                 </div>
-              </section>
-            )
-          })}
-          {loadingMore && (
-            <div className="flex h-32 shrink-0 items-center justify-center gap-2 text-sm text-[var(--mag-ink-soft)]">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />Loading more...
-            </div>
-          )}
-        </div>
+              </div>
+              <div className="absolute right-3 bottom-28 flex flex-col items-center gap-3">
+                <button
+                  onClick={() => handleAction('like')}
+                  disabled={swipedIds.has(profile.userId)}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${
+                    swipedIds.has(profile.userId) ? 'bg-[var(--mag-green)]' : 'bg-black/30'
+                  }`}
+                >
+                  <Heart
+                    className={`h-6 w-6 ${
+                      swipedIds.has(profile.userId)
+                        ? 'fill-white text-white'
+                        : 'fill-transparent text-[var(--mag-green)]'
+                    }`}
+                  />
+                </button>
+                <button
+                  onClick={() => handleAction('pass')}
+                  disabled={swipedIds.has(profile.userId)}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${
+                    swipedIds.has(profile.userId) ? 'bg-red-500' : 'bg-black/30'
+                  }`}
+                >
+                  <X
+                    className={`h-6 w-6 ${
+                      swipedIds.has(profile.userId) ? 'text-white' : 'text-red-400'
+                    }`}
+                    strokeWidth={2.5}
+                  />
+                </button>
+                <button
+                  onClick={() => {
+                    setReportModalOpen(true)
+                    setReportReason('')
+                    setReportCustom('')
+                    setReportSuccess('')
+                  }}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110"
+                  title="Report user"
+                >
+                  <Flag className="h-4 w-4 text-yellow-400" />
+                </button>
+              </div>
+            </section>
+          )
+        })}
+      </div>
 
       {/* Report Modal */}
       {reportModalOpen && (
@@ -270,7 +263,10 @@ function DiscoverPage() {
               <>
                 <div className="mb-3 space-y-2">
                   {REPORT_REASONS.map((r) => (
-                    <label key={r} className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 transition hover:border-[var(--mag-green)]/30">
+                    <label
+                      key={r}
+                      className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 transition hover:border-[var(--mag-green)]/30"
+                    >
                       <input
                         type="radio"
                         name="reportReason"
@@ -303,7 +299,9 @@ function DiscoverPage() {
                   </button>
                   <button
                     onClick={handleReport}
-                    disabled={!reportReason || (reportReason === 'Other' && !reportCustom.trim()) || reportMutation.isPending}
+                    disabled={
+                      !reportReason || (reportReason === 'Other' && !reportCustom.trim()) || reportMutation.isPending
+                    }
                     className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-bold text-white transition hover:bg-red-600 disabled:opacity-50"
                   >
                     {reportMutation.isPending ? 'Submitting…' : 'Submit Report'}

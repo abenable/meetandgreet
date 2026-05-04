@@ -150,11 +150,16 @@ export const getLikes = createServerFn({ method: 'GET' })
       prisma.profile.findMany({ where: { userId: { in: swiperIds } } }),
       prisma.user.findMany({
         where: { id: { in: swiperIds } },
-        select: { id: true, name: true, image: true, email: true },
+        select: { id: true, name: true, image: true, email: true, disabledAt: true },
       }),
     ])
 
-    return swiperIds.map((userId) => {
+    const activeSwiperIds = swiperIds.filter((id) => {
+      const user = users.find((u) => u.id === id)
+      return !user?.disabledAt
+    })
+
+    return activeSwiperIds.map((userId) => {
       const profile = profiles.find((p) => p.userId === userId)
       const user = users.find((u) => u.id === userId)
       return {
@@ -205,31 +210,43 @@ export const getMatches = createServerFn({ method: 'GET' })
       prisma.profile.findMany({ where: { userId: { in: peerIds } } }),
       prisma.user.findMany({
         where: { id: { in: peerIds } },
-        select: { id: true, name: true, image: true },
+        select: { id: true, name: true, image: true, disabledAt: true },
       }),
     ])
 
-    return matches.map((match) => {
-      const peerId = match.user1Id === session.user.id ? match.user2Id : match.user1Id
-      const profile = profiles.find((p) => p.userId === peerId)
-      const user = users.find((u) => u.id === peerId)
-      const photos =
-        profile?.photos && profile.photos.length > 0
-          ? profile.photos
-          : user?.image
-            ? [user.image]
-            : []
-      return {
-        id: match.id,
-        eventId: match.eventId,
-        peerId,
-        peerName: profile?.name || user?.name || 'Unknown',
-        peerPhoto: photos[0],
-        lastMessage: match.messages[0]?.content ?? '',
-        lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
-        unread: 0,
-      }
-    })
+    const activePeerIds = new Set(
+      peerIds.filter((id) => {
+        const user = users.find((u) => u.id === id)
+        return !user?.disabledAt
+      })
+    )
+
+    return matches
+      .filter((match) => {
+        const peerId = match.user1Id === session.user.id ? match.user2Id : match.user1Id
+        return activePeerIds.has(peerId)
+      })
+      .map((match) => {
+        const peerId = match.user1Id === session.user.id ? match.user2Id : match.user1Id
+        const profile = profiles.find((p) => p.userId === peerId)
+        const user = users.find((u) => u.id === peerId)
+        const photos =
+          profile?.photos && profile.photos.length > 0
+            ? profile.photos
+            : user?.image
+              ? [user.image]
+              : []
+        return {
+          id: match.id,
+          eventId: match.eventId,
+          peerId,
+          peerName: profile?.name || user?.name || 'Unknown',
+          peerPhoto: photos[0],
+          lastMessage: match.messages[0]?.content ?? '',
+          lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
+          unread: 0,
+        }
+      })
   })
 
 export const getMessages = createServerFn({ method: 'GET' })

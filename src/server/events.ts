@@ -342,11 +342,17 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
       prisma.profile.findMany({ where: { userId: { in: visibleUserIds } } }),
       prisma.user.findMany({
         where: { id: { in: visibleUserIds } },
-        select: { id: true, name: true, image: true, email: true },
+        select: { id: true, name: true, image: true, email: true, disabledAt: true },
       }),
     ])
 
-    return visibleUserIds.map((userId) => {
+    // Filter out disabled accounts
+    const activeUserIds = visibleUserIds.filter((id) => {
+      const user = users.find((u) => u.id === id)
+      return !user?.disabledAt
+    })
+
+    return activeUserIds.map((userId) => {
       const profile = profiles.find((p) => p.userId === userId)
       const user = users.find((u) => u.id === userId)
       if (profile) {
@@ -397,11 +403,17 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
       }),
       prisma.user.findMany({
         where: { id: { in: userIds } },
-        select: { id: true, name: true, image: true, email: true },
+        select: { id: true, name: true, image: true, email: true, disabledAt: true },
       }),
     ])
 
-    return userIds.map((userId) => {
+    // Filter out disabled accounts
+    const activeUserIds = userIds.filter((id) => {
+      const user = users.find((u) => u.id === id)
+      return !user?.disabledAt
+    })
+
+    return activeUserIds.map((userId) => {
       const profile = profiles.find((p) => p.userId === userId)
       if (profile) return profile
       const user = users.find((u) => u.id === userId)
@@ -501,14 +513,23 @@ export const getEventBlockedUsers = createServerFn({ method: 'GET' })
     const userIds = blocked.map((b) => b.userId)
     if (userIds.length === 0) return []
 
-    const profiles = await prisma.profile.findMany({
-      where: { userId: { in: userIds } },
-    })
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({ where: { userId: { in: userIds } } }),
+      prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, disabledAt: true },
+      }),
+    ])
 
-    return blocked.map((b) => {
-      const profile = profiles.find((p) => p.userId === b.userId)
-      return { ...b, profile }
-    })
+    return blocked
+      .filter((b) => {
+        const user = users.find((u) => u.id === b.userId)
+        return !user?.disabledAt
+      })
+      .map((b) => {
+        const profile = profiles.find((p) => p.userId === b.userId)
+        return { ...b, profile }
+      })
   })
 
 export const reportUser = createServerFn({ method: 'POST' })
@@ -564,13 +585,26 @@ export const getEventReports = createServerFn({ method: 'GET' })
     })
 
     const userIds = [...new Set(reports.flatMap((r) => [r.reporterId, r.reportedId]))]
-    const profiles = await prisma.profile.findMany({
-      where: { userId: { in: userIds } },
-    })
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({ where: { userId: { in: userIds } } }),
+      prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, disabledAt: true },
+      }),
+    ])
 
-    return reports.map((r) => ({
-      ...r,
-      reporter: profiles.find((p) => p.userId === r.reporterId),
-      reported: profiles.find((p) => p.userId === r.reportedId),
-    }))
+    const activeUserIds = new Set(
+      userIds.filter((id) => {
+        const user = users.find((u) => u.id === id)
+        return !user?.disabledAt
+      })
+    )
+
+    return reports
+      .filter((r) => activeUserIds.has(r.reporterId) && activeUserIds.has(r.reportedId))
+      .map((r) => ({
+        ...r,
+        reporter: profiles.find((p) => p.userId === r.reporterId),
+        reported: profiles.find((p) => p.userId === r.reportedId),
+      }))
   })

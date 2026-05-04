@@ -21,6 +21,15 @@ async function fetchSessionFromAuthHandler(): Promise<{ session: any; user: any 
   const data = await response.json()
   if (!data || !data.session) return null
 
+  // Reject sessions for disabled accounts
+  if (data.user?.id) {
+    const user = await prisma.user.findUnique({
+      where: { id: data.user.id },
+      select: { disabledAt: true },
+    })
+    if (user?.disabledAt) return null
+  }
+
   return data
 }
 
@@ -41,6 +50,31 @@ export const requireSession = createServerFn({ method: 'GET' })
       throw new Error('Unauthorized')
     }
     return data
+  })
+
+export const disableMyAccount = createServerFn({ method: 'POST' })
+  .handler(async () => {
+    const session = await requireSession()
+    const userId = session.user.id
+
+    // Disable user
+    await prisma.user.update({
+      where: { id: userId },
+      data: { disabledAt: new Date() },
+    })
+
+    // Remove from all active events
+    await prisma.eventAttendee.updateMany({
+      where: { userId, leftAt: null },
+      data: { leftAt: new Date() },
+    })
+
+    // Delete all sessions (force logout everywhere)
+    await prisma.session.deleteMany({
+      where: { userId },
+    })
+
+    return { success: true }
   })
 
 export const sendEmailVerificationOtp = createServerFn({ method: 'POST' })

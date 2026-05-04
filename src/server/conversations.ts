@@ -72,9 +72,17 @@ export const getConversations = createServerFn({ method: 'GET' })
       prisma.profile.findMany({ where: { userId: { in: allPeerIds } } }),
       prisma.user.findMany({
         where: { id: { in: allPeerIds } },
-        select: { id: true, name: true, image: true },
+        select: { id: true, name: true, image: true, disabledAt: true },
       }),
     ])
+
+    // Filter out disabled accounts
+    const activePeerIds = new Set(
+      allPeerIds.filter((id) => {
+        const user = users.find((u) => u.id === id)
+        return !user?.disabledAt
+      })
+    )
 
     const getPeerPhoto = (peerId: string) => {
       const profile = profiles.find((p) => p.userId === peerId)
@@ -90,29 +98,36 @@ export const getConversations = createServerFn({ method: 'GET' })
     }
 
     // Build match conversation list
-    const matchConversations = matches.map((match) => {
-      const peerId = match.user1Id === myId ? match.user2Id : match.user1Id
-      return {
-        id: `${match.id}`,
-        chatId: `match_${match.id}`,
-        type: 'match' as const,
-        matchId: match.id,
-        eventId: match.eventId,
-        peerId,
-        peerName: getPeerName(peerId),
-        peerPhoto: getPeerPhoto(peerId),
-        lastMessage: match.messages[0]?.content ?? 'New match!',
-        lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
-        unreadCount: 0,
-      }
-    })
+    const matchConversations = matches
+      .filter((match) => {
+        const peerId = match.user1Id === myId ? match.user2Id : match.user1Id
+        return activePeerIds.has(peerId)
+      })
+      .map((match) => {
+        const peerId = match.user1Id === myId ? match.user2Id : match.user1Id
+        return {
+          id: `${match.id}`,
+          chatId: `match_${match.id}`,
+          type: 'match' as const,
+          matchId: match.id,
+          eventId: match.eventId,
+          peerId,
+          peerName: getPeerName(peerId),
+          peerPhoto: getPeerPhoto(peerId),
+          lastMessage: match.messages[0]?.content ?? 'New match!',
+          lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
+          unreadCount: 0,
+        }
+      })
 
     // Build organizer conversation list
-    const organizerConversations = [...organizerConvoMap.values()].map((convo) => {
-      const event = events.find((e) => e.id === convo.eventId)
-      return {
-        id: `${convo.eventId}:${convo.peerId}`,
-        chatId: `org_${convo.eventId}_${convo.peerId}`,
+    const organizerConversations = [...organizerConvoMap.values()]
+      .filter((convo) => activePeerIds.has(convo.peerId))
+      .map((convo) => {
+        const event = events.find((e) => e.id === convo.eventId)
+        return {
+          id: `${convo.eventId}:${convo.peerId}`,
+          chatId: `org_${convo.eventId}_${convo.peerId}`,
         type: 'organizer' as const,
         eventId: convo.eventId,
         eventName: event?.name ?? 'Event',

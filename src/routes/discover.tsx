@@ -135,7 +135,7 @@ function DiscoverPage() {
   }
 
   return (
-    <div className="flex-1 overflow-hidden bg-[var(--mag-bg)]">
+    <div className="h-[calc(100dvh-112px)] bg-[var(--mag-bg)]">
       <div
         ref={containerRef}
         onScroll={onScroll}

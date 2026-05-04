@@ -48,6 +48,7 @@ function DiscoverPage() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [photoIndices, setPhotoIndices] = useState<Record<string, number>>({})
   const [loadingMore, setLoadingMore] = useState(false)
+  const isLoadingRef = useRef(false)
   const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set())
 
   // Report modal state
@@ -57,23 +58,27 @@ function DiscoverPage() {
   const [reportSuccess, setReportSuccess] = useState('')
 
   useEffect(() => {
-    if (baseProfiles.length > 0) {
+    if (baseProfiles.length > 0 && pages.length === 0) {
       setPages([baseProfiles.map((p) => ({ ...p, id: p.userId }))])
     }
-  }, [baseProfiles])
+  }, [baseProfiles, pages.length])
 
   const flatProfiles = pages.flat()
   const totalItems = flatProfiles.length
 
   const loadMore = useCallback(() => {
-    if (loadingMore || baseProfiles.length === 0) return
+    if (isLoadingRef.current || baseProfiles.length === 0) return
+    isLoadingRef.current = true
     setLoadingMore(true)
     setTimeout(() => {
-      const nextPage = pages.length
-      setPages((prev) => [...prev, baseProfiles.map((p) => ({ ...p, id: `${p.userId}_p${nextPage}` }))])
+      setPages((prev) => {
+        const nextPage = prev.length
+        return [...prev, baseProfiles.map((p) => ({ ...p, id: `${p.userId}_p${nextPage}` }))]
+      })
+      isLoadingRef.current = false
       setLoadingMore(false)
     }, 800)
-  }, [loadingMore, pages.length, baseProfiles])
+  }, [baseProfiles])
 
   useEffect(() => {
     const container = containerRef.current

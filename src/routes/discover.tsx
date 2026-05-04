@@ -182,18 +182,17 @@ function DiscoverPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-[var(--mag-bg)]">
-      <div className="mx-auto h-full w-full">
-        <div ref={containerRef} className="hide-scrollbar relative h-full snap-y snap-mandatory overflow-y-auto" style={{ scrollBehavior: 'smooth' }}>
-          {flatProfiles.map((profile, index) => {
-            const photoIdx = photoIndices[profile.id] ?? 0
-            const pic = profile.photos[photoIdx] ?? ''
-            const hasPhotos = profile.photos.length > 0
-            return (
-              <section key={profile.id} data-index={index} className="relative h-full w-full shrink-0 snap-start snap-always overflow-hidden">
-                <div className="h-full w-full">
-                  <AvatarImage src={pic} alt={profile.name ?? ''} />
-                </div>
+    <div className="relative flex-1 overflow-hidden bg-[var(--mag-bg)]">
+      <div ref={containerRef} className="hide-scrollbar absolute inset-0 snap-y snap-mandatory overflow-y-auto" style={{ scrollBehavior: 'smooth' }}>
+        {flatProfiles.map((profile, index) => {
+          const photoIdx = photoIndices[profile.id] ?? 0
+          const pic = profile.photos[photoIdx] ?? ''
+          const hasPhotos = profile.photos.length > 0
+          return (
+            <section key={profile.id} data-index={index} className="relative h-full w-full shrink-0 snap-start snap-always overflow-hidden">
+              <div className="h-full w-full">
+                <AvatarImage src={pic} alt={profile.name ?? ''} />
+              </div>
                 <div className="gradient-overlay absolute inset-0" />
                 {hasPhotos && (
                   <>
@@ -248,7 +247,6 @@ function DiscoverPage() {
             </div>
           )}
         </div>
-      </div>
 
       {/* Report Modal */}
       {reportModalOpen && (

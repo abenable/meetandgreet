@@ -338,8 +338,43 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
 
     if (visibleUserIds.length === 0) return []
 
-    return prisma.profile.findMany({
-      where: { userId: { in: visibleUserIds } },
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({ where: { userId: { in: visibleUserIds } } }),
+      prisma.user.findMany({
+        where: { id: { in: visibleUserIds } },
+        select: { id: true, name: true, image: true, email: true },
+      }),
+    ])
+
+    return visibleUserIds.map((userId) => {
+      const profile = profiles.find((p) => p.userId === userId)
+      const user = users.find((u) => u.id === userId)
+      if (profile) {
+        return {
+          ...profile,
+          name: profile.name || user?.name || 'Unnamed',
+          photos:
+            profile.photos && profile.photos.length > 0
+              ? profile.photos
+              : user?.image
+                ? [user.image]
+                : [],
+        }
+      }
+      return {
+        id: user?.id ?? userId,
+        userId,
+        name: user?.name || user?.email?.split('@')[0] || 'Unnamed',
+        bio: '',
+        photos: user?.image ? [user.image] : [],
+        gender: '',
+        birthDate: '',
+        location: '',
+        interests: [],
+        job: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any
     })
   })
 

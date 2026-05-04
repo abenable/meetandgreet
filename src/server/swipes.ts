@@ -146,11 +146,38 @@ export const getLikes = createServerFn({ method: 'GET' })
     if (swipes.length === 0) return []
 
     const swiperIds = swipes.map((s) => s.swiperId)
-    const profiles = await prisma.profile.findMany({
-      where: { userId: { in: swiperIds } },
-    })
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({ where: { userId: { in: swiperIds } } }),
+      prisma.user.findMany({
+        where: { id: { in: swiperIds } },
+        select: { id: true, name: true, image: true, email: true },
+      }),
+    ])
 
-    return profiles
+    return swiperIds.map((userId) => {
+      const profile = profiles.find((p) => p.userId === userId)
+      const user = users.find((u) => u.id === userId)
+      return {
+        ...(profile || {}),
+        id: profile?.id ?? userId,
+        userId,
+        name: profile?.name || user?.name || 'Unnamed',
+        photos:
+          profile?.photos && profile.photos.length > 0
+            ? profile.photos
+            : user?.image
+              ? [user.image]
+              : [],
+        bio: profile?.bio ?? '',
+        gender: profile?.gender ?? '',
+        birthDate: profile?.birthDate ?? '',
+        location: profile?.location ?? '',
+        interests: profile?.interests ?? [],
+        job: profile?.job ?? '',
+        createdAt: profile?.createdAt ?? new Date(),
+        updatedAt: profile?.updatedAt ?? new Date(),
+      }
+    })
   })
 
 export const getMatches = createServerFn({ method: 'GET' })
@@ -174,19 +201,30 @@ export const getMatches = createServerFn({ method: 'GET' })
       m.user1Id === session.user.id ? m.user2Id : m.user1Id
     )
 
-    const profiles = await prisma.profile.findMany({
-      where: { userId: { in: peerIds } },
-    })
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({ where: { userId: { in: peerIds } } }),
+      prisma.user.findMany({
+        where: { id: { in: peerIds } },
+        select: { id: true, name: true, image: true },
+      }),
+    ])
 
     return matches.map((match) => {
       const peerId = match.user1Id === session.user.id ? match.user2Id : match.user1Id
       const profile = profiles.find((p) => p.userId === peerId)
+      const user = users.find((u) => u.id === peerId)
+      const photos =
+        profile?.photos && profile.photos.length > 0
+          ? profile.photos
+          : user?.image
+            ? [user.image]
+            : []
       return {
         id: match.id,
         eventId: match.eventId,
         peerId,
-        peerName: profile?.name ?? 'Unknown',
-        peerPhoto: profile?.photos[0],
+        peerName: profile?.name || user?.name || 'Unknown',
+        peerPhoto: photos[0],
         lastMessage: match.messages[0]?.content ?? '',
         lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
         unread: 0,

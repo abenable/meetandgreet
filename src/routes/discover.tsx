@@ -182,8 +182,8 @@ function DiscoverPage() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-112px)] flex-col bg-[var(--mag-bg)]">
-      <div className="mx-auto h-full w-[90%]">
+    <div className="flex flex-1 flex-col overflow-hidden bg-[var(--mag-bg)]">
+      <div className="mx-auto h-full w-full">
         <div ref={containerRef} className="hide-scrollbar relative h-full snap-y snap-mandatory overflow-y-auto" style={{ scrollBehavior: 'smooth' }}>
           {flatProfiles.map((profile, index) => {
             const photoIdx = photoIndices[profile.id] ?? 0
@@ -252,7 +252,7 @@ function DiscoverPage() {
 
       {/* Report Modal */}
       {reportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 px-4 pb-20 sm:items-center sm:pb-0">
           <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
             <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Report user</h3>
             <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">

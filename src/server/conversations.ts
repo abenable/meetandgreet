@@ -66,16 +66,32 @@ export const getConversations = createServerFn({ method: 'GET' })
       select: { id: true, name: true },
     })
 
-    // 3. Fetch all peer profiles
+    // 3. Fetch all peer profiles and users for fallback photos/names
     const allPeerIds = [...new Set([...matchPeerIds, ...organizerPeerIds])]
-    const profiles = await prisma.profile.findMany({
-      where: { userId: { in: allPeerIds } },
-    })
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({ where: { userId: { in: allPeerIds } } }),
+      prisma.user.findMany({
+        where: { id: { in: allPeerIds } },
+        select: { id: true, name: true, image: true },
+      }),
+    ])
+
+    const getPeerPhoto = (peerId: string) => {
+      const profile = profiles.find((p) => p.userId === peerId)
+      const user = users.find((u) => u.id === peerId)
+      if (profile?.photos && profile.photos.length > 0) return profile.photos[0]
+      return user?.image
+    }
+
+    const getPeerName = (peerId: string) => {
+      const profile = profiles.find((p) => p.userId === peerId)
+      const user = users.find((u) => u.id === peerId)
+      return profile?.name || user?.name || 'Unknown'
+    }
 
     // Build match conversation list
     const matchConversations = matches.map((match) => {
       const peerId = match.user1Id === myId ? match.user2Id : match.user1Id
-      const profile = profiles.find((p) => p.userId === peerId)
       return {
         id: `${match.id}`,
         chatId: `match_${match.id}`,
@@ -83,8 +99,8 @@ export const getConversations = createServerFn({ method: 'GET' })
         matchId: match.id,
         eventId: match.eventId,
         peerId,
-        peerName: profile?.name ?? 'Unknown',
-        peerPhoto: profile?.photos[0],
+        peerName: getPeerName(peerId),
+        peerPhoto: getPeerPhoto(peerId),
         lastMessage: match.messages[0]?.content ?? 'New match!',
         lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
         unreadCount: 0,
@@ -93,7 +109,6 @@ export const getConversations = createServerFn({ method: 'GET' })
 
     // Build organizer conversation list
     const organizerConversations = [...organizerConvoMap.values()].map((convo) => {
-      const profile = profiles.find((p) => p.userId === convo.peerId)
       const event = events.find((e) => e.id === convo.eventId)
       return {
         id: `${convo.eventId}:${convo.peerId}`,
@@ -102,8 +117,8 @@ export const getConversations = createServerFn({ method: 'GET' })
         eventId: convo.eventId,
         eventName: event?.name ?? 'Event',
         peerId: convo.peerId,
-        peerName: profile?.name ?? 'Unknown',
-        peerPhoto: profile?.photos[0],
+        peerName: getPeerName(convo.peerId),
+        peerPhoto: getPeerPhoto(convo.peerId),
         lastMessage: convo.lastMessage.content,
         lastMessageAt: convo.lastMessage.createdAt,
         unreadCount: convo.unreadCount,

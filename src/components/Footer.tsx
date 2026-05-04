@@ -1,10 +1,15 @@
 import { useRouterState, Link } from '@tanstack/react-router'
 
+const HIDE_ON_PATHS = ['/discover']
+
 export default function Footer() {
   const router = useRouterState()
   const path = router.location.pathname
 
-  const mainPaths = ['/discover', '/events', '/likes', '/chats', '/profile']
+  const hideFooter = HIDE_ON_PATHS.some((p) => path === p || path.startsWith(p + '/'))
+  if (hideFooter) return null
+
+  const mainPaths = ['/events', '/likes', '/chats', '/profile']
   const isMainScreen = mainPaths.some((p) => path === p || path.startsWith(p + '/'))
 
   return (

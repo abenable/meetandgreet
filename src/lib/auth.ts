@@ -16,5 +16,33 @@ export const auth = betterAuth({
     minPasswordLength: 8,
     maxPasswordLength: 128,
   },
+  databaseHooks: {
+    session: {
+      create: {
+        async before(session) {
+          const user = await prisma.user.findUnique({
+            where: { id: (session as any).userId },
+            select: { disabledAt: true },
+          })
+          if (user?.disabledAt) {
+            return false
+          }
+        },
+      },
+    },
+    user: {
+      create: {
+        async before(userData) {
+          const existing = await prisma.user.findUnique({
+            where: { email: (userData as any).email },
+            select: { disabledAt: true },
+          })
+          if (existing?.disabledAt) {
+            return false
+          }
+        },
+      },
+    },
+  },
   plugins: [tanstackStartCookies()],
 })

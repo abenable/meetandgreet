@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { MapPin, Camera, Link2, Pencil } from 'lucide-react'
+import { MapPin, Camera, Link2, Pencil, Trash2, AlertTriangle } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
+import { disableMyAccount } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
@@ -23,6 +24,7 @@ function ProfilePage() {
   const [editValue, setEditValue] = useState('')
   const [editGender, setEditGender] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const updateMutation = useMutation({
     mutationFn: async (updates: any) => {
@@ -42,6 +44,15 @@ function ProfilePage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['session'] })
       window.location.href = '/login'
+    },
+  })
+
+  const disableMutation = useMutation({
+    mutationFn: async () => {
+      await disableMyAccount()
+    },
+    onSuccess: () => {
+      window.location.href = '/'
     },
   })
 
@@ -191,6 +202,48 @@ function ProfilePage() {
           Log Out
         </button>
       </div>
+
+      <div className="mb-6 mt-2 border-t border-[var(--mag-line)] pt-4">
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 py-2.5 text-sm font-semibold text-red-500 transition hover:bg-red-500/20"
+        >
+          <Trash2 className="h-4 w-4" />
+          Delete Account
+        </button>
+        <p className="mt-2 text-center text-[10px] text-[var(--mag-ink-muted)]">
+          Your account will be disabled and you will no longer appear anywhere in the app.
+        </p>
+      </div>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+            <div className="mb-3 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Delete Account</h3>
+            </div>
+            <p className="mb-4 text-sm text-[var(--mag-ink-soft)]">
+              Are you sure? This will disable your account, remove you from all events, and you will no longer be visible to anyone. Your email will be permanently blocked from re-registration.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => disableMutation.mutate()}
+                disabled={disableMutation.isPending}
+                className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-60"
+              >
+                {disableMutation.isPending ? 'Deleting…' : 'Delete Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {editingField && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">

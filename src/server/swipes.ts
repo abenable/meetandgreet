@@ -146,11 +146,43 @@ export const getLikes = createServerFn({ method: 'GET' })
     if (swipes.length === 0) return []
 
     const swiperIds = swipes.map((s) => s.swiperId)
-    const profiles = await prisma.profile.findMany({
-      where: { userId: { in: swiperIds } },
-    })
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({ where: { userId: { in: swiperIds } } }),
+      prisma.user.findMany({
+        where: { id: { in: swiperIds } },
+        select: { id: true, name: true, image: true, email: true, disabledAt: true },
+      }),
+    ])
 
-    return profiles
+    const userById = new Map(users.map((u) => [u.id, u]))
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
+
+    const activeSwiperIds = swiperIds.filter((id) => !userById.get(id)?.disabledAt)
+
+    return activeSwiperIds.map((userId) => {
+      const profile = profileByUserId.get(userId)
+      const user = userById.get(userId)
+      return {
+        ...(profile || {}),
+        id: profile?.id ?? userId,
+        userId,
+        name: profile?.name || user?.name || user?.email?.split('@')[0] || 'Unnamed',
+        photos:
+          profile?.photos && profile.photos.length > 0
+            ? profile.photos
+            : user?.image
+              ? [user.image]
+              : [],
+        bio: profile?.bio ?? '',
+        gender: profile?.gender ?? '',
+        birthDate: profile?.birthDate ?? '',
+        location: profile?.location ?? '',
+        interests: profile?.interests ?? [],
+        job: profile?.job ?? '',
+        createdAt: profile?.createdAt ?? new Date(),
+        updatedAt: profile?.updatedAt ?? new Date(),
+      }
+    })
   })
 
 export const getMatches = createServerFn({ method: 'GET' })
@@ -174,24 +206,47 @@ export const getMatches = createServerFn({ method: 'GET' })
       m.user1Id === session.user.id ? m.user2Id : m.user1Id
     )
 
-    const profiles = await prisma.profile.findMany({
-      where: { userId: { in: peerIds } },
-    })
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({ where: { userId: { in: peerIds } } }),
+      prisma.user.findMany({
+        where: { id: { in: peerIds } },
+        select: { id: true, name: true, image: true, disabledAt: true },
+      }),
+    ])
 
-    return matches.map((match) => {
-      const peerId = match.user1Id === session.user.id ? match.user2Id : match.user1Id
-      const profile = profiles.find((p) => p.userId === peerId)
-      return {
-        id: match.id,
-        eventId: match.eventId,
-        peerId,
-        peerName: profile?.name ?? 'Unknown',
-        peerPhoto: profile?.photos[0],
-        lastMessage: match.messages[0]?.content ?? '',
-        lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
-        unread: 0,
-      }
-    })
+    const userById = new Map(users.map((u) => [u.id, u]))
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
+
+    const activePeerIds = new Set(
+      peerIds.filter((id) => !userById.get(id)?.disabledAt)
+    )
+
+    return matches
+      .filter((match) => {
+        const peerId = match.user1Id === session.user.id ? match.user2Id : match.user1Id
+        return activePeerIds.has(peerId)
+      })
+      .map((match) => {
+        const peerId = match.user1Id === session.user.id ? match.user2Id : match.user1Id
+        const profile = profileByUserId.get(peerId)
+        const user = userById.get(peerId)
+        const photos =
+          profile?.photos && profile.photos.length > 0
+            ? profile.photos
+            : user?.image
+              ? [user.image]
+              : []
+        return {
+          id: match.id,
+          eventId: match.eventId,
+          peerId,
+          peerName: profile?.name || user?.name || 'Unknown',
+          peerPhoto: photos[0],
+          lastMessage: match.messages[0]?.content ?? '',
+          lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
+          unread: 0,
+        }
+      })
   })
 
 export const getMessages = createServerFn({ method: 'GET' })

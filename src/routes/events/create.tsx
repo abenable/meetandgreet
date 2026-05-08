@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Calendar, MapPin, Plus, Users, X, ImageIcon, Eye, EyeOff } from 'lucide-react'
 import { createEvent, getMyActiveEvent } from '#/server/events'
+import { localDatetimeToUTCISO } from '#/lib/datetime'
 
 export const Route = createFileRoute('/events/create')({ component: CreateEventPage })
 
@@ -75,7 +76,7 @@ function CreateEventPage() {
     if (!name.trim()) return
     setCreateError('')
     try {
-      const startsAtIso = startsAt ? new Date(startsAt + ':00').toISOString() : undefined
+      const startsAtIso = startsAt ? localDatetimeToUTCISO(startsAt) : undefined
       const result = await createEvent({ data: { 
         name: name.trim(), 
         description: description.trim(), 

@@ -39,6 +39,7 @@ function EventsExplorePage() {
   const [joinCodeModal, setJoinCodeModal] = useState<{ open: boolean; eventName: string } | null>(null)
   const [enteredCode, setEnteredCode] = useState('')
   const [joinError, setJoinError] = useState('')
+  const [joinSuccess, setJoinSuccess] = useState('')
 
   const handleCopyShareLink = (code: string) => {
     const link = `${window.location.origin}/events/join/${code}`
@@ -58,16 +59,24 @@ function EventsExplorePage() {
 
   const handleJoin = async (code: string, force = false) => {
     setJoinError('')
+    setJoinSuccess('')
     const result = await joinEvent({ data: { code, force } })
     if (result.success) {
-      setJoinCodeModal(null)
-      setConfirmModal(null)
-      queryClient.invalidateQueries({ queryKey: ['active-event'] })
-      queryClient.invalidateQueries({ queryKey: ['my-waitlisted-events'] })
-      queryClient.invalidateQueries({ queryKey: ['events'] })
+      if ((result as any).waitlisted) {
+        setJoinSuccess('You are on the waitlist! You will be added automatically when the event starts.')
+        queryClient.invalidateQueries({ queryKey: ['my-waitlisted-events'] })
+        queryClient.invalidateQueries({ queryKey: ['events'] })
+      } else {
+        setJoinCodeModal(null)
+        setConfirmModal(null)
+        queryClient.invalidateQueries({ queryKey: ['active-event'] })
+        queryClient.invalidateQueries({ queryKey: ['my-waitlisted-events'] })
+        queryClient.invalidateQueries({ queryKey: ['events'] })
+      }
     } else if ((result as any).needsConfirm) {
       setJoinCodeModal(null)
       setJoinError('')
+      setJoinSuccess('')
       setConfirmModal({
         open: true,
         eventName: (result as any).eventName,
@@ -84,9 +93,10 @@ function EventsExplorePage() {
     await handleJoin(confirmModal.code, true)
   }
 
-  const currentEvents = events.filter((e) => e.isActive && !e.endedAt)
+  const now = Date.now()
+  const currentEvents = events.filter((e) => e.isActive && !e.endedAt && (!e.startsAt || new Date(e.startsAt).getTime() <= now))
+  const upcomingEvents = events.filter((e) => e.isActive && !e.endedAt && e.startsAt && new Date(e.startsAt).getTime() > now)
   const pastEvents = events.filter((e) => e.endedAt)
-  const upcomingEvents = events.filter((e) => !e.isActive && !e.endedAt)
 
   const attendeeCount = (activeEvent as any)?._count?.attendees ?? 0
 
@@ -292,30 +302,44 @@ function EventsExplorePage() {
             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><Clock className="h-3 w-3" />Starting soon</span>
           </div>
           <div className="mb-6 space-y-3">
-            {upcomingEvents.map((event) => (
-              <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-80">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 flex-1 gap-3">
-                    {event.photo && (
-                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{0} interested</span>
+            {upcomingEvents.map((event) => {
+              const count = (event as any)._count?.attendees ?? 0
+              return (
+                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-90">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-1 gap-3">
+                      {event.photo && (
+                        <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                        <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
+                          {event.startsAt && (
+                            <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />Starts {new Date(event.startsAt).toLocaleString()}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
+                      <button
+                        onClick={() => { setEnteredCode(''); setJoinError(''); setJoinSuccess(''); setJoinCodeModal({ open: true, eventName: event.name }) }}
+                        className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1.5 text-[10px] font-bold text-white transition hover:bg-amber-500"
+                      >
+                        <ListOrdered className="h-3 w-3" /> Join Waitlist
+                      </button>
+                      {event.createdById === session?.user?.id && (
+                        <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
+                          Manage
+                        </Link>
+                      )}
+                    </div>
                   </div>
-                  {event.createdById === session?.user?.id && (
-                    <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
-                      Manage
-                    </Link>
-                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </>
       )}
@@ -374,33 +398,50 @@ function EventsExplorePage() {
             <input
               type="text"
               value={enteredCode}
-              onChange={(e) => { setJoinError(''); setEnteredCode(e.target.value.toUpperCase()) }}
+              onChange={(e) => { setJoinError(''); setJoinSuccess(''); setEnteredCode(e.target.value.toUpperCase()) }}
               placeholder="Enter code"
               maxLength={10}
               autoFocus
-              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-center text-sm font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              disabled={!!joinSuccess}
+              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-center text-sm font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20 disabled:opacity-50"
             />
             {joinError && (
               <p className="mt-2 text-xs font-semibold text-red-500">{joinError}</p>
             )}
+            {joinSuccess && (
+              <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-600 dark:border-amber-900 dark:bg-amber-900/10">
+                {joinSuccess}
+              </div>
+            )}
             <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => { setJoinError(''); setJoinCodeModal(null) }}
-                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  const code = enteredCode.trim()
-                  if (!code) return
-                  handleJoin(code)
-                }}
-                disabled={!enteredCode.trim()}
-                className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Join
-              </button>
+              {joinSuccess ? (
+                <button
+                  onClick={() => { setJoinSuccess(''); setJoinCodeModal(null) }}
+                  className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+                >
+                  Got it
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => { setJoinError(''); setJoinSuccess(''); setJoinCodeModal(null) }}
+                    className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      const code = enteredCode.trim()
+                      if (!code) return
+                      handleJoin(code)
+                    }}
+                    disabled={!enteredCode.trim()}
+                    className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Join
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

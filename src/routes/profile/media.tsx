@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
-import { ArrowLeft, Upload, X, GripVertical } from 'lucide-react'
+import { ArrowLeft, Upload, X, GripVertical, Sparkles } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
@@ -68,6 +68,16 @@ function MediaPage() {
         <h1 className="text-lg font-bold text-[var(--mag-ink)]">My Photos</h1>
         <span className="ml-auto text-xs text-[var(--mag-ink-muted)]">{photos.length}/6</span>
       </div>
+
+      {photos.length < 3 && (
+        <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[var(--mag-green)]/20 bg-[var(--mag-green)]/10 px-4 py-3">
+          <Sparkles className="h-5 w-5 flex-shrink-0 text-[var(--mag-green)]" />
+          <div>
+            <p className="text-sm font-semibold text-[var(--mag-green)]">More photos = more matches</p>
+            <p className="text-xs text-[var(--mag-green)]/80">Profiles with 3 or more photos get noticed 10x more.</p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         {photos.map((photo: string, i: number) => (

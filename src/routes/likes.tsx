@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Heart, MessageCircle, Users } from 'lucide-react'
 import { getLikes, getMatches } from '#/server/swipes'
+import { recordSwipe } from '#/server/swipes'
 import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/likes')({ component: LikesPage })
@@ -11,8 +12,39 @@ type Tab = 'likes' | 'matches'
 
 function LikesPage() {
   const [activeTab, setActiveTab] = useState<Tab>('likes')
+  const queryClient = useQueryClient()
   const { data: likes = [], isLoading: likesLoading } = useQuery({ queryKey: ['likes'], queryFn: () => getLikes() })
   const { data: matches = [], isLoading: matchesLoading } = useQuery({ queryKey: ['matches'], queryFn: () => getMatches() })
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
+  const [justMatchedIds, setJustMatchedIds] = useState<Set<string>>(new Set())
+
+  const likeBackMutation = useMutation({
+    mutationFn: async ({ eventId, swipedId }: { eventId: string; swipedId: string }) => {
+      return recordSwipe({ data: { eventId, swipedId, direction: 'like' } })
+    },
+    onSuccess: (result, vars) => {
+      // result is either a swipe or a match object. If it has eventId + user1Id, it's a match.
+      const isMatch = 'user1Id' in (result as any)
+      if (isMatch) {
+        setJustMatchedIds((prev) => new Set(prev).add(vars.swipedId))
+      }
+      queryClient.invalidateQueries({ queryKey: ['likes'] })
+      queryClient.invalidateQueries({ queryKey: ['matches'] })
+    },
+    onSettled: (_, __, vars) => {
+      setPendingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(vars.swipedId)
+        return next
+      })
+    },
+  })
+
+  const handleLikeBack = (like: any) => {
+    if (!like.eventId || pendingIds.has(like.userId) || justMatchedIds.has(like.userId)) return
+    setPendingIds((prev) => new Set(prev).add(like.userId))
+    likeBackMutation.mutate({ eventId: like.eventId, swipedId: like.userId })
+  }
 
   const isLoading = likesLoading || matchesLoading
 
@@ -61,21 +93,42 @@ function LikesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {likes.map((like: any) => (
-              <div key={like.id} className="relative overflow-hidden rounded-2xl">
-                <div className="aspect-[3/4] w-full">
-                  <AvatarImage src={(like.photos || [])[0]} alt={like.name} />
+            {likes.map((like: any) => {
+              const isPending = pendingIds.has(like.userId)
+              const isMatched = justMatchedIds.has(like.userId)
+              return (
+                <div key={like.userId} className="relative overflow-hidden rounded-2xl">
+                  <div className="aspect-[3/4] w-full">
+                    <AvatarImage src={(like.photos || [])[0]} alt={like.name} />
+                  </div>
+                  <div className="absolute inset-0 bg-black/20" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <div className="flex items-end justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="truncate text-sm font-bold text-white">{like.name}</h3>
+                        <p className="truncate text-[10px] text-white/80">{like.location}</p>
+                      </div>
+                      <button
+                        onClick={() => handleLikeBack(like)}
+                        disabled={isPending || isMatched || !like.eventId}
+                        className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full shadow-lg transition active:scale-95 disabled:opacity-50 ${
+                          isMatched
+                            ? 'bg-[var(--mag-green)] text-white'
+                            : 'bg-white/90 text-[var(--mag-green)] hover:scale-105 hover:bg-white'
+                        }`}
+                        title={isMatched ? 'Matched!' : 'Like back'}
+                      >
+                        {isPending ? (
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+                        ) : (
+                          <Heart className={`h-5 w-5 ${isMatched ? 'fill-white' : 'fill-[var(--mag-green)]'}`} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="absolute inset-0 bg-black/20" />
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <h3 className="text-sm font-bold text-white">{like.name}</h3>
-                  <p className="text-[10px] text-white/80">{like.location}</p>
-                </div>
-                <div className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-green)] text-white shadow-md">
-                  <Heart className="h-4 w-4 fill-white" />
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )
       ) : (

@@ -39,6 +39,7 @@ import {
 import { getSession } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
+import { localDatetimeToUTCISO, toDatetimeLocalValue } from '#/lib/datetime'
 
 export const Route = createFileRoute('/events/manage/$eventId')({ component: ManageEventPage })
 
@@ -97,18 +98,6 @@ function ManageEventPage() {
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState<'attendees' | 'waitlist' | 'reports' | 'blocked'>('attendees')
 
-  // Convert a Date (UTC from server) to YYYY-MM-DDTHH:mm string in the user's local timezone
-  // for <input type="datetime-local"> which has no timezone handling of its own.
-  function toDatetimeLocalValue(date: Date): string {
-    const pad = (n: number) => String(n).padStart(2, '0')
-    return (
-      date.getFullYear() +
-      '-' + pad(date.getMonth() + 1) +
-      '-' + pad(date.getDate()) +
-      'T' + pad(date.getHours()) +
-      ':' + pad(date.getMinutes())
-    )
-  }
   const [eventPhoto, setEventPhoto] = useState<string | null>(null)
   const [eventIsPublic, setEventIsPublic] = useState(true)
   const [photoError, setPhotoError] = useState('')
@@ -140,7 +129,7 @@ function ManageEventPage() {
       setDescription(event.description ?? '')
       setLocation(event.location ?? '')
       setMaxAttendees(event.maxAttendees != null ? String(event.maxAttendees) : '')
-      setStartsAt(event.startsAt ? toDatetimeLocalValue(new Date(event.startsAt)) : '')
+      setStartsAt(event.startsAt ? toDatetimeLocalValue(event.startsAt) : '')
       setEventPhoto(event.photo ?? null)
       setEventIsPublic((event as any).isPublic ?? true)
     }
@@ -212,7 +201,7 @@ function ManageEventPage() {
   })
 
   const handleSave = () => {
-    const startsAtIso = startsAt ? new Date(startsAt + ':00').toISOString() : undefined
+    const startsAtIso = startsAt ? localDatetimeToUTCISO(startsAt) : undefined
     updateMutation.mutate({
       data: {
         eventId,

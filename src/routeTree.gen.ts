@@ -45,6 +45,7 @@ import { Route as ForgotPasswordResetRouteImport } from './routes/forgot-passwor
 import { Route as EventsJoinRouteImport } from './routes/events/join'
 import { Route as EventsCreateRouteImport } from './routes/events/create'
 import { Route as ChatsChatIdRouteImport } from './routes/chats.$chatId'
+import { Route as EventsWaitlistEventIdRouteImport } from './routes/events/waitlist.$eventId'
 import { Route as EventsManageEventIdRouteImport } from './routes/events/manage.$eventId'
 import { Route as EventsJoinCodeRouteImport } from './routes/events/join.$code'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -229,6 +230,11 @@ const ChatsChatIdRoute = ChatsChatIdRouteImport.update({
   path: '/$chatId',
   getParentRoute: () => ChatsRoute,
 } as any)
+const EventsWaitlistEventIdRoute = EventsWaitlistEventIdRouteImport.update({
+  id: '/events/waitlist/$eventId',
+  path: '/events/waitlist/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsManageEventIdRoute = EventsManageEventIdRouteImport.update({
   id: '/events/manage/$eventId',
   path: '/events/manage/$eventId',
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
+  '/events/waitlist/$eventId': typeof EventsWaitlistEventIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -324,6 +331,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
+  '/events/waitlist/$eventId': typeof EventsWaitlistEventIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -366,6 +374,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/events/join/$code': typeof EventsJoinCodeRoute
   '/events/manage/$eventId': typeof EventsManageEventIdRoute
+  '/events/waitlist/$eventId': typeof EventsWaitlistEventIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -409,6 +418,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
+    | '/events/waitlist/$eventId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -448,6 +458,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
+    | '/events/waitlist/$eventId'
   id:
     | '__root__'
     | '/'
@@ -489,6 +500,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/events/join/$code'
     | '/events/manage/$eventId'
+    | '/events/waitlist/$eventId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -526,6 +538,7 @@ export interface RootRouteChildren {
   VerifyIndexRoute: typeof VerifyIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   EventsManageEventIdRoute: typeof EventsManageEventIdRoute
+  EventsWaitlistEventIdRoute: typeof EventsWaitlistEventIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -782,6 +795,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatsChatIdRouteImport
       parentRoute: typeof ChatsRoute
     }
+    '/events/waitlist/$eventId': {
+      id: '/events/waitlist/$eventId'
+      path: '/events/waitlist/$eventId'
+      fullPath: '/events/waitlist/$eventId'
+      preLoaderRoute: typeof EventsWaitlistEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/manage/$eventId': {
       id: '/events/manage/$eventId'
       path: '/events/manage/$eventId'
@@ -878,6 +898,7 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyIndexRoute: VerifyIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   EventsManageEventIdRoute: EventsManageEventIdRoute,
+  EventsWaitlistEventIdRoute: EventsWaitlistEventIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

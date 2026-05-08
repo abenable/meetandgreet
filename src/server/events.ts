@@ -40,15 +40,24 @@ export const getEventByCode = createServerFn({ method: 'GET' })
     const now = new Date()
     if (!event.isActive) return null
     if (event.endedAt && event.endedAt <= now) return null
-    if (event.startsAt && event.startsAt > now) return null
 
-    return event
+    await promoteWaitlist(event.id)
+
+    // Re-fetch to get updated count after promotion
+    return prisma.event.findUnique({
+      where: { id: event.id },
+      include: {
+        _count: { select: { attendees: { where: { leftAt: null } } } },
+      },
+    })
   })
 
 export const getEventById = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
   .handler(async ({ data: id }) => {
     const session = await requireSession()
+
+    await promoteWaitlist(id)
 
     const event = await prisma.event.findUnique({
       where: { id },
@@ -82,6 +91,52 @@ async function getCurrentActiveEvent(userId: string) {
     include: { event: { select: { id: true, name: true } } },
   })
   return attendee?.event ?? null
+}
+
+async function promoteWaitlist(eventId: string) {
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    include: {
+      _count: { select: { attendees: { where: { leftAt: null } } } },
+    },
+  })
+  if (!event) return
+  if (event.endedAt && event.endedAt <= new Date()) return
+
+  const hasStarted = !event.startsAt || event.startsAt <= new Date()
+  if (!hasStarted) return
+
+  const waitlist = await prisma.eventWaitlist.findMany({
+    where: { eventId },
+    orderBy: { joinedAt: 'asc' },
+  })
+  if (waitlist.length === 0) return
+
+  const slotsAvailable =
+    event.maxAttendees === null
+      ? Infinity
+      : event.maxAttendees - event._count.attendees
+  if (slotsAvailable <= 0) return
+
+  const toPromote = waitlist.slice(
+    0,
+    slotsAvailable === Infinity ? undefined : slotsAvailable
+  )
+  const userIds = toPromote.map((w) => w.userId)
+
+  await prisma.$transaction(async (tx) => {
+    await tx.eventAttendee.updateMany({
+      where: { eventId, userId: { in: userIds } },
+      data: { leftAt: null, removedById: null, removedAt: null },
+    })
+    await tx.eventAttendee.createMany({
+      data: userIds.map((userId) => ({ eventId, userId })),
+      skipDuplicates: true,
+    })
+    await tx.eventWaitlist.deleteMany({
+      where: { id: { in: toPromote.map((w) => w.id) } },
+    })
+  })
 }
 
 export const createEvent = createServerFn({ method: 'POST' })
@@ -152,16 +207,8 @@ export const joinEvent = createServerFn({ method: 'POST' })
       return { success: false, message: 'Event is not active' }
     }
 
-    if (event.startsAt && event.startsAt > now) {
-      return { success: false, message: 'Event has not started yet' }
-    }
-
     if (event.endedAt && event.endedAt <= now) {
       return { success: false, message: 'Event has ended' }
-    }
-
-    if (event.maxAttendees !== null && event._count.attendees >= event.maxAttendees) {
-      return { success: false, message: 'Event is full' }
     }
 
     const blocked = await prisma.eventBlockedUser.findUnique({
@@ -173,6 +220,9 @@ export const joinEvent = createServerFn({ method: 'POST' })
       return { success: false, message: 'You have been blocked from this event' }
     }
 
+    // Promote waitlist in case event has just started
+    await promoteWaitlist(event.id)
+
     const existing = await prisma.eventAttendee.findUnique({
       where: {
         eventId_userId: { eventId: event.id, userId: session.user.id },
@@ -181,6 +231,27 @@ export const joinEvent = createServerFn({ method: 'POST' })
 
     if (existing && existing.leftAt === null) {
       return { success: true, alreadyJoined: true }
+    }
+
+    // If event hasn't started yet, add to waitlist
+    if (event.startsAt && event.startsAt > now) {
+      await prisma.eventWaitlist.upsert({
+        where: { eventId_userId: { eventId: event.id, userId: session.user.id } },
+        update: {},
+        create: { eventId: event.id, userId: session.user.id },
+      })
+      return { success: true, waitlisted: true }
+    }
+
+    // Check capacity after promotion
+    const freshEvent = await prisma.event.findUnique({
+      where: { id: event.id },
+      include: {
+        _count: { select: { attendees: { where: { leftAt: null } } } },
+      },
+    })
+    if (freshEvent && freshEvent.maxAttendees !== null && freshEvent._count.attendees >= freshEvent.maxAttendees) {
+      return { success: false, message: 'Event is full' }
     }
 
     if (!data.force) {
@@ -215,6 +286,10 @@ export const leaveEvent = createServerFn({ method: 'POST' })
         eventId_userId: { eventId, userId: session.user.id },
       },
       data: { leftAt: new Date() },
+    })
+
+    await prisma.eventWaitlist.deleteMany({
+      where: { eventId, userId: session.user.id },
     })
   })
 
@@ -302,6 +377,13 @@ export const getMyActiveEvent = createServerFn({ method: 'GET' })
   .handler(async () => {
     const session = await requireSession()
 
+    // Promote any waitlisted events that have started
+    const waitlisted = await prisma.eventWaitlist.findMany({
+      where: { userId: session.user.id },
+      select: { eventId: true },
+    })
+    await Promise.all(waitlisted.map((w) => promoteWaitlist(w.eventId)))
+
     const attendee = await prisma.eventAttendee.findFirst({
       where: { userId: session.user.id, leftAt: null },
       include: {
@@ -312,6 +394,7 @@ export const getMyActiveEvent = createServerFn({ method: 'GET' })
         },
       },
     })
+
     return attendee?.event ?? null
   })
 
@@ -320,6 +403,8 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
   .handler(async ({ data: eventId }) => {
     const session = await requireSession()
     const myUserId = session.user.id
+
+    await promoteWaitlist(eventId)
 
     const attendees = await prisma.eventAttendee.findMany({
       where: { eventId, leftAt: null },
@@ -389,6 +474,8 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
   .handler(async ({ data: eventId }) => {
     await requireSession()
+
+    await promoteWaitlist(eventId)
 
     const rows = await prisma.eventAttendee.findMany({
       where: { eventId, leftAt: null },
@@ -530,6 +617,112 @@ export const getEventBlockedUsers = createServerFn({ method: 'GET' })
         const profile = profileByUserId.get(b.userId)
         return { ...b, profile }
       })
+  })
+
+export const getMyWaitlistedEvents = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    const session = await requireSession()
+
+    const rows = await prisma.eventWaitlist.findMany({
+      where: { userId: session.user.id },
+      include: {
+        event: {
+          include: {
+            _count: { select: { attendees: { where: { leftAt: null } } } },
+          },
+        },
+      },
+    })
+
+    // Promote waitlists in case any events have started
+    await Promise.all(rows.map((r) => promoteWaitlist(r.eventId)))
+
+    // Re-fetch after promotion so we only return events where user is still waitlisted
+    const refreshed = await prisma.eventWaitlist.findMany({
+      where: { userId: session.user.id },
+      include: {
+        event: {
+          include: {
+            _count: { select: { attendees: { where: { leftAt: null } } } },
+          },
+        },
+      },
+    })
+
+    return refreshed.map((r) => r.event)
+  })
+
+export const getEventWaitlist = createServerFn({ method: 'GET' })
+  .inputValidator(z.string())
+  .handler(async ({ data: eventId }) => {
+    const session = await requireSession()
+
+    const event = await prisma.event.findUnique({ where: { id: eventId } })
+    if (!event) throw new Error('Event not found')
+
+    const isCreator = event.createdById === session.user.id
+    const isWaitlisted = await prisma.eventWaitlist.findUnique({
+      where: { eventId_userId: { eventId, userId: session.user.id } },
+    })
+
+    if (!isCreator && !isWaitlisted) {
+      throw new Error('Unauthorized')
+    }
+
+    await promoteWaitlist(eventId)
+
+    const rows = await prisma.eventWaitlist.findMany({
+      where: { eventId },
+      orderBy: { joinedAt: 'asc' },
+      select: { userId: true, joinedAt: true },
+    })
+
+    if (rows.length === 0) return []
+
+    const userIds = rows.map((r) => r.userId)
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({ where: { userId: { in: userIds } } }),
+      prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, name: true, image: true, email: true, disabledAt: true },
+      }),
+    ])
+
+    const userById = new Map(users.map((u) => [u.id, u]))
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
+
+    const activeUserIds = userIds.filter((id) => !userById.get(id)?.disabledAt)
+
+    return activeUserIds.map((userId) => {
+      const profile = profileByUserId.get(userId)
+      const user = userById.get(userId)
+      const row = rows.find((r) => r.userId === userId)!
+      return {
+        userId,
+        joinedAt: row.joinedAt,
+        name: profile?.name || user?.name || user?.email?.split('@')[0] || 'Unnamed',
+        photo: profile?.photos?.[0] || user?.image || null,
+      }
+    })
+  })
+
+export const removeFromWaitlist = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ eventId: z.string(), userId: z.string().optional() }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+    const targetUserId = data.userId || session.user.id
+
+    if (targetUserId !== session.user.id) {
+      const event = await prisma.event.findUnique({ where: { id: data.eventId } })
+      if (!event) throw new Error('Event not found')
+      if (event.createdById !== session.user.id) throw new Error('Unauthorized')
+    }
+
+    await prisma.eventWaitlist.deleteMany({
+      where: { eventId: data.eventId, userId: targetUserId },
+    })
+
+    return { success: true }
   })
 
 export const reportUser = createServerFn({ method: 'POST' })

@@ -130,14 +130,16 @@ export const getLikes = createServerFn({ method: 'GET' })
   .handler(async () => {
     const session = await requireSession()
 
-    const activeAttendee = await prisma.eventAttendee.findFirst({
-      where: { userId: session.user.id, leftAt: null },
+    const attendedEvents = await prisma.eventAttendee.findMany({
+      where: { userId: session.user.id },
+      select: { eventId: true },
     })
-    if (!activeAttendee) return []
+    const eventIds = [...new Set(attendedEvents.map((a) => a.eventId))]
+    if (eventIds.length === 0) return []
 
     const swipes = await prisma.eventSwipe.findMany({
       where: {
-        eventId: activeAttendee.eventId,
+        eventId: { in: eventIds },
         swipedId: session.user.id,
         direction: { in: ['like', 'super'] },
       },

@@ -1,7 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
+import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { prisma } from '#/db'
 import { requireSession } from '#/server/auth'
+import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
 import type { Profile } from '@prisma/client'
 
 function generateCode(): string {
@@ -160,14 +162,16 @@ export const createEvent = createServerFn({ method: 'POST' })
       }
     }
 
-    return prisma.$transaction(async (tx) => {
+    const photoIsBase64 = data.photo && data.photo.startsWith('data:image')
+
+    const event = await prisma.$transaction(async (tx) => {
       await leaveAllActiveEvents(session.user.id, tx)
 
       const event = await tx.event.create({
         data: {
           code: generateCode(),
           name: data.name,
-          photo: data.photo,
+          photo: photoIsBase64 ? null : data.photo ?? null,
           description: data.description,
           location: data.location,
           maxAttendees: data.maxAttendees,
@@ -179,8 +183,37 @@ export const createEvent = createServerFn({ method: 'POST' })
       await tx.eventAttendee.create({
         data: { eventId: event.id, userId: session.user.id },
       })
-      return { success: true as const, event }
+      return event
     })
+
+    // Upload base64 photo to R2 after event is created so we know the eventId
+    if (photoIsBase64) {
+      try {
+        const key = `events/${event.id}/photo-${crypto.randomUUID()}.jpg`
+        const base64Data = data.photo!.split(',')[1]
+        if (base64Data) {
+          const buffer = Buffer.from(base64Data, 'base64')
+          await r2Client.send(
+            new PutObjectCommand({
+              Bucket: R2_BUCKET_NAME,
+              Key: key,
+              Body: buffer,
+              ContentType: 'image/jpeg',
+            })
+          )
+          const publicUrl = `${R2_PUBLIC_URL}/${key}`
+          await prisma.event.update({
+            where: { id: event.id },
+            data: { photo: publicUrl },
+          })
+          event.photo = publicUrl
+        }
+      } catch (err: any) {
+        console.error('[Create Event] R2 photo upload failed:', err)
+      }
+    }
+
+    return { success: true as const, event }
   })
 
 export const joinEvent = createServerFn({ method: 'POST' })

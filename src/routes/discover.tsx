@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useRef, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { X, Heart, MapPin, Users, ArrowRight, Flag } from 'lucide-react'
+import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle } from 'lucide-react'
 import { getMyActiveEvent, getEventProfiles, reportUser } from '#/server/events'
 import { recordSwipe } from '#/server/swipes'
+import { sendMessageRequest } from '#/server/requests'
 import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/discover')({ component: DiscoverPage })
@@ -36,6 +37,8 @@ function DiscoverPage() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [photoIndices, setPhotoIndices] = useState<Record<string, number>>({})
   const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set())
+  const [requestedIds, setRequestedIds] = useState<Set<string>>(new Set())
+  const [requestPendingIds, setRequestPendingIds] = useState<Set<string>>(new Set())
 
   // Report modal state
   const [reportModalOpen, setReportModalOpen] = useState(false)
@@ -48,6 +51,21 @@ function DiscoverPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['likes'] })
       queryClient.invalidateQueries({ queryKey: ['matches'] })
+    },
+  })
+
+  const requestMutation = useMutation({
+    mutationFn: sendMessageRequest,
+    onSuccess: (_, vars) => {
+      setRequestedIds((prev) => new Set(prev).add(vars.data.receiverId))
+      queryClient.invalidateQueries({ queryKey: ['outgoing-requests'] })
+    },
+    onSettled: (_, __, vars) => {
+      setRequestPendingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(vars.data.receiverId)
+        return next
+      })
     },
   })
 
@@ -83,6 +101,15 @@ function DiscoverPage() {
       ;(container.children[next] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [currentIndex, eventId, baseProfiles, swipeMutation, swipedIds])
+
+  const handleRequest = useCallback(() => {
+    const profile = baseProfiles[currentIndex]
+    if (!profile || !eventId) return
+    if (requestedIds.has(profile.userId) || requestPendingIds.has(profile.userId)) return
+
+    setRequestPendingIds((prev) => new Set(prev).add(profile.userId))
+    requestMutation.mutate({ data: { eventId, receiverId: profile.userId } })
+  }, [currentIndex, eventId, baseProfiles, requestMutation, requestedIds, requestPendingIds])
 
   const handleReport = () => {
     const profile = baseProfiles[currentIndex]
@@ -213,6 +240,26 @@ function DiscoverPage() {
                         : 'fill-transparent text-[var(--mag-green)]'
                     }`}
                   />
+                </button>
+                <button
+                  onClick={handleRequest}
+                  disabled={requestedIds.has(profile.userId) || requestPendingIds.has(profile.userId)}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${
+                    requestedIds.has(profile.userId) ? 'bg-blue-500' : 'bg-black/30'
+                  }`}
+                  title={requestedIds.has(profile.userId) ? 'Request sent' : 'Send message request'}
+                >
+                  {requestPendingIds.has(profile.userId) ? (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+                  ) : (
+                    <MessageCircle
+                      className={`h-6 w-6 ${
+                        requestedIds.has(profile.userId)
+                          ? 'fill-white text-white'
+                          : 'fill-transparent text-blue-400'
+                      }`}
+                    />
+                  )}
                 </button>
                 <button
                   onClick={() => handleAction('pass')}

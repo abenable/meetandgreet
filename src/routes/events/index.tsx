@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, Lock, LogIn } from 'lucide-react'
-import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents, joinEvent } from '#/server/events'
+import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, Lock, LogIn, ListOrdered, X } from 'lucide-react'
+import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents, joinEvent, getMyWaitlistedEvents, removeFromWaitlist } from '#/server/events'
 import { getSession } from '#/server/auth'
 
 export const Route = createFileRoute('/events/')({ component: EventsExplorePage })
@@ -30,6 +30,11 @@ function EventsExplorePage() {
     queryFn: () => getMyCreatedEvents(),
   })
 
+  const { data: waitlistedEvents = [] } = useQuery({
+    queryKey: ['my-waitlisted-events'],
+    queryFn: () => getMyWaitlistedEvents(),
+  })
+
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; eventName: string; code: string; currentEventName: string } | null>(null)
   const [joinCodeModal, setJoinCodeModal] = useState<{ open: boolean; eventName: string } | null>(null)
   const [enteredCode, setEnteredCode] = useState('')
@@ -46,6 +51,11 @@ function EventsExplorePage() {
     queryClient.invalidateQueries({ queryKey: ['active-event'] })
   }
 
+  const handleLeaveWaitlist = async (eventId: string) => {
+    await removeFromWaitlist({ data: { eventId } })
+    queryClient.invalidateQueries({ queryKey: ['my-waitlisted-events'] })
+  }
+
   const handleJoin = async (code: string, force = false) => {
     setJoinError('')
     const result = await joinEvent({ data: { code, force } })
@@ -53,6 +63,7 @@ function EventsExplorePage() {
       setJoinCodeModal(null)
       setConfirmModal(null)
       queryClient.invalidateQueries({ queryKey: ['active-event'] })
+      queryClient.invalidateQueries({ queryKey: ['my-waitlisted-events'] })
       queryClient.invalidateQueries({ queryKey: ['events'] })
     } else if ((result as any).needsConfirm) {
       setJoinCodeModal(null)
@@ -127,6 +138,56 @@ function EventsExplorePage() {
           <h2 className="text-sm font-semibold text-[var(--mag-ink)]">No Active Event</h2>
           <p className="mt-1 text-xs text-[var(--mag-ink-soft)]">Join an event below to start meeting people nearby.</p>
         </div>
+      )}
+
+      {waitlistedEvents.length > 0 && (
+        <>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--mag-ink)]">Waitlisted</h3>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><ListOrdered className="h-3 w-3" />Waiting to start</span>
+          </div>
+          <div className="mb-6 space-y-3">
+            {waitlistedEvents.map((event) => {
+              const count = (event as any)._count?.attendees ?? 0
+              return (
+                <div key={event.id} className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900 dark:bg-amber-900/10">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-1 gap-3">
+                      {event.photo && (
+                        <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                          <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-white">Waitlisted</span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
+                          {event.startsAt && (
+                            <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />Starts {new Date(event.startsAt).toLocaleString()}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
+                      <button
+                        onClick={() => handleLeaveWaitlist(event.id)}
+                        className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-white px-3 py-1.5 text-[10px] font-bold text-amber-600 transition hover:bg-amber-100 dark:bg-transparent dark:hover:bg-amber-900/20"
+                      >
+                        <X className="h-3 w-3" /> Leave
+                      </button>
+                      <Link to="/events/waitlist/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
+                        Waiting Room
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
       )}
 
       <div className="mb-2 flex items-center justify-between">

@@ -9,6 +9,8 @@ import {
   MapPin,
   LogIn,
   Loader2,
+  Clock,
+  ListOrdered,
 } from 'lucide-react'
 import { getEventByCode, joinEvent } from '#/server/events'
 import { getSession } from '#/server/auth'
@@ -23,6 +25,7 @@ function ShareJoinPage() {
   const [status, setStatus] = useState<'loading' | 'ready' | 'joining' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
   const [alreadyJoined, setAlreadyJoined] = useState(false)
+  const [waitlisted, setWaitlisted] = useState(false)
   const [confirmInfo, setConfirmInfo] = useState<{ currentEventName: string; eventName: string } | null>(null)
 
   const { data: session, isLoading: sessionLoading } = useQuery({
@@ -64,6 +67,7 @@ function ShareJoinPage() {
       const result = await joinEvent({ data: { code, force } })
       if (result.success) {
         setAlreadyJoined((result as any).alreadyJoined === true)
+        setWaitlisted((result as any).waitlisted === true)
         setStatus('success')
         setTimeout(() => navigate({ to: '/events' }), 1800)
       } else if ((result as any).needsConfirm) {
@@ -105,10 +109,12 @@ function ShareJoinPage() {
         <div className="rounded-2xl border border-[var(--mag-green)] bg-[var(--mag-green)]/5 p-6 text-center">
           <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-[var(--mag-green)]" />
           <h2 className="text-lg font-bold text-[var(--mag-ink)]">
-            {alreadyJoined ? 'You are already in!' : 'You are in!'}
+            {alreadyJoined ? 'You are already in!' : waitlisted ? 'You are on the waitlist!' : 'You are in!'}
           </h2>
           <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">
-            {event?.name} — redirecting…
+            {waitlisted
+              ? `${event?.name} — You will automatically join when the event starts.`
+              : `${event?.name} — redirecting…`}
           </p>
         </div>
       ) : status === 'error' ? (
@@ -135,6 +141,12 @@ function ShareJoinPage() {
                       <Users className="h-3 w-3" />
                       {(event as any)._count?.attendees ?? 0} attending
                     </span>
+                    {event.startsAt && new Date(event.startsAt) > new Date() && (
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Starts {new Date(event.startsAt).toLocaleString()}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -201,6 +213,12 @@ function ShareJoinPage() {
                       <Users className="h-3 w-3" />
                       {(event as any)._count?.attendees ?? 0} attending
                     </span>
+                    {event.startsAt && new Date(event.startsAt) > new Date() && (
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Starts {new Date(event.startsAt).toLocaleString()}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -236,8 +254,17 @@ function ShareJoinPage() {
               onClick={() => doJoin()}
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-3 text-sm font-bold !text-white transition hover:bg-[var(--mag-green-dark)]"
             >
-              <LogIn className="h-4 w-4" />
-              Join Event
+              {event && event.startsAt && new Date(event.startsAt) > new Date() ? (
+                <>
+                  <ListOrdered className="h-4 w-4" />
+                  Join Waitlist
+                </>
+              ) : (
+                <>
+                  <LogIn className="h-4 w-4" />
+                  Join Event
+                </>
+              )}
             </button>
           )}
         </div>

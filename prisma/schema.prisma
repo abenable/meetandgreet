@@ -97,6 +97,7 @@ model Event {
   organizerMessages EventOrganizerMessage[]
   swipes      EventSwipe[]
   matches     EventMatch[]
+  waitlist    EventWaitlist[]
 }
 
 model EventAttendee {
@@ -108,6 +109,16 @@ model EventAttendee {
   leftAt    DateTime?
   removedById String?
   removedAt   DateTime?
+
+  @@unique([eventId, userId])
+}
+
+model EventWaitlist {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  joinedAt  DateTime @default(now())
 
   @@unique([eventId, userId])
 }

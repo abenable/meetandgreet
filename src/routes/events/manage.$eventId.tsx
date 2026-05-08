@@ -21,6 +21,7 @@ import {
   ImageIcon,
   Eye,
   Lock,
+  ListOrdered,
 } from 'lucide-react'
 import {
   getEventById,
@@ -32,6 +33,8 @@ import {
   unblockEventAttendee,
   getEventBlockedUsers,
   getEventReports,
+  getEventWaitlist,
+  removeFromWaitlist,
 } from '#/server/events'
 import { getSession } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
@@ -76,6 +79,12 @@ function ManageEventPage() {
     enabled: !!eventId,
   })
 
+  const { data: waitlist = [], isLoading: waitlistLoading } = useQuery({
+    queryKey: ['event-waitlist', eventId],
+    queryFn: () => getEventWaitlist({ data: eventId }),
+    enabled: !!eventId,
+  })
+
   const attendeeCount = (event as any)?._count?.attendees ?? 0
 
   // Editable form state
@@ -86,7 +95,7 @@ function ManageEventPage() {
   const [startsAt, setStartsAt] = useState<string>('')
   const [savedMsg, setSavedMsg] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [activeTab, setActiveTab] = useState<Tab>('attendees')
+  const [activeTab, setActiveTab] = useState<'attendees' | 'waitlist' | 'reports' | 'blocked'>('attendees')
   const [eventPhoto, setEventPhoto] = useState<string | null>(null)
   const [eventIsPublic, setEventIsPublic] = useState(true)
   const [photoError, setPhotoError] = useState('')
@@ -181,6 +190,14 @@ function ManageEventPage() {
     },
   })
 
+  const removeWaitlistMutation = useMutation({
+    mutationFn: removeFromWaitlist,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event-waitlist', eventId] })
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
+    },
+  })
+
   const handleSave = () => {
     const startsAtIso = startsAt ? new Date(startsAt + ':00').toISOString() : undefined
     updateMutation.mutate({
@@ -239,6 +256,11 @@ function ManageEventPage() {
   const handleUnblock = (userId: string) => {
     if (!confirm('Unblock this user? They will be able to join again.')) return
     unblockMutation.mutate({ data: { eventId, userId } })
+  }
+
+  const handleRemoveWaitlist = (userId: string, name: string) => {
+    if (!confirm(`Remove ${name || 'this user'} from the waitlist?`)) return
+    removeWaitlistMutation.mutate({ data: { eventId, userId } })
   }
 
   if (eventLoading || !event) {
@@ -490,6 +512,7 @@ function ManageEventPage() {
       <div className="mb-4 flex items-center gap-1 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-1">
         {([
           { key: 'attendees', label: 'Attendees', count: attendeeCount, icon: Users },
+          { key: 'waitlist', label: 'Waitlist', count: waitlist.length, icon: ListOrdered },
           { key: 'reports', label: 'Reports', count: reports.length, icon: Flag },
           { key: 'blocked', label: 'Blocked', count: blockedUsers.length, icon: Ban },
         ] as const).map((t) => (
@@ -575,6 +598,57 @@ function ManageEventPage() {
                     </div>
                   )
                 })}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'waitlist' && (
+          <>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-[var(--mag-ink)]">Waitlist</h2>
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500">
+                <ListOrdered className="h-3 w-3" />
+                {waitlist.length} waiting
+              </span>
+            </div>
+
+            {waitlistLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+              </div>
+            ) : waitlist.length === 0 ? (
+              <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No one on the waitlist yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {waitlist.map((person: any, index: number) => (
+                  <div
+                    key={person.userId}
+                    className="flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3"
+                  >
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--mag-line)] text-[10px] font-bold text-[var(--mag-ink-muted)]">
+                      {index + 1}
+                    </div>
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
+                      <AvatarImage src={person.photo} alt={person.name ?? ''} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-[var(--mag-ink)]">
+                        {person.name ?? 'Unnamed'}
+                      </p>
+                      <p className="truncate text-[10px] text-[var(--mag-ink-muted)]">
+                        Joined waitlist {new Date(person.joinedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveWaitlist(person.userId, person.name)}
+                      disabled={removeWaitlistMutation.isPending}
+                      className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:border-red-300 hover:text-red-500 disabled:opacity-50"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </>

@@ -15,6 +15,28 @@ function generateCode(): string {
   return code
 }
 
+function seededShuffle<T>(arr: T[], seed: string): T[] {
+  const result = [...arr]
+  // Simple hash of the seed string
+  let s = 0
+  for (let i = 0; i < seed.length; i++) {
+    s = ((s << 5) - s + seed.charCodeAt(i)) | 0
+  }
+  // Xorshift PRNG
+  const rand = () => {
+    s ^= s << 13
+    s ^= s >>> 17
+    s ^= s << 5
+    s = s | 0
+    return ((s >>> 0) % 100000) / 100000
+  }
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}
+
 export const listEvents = createServerFn({ method: 'GET' })
   .handler(async () => {
     return prisma.event.findMany({
@@ -471,7 +493,9 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
     // Filter out disabled accounts
     const activeUserIds = visibleUserIds.filter((id) => !userById.get(id)?.disabledAt)
 
-    return activeUserIds.map((userId): Profile => {
+    const shuffledUserIds = seededShuffle(activeUserIds, myUserId)
+
+    return shuffledUserIds.map((userId): Profile => {
       const profile = profileByUserId.get(userId)
       const user = userById.get(userId)
       if (profile) {

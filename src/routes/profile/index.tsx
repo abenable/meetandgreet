@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { MapPin, Camera, Link2, Pencil, Trash2, AlertTriangle } from 'lucide-react'
+import { MapPin, Camera, Link2, Pencil, Trash2, AlertTriangle, Sparkles } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import { disableMyAccount } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
@@ -177,6 +177,14 @@ function ProfilePage() {
             <span className="text-sm text-[var(--mag-ink-muted)]">Tap to add photos</span>
           )}
         </div>
+        {(profile.photos || []).length < 3 && (
+          <div className="mt-3 flex items-center gap-2 rounded-xl bg-[var(--mag-green)]/10 px-3 py-2">
+            <Sparkles className="h-4 w-4 flex-shrink-0 text-[var(--mag-green)]" />
+            <p className="text-xs font-medium text-[var(--mag-green)]">
+              Profiles with 3+ photos get 10x more matches. Tap to add more.
+            </p>
+          </div>
+        )}
       </div>
 
       <div onClick={() => openEdit('location', profile.location || '')} className="mb-4 cursor-pointer rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow transition hover:border-[var(--mag-green)]/30">

@@ -161,13 +161,17 @@ export const getLikes = createServerFn({ method: 'GET' })
 
     const activeSwiperIds = swiperIds.filter((id) => !userById.get(id)?.disabledAt)
 
+    const swipeBySwiperId = new Map(swipes.map((s) => [s.swiperId, s]))
+
     return activeSwiperIds.map((userId) => {
       const profile = profileByUserId.get(userId)
       const user = userById.get(userId)
+      const swipe = swipeBySwiperId.get(userId)
       return {
         ...(profile || {}),
         id: profile?.id ?? userId,
         userId,
+        eventId: swipe?.eventId ?? '',
         name: profile?.name || user?.name || user?.email?.split('@')[0] || 'Unnamed',
         photos:
           profile?.photos && profile.photos.length > 0

@@ -190,7 +190,7 @@ model Report {
 model Notification {
   id        String   @id @default(uuid())
   userId    String
-  type      String   // like | match | message | organizer_message
+  type      String   // like | match | message | organizer_message | request | request_accepted
   title     String
   body      String
   link      String?
@@ -202,4 +202,16 @@ model Todo {
   id        String   @id @default(uuid())
   title     String
   createdAt DateTime @default(now())
+}
+
+model EventMessageRequest {
+  id         String   @id @default(uuid())
+  eventId    String
+  senderId   String
+  receiverId String
+  status     String   // pending | accepted | declined
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([eventId, senderId, receiverId])
 }

@@ -20,8 +20,9 @@ Prerequisites: [Bun](https://bun.sh/) installed.
 bun install
 
 # Set up environment
-cp .env.example .env.local
-# Edit .env.local with your DATABASE_URL and BETTER_AUTH_SECRET
+cp .env.example .env.development
+# Edit .env.development with your local DATABASE_URL and BETTER_AUTH_SECRET
+# NEVER use production database in .env.development!
 
 # Run migrations
 bun run db:migrate

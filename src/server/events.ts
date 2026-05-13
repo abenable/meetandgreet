@@ -38,14 +38,37 @@ function seededShuffle<T>(arr: T[], seed: string): T[] {
 }
 
 export const listEvents = createServerFn({ method: 'GET' })
-  .handler(async () => {
+  .inputValidator(z.object({
+    cursor: z.string().optional(),
+    limit: z.number().min(1).max(50).default(20),
+  }).optional())
+  .handler(async ({ data }) => {
+    const limit = data?.limit || 20
+    const cursor = data?.cursor
+
     return prisma.event.findMany({
       where: { isPublic: true },
-      omit: { code: true },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        photo: true,
+        description: true,
+        location: true,
+        createdAt: true,
+        startsAt: true,
+        maxAttendees: true,
         _count: { select: { attendees: { where: { leftAt: null } } } },
       },
       orderBy: { createdAt: 'desc' },
+      take: limit + 1,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+    }).then(events => {
+      const hasMore = events.length > limit
+      const items = hasMore ? events.slice(0, limit) : events
+      return {
+        items,
+        nextCursor: hasMore ? items[items.length - 1].id : null,
+      }
     })
   })
 
@@ -480,7 +503,23 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
     if (visibleUserIds.length === 0) return []
 
     const [profiles, users] = await Promise.all([
-      prisma.profile.findMany({ where: { userId: { in: visibleUserIds } } }),
+      prisma.profile.findMany({
+        where: { userId: { in: visibleUserIds } },
+        select: {
+          id: true,
+          userId: true,
+          name: true,
+          bio: true,
+          photos: true,
+          gender: true,
+          birthDate: true,
+          location: true,
+          interests: true,
+          job: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
       prisma.user.findMany({
         where: { id: { in: visibleUserIds } },
         select: { id: true, name: true, image: true, email: true, disabledAt: true },

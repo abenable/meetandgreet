@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '#/db'
 import { requireSession } from '#/server/auth'
 import { createNotification } from './notifications.server'
+import { broadcastChatMessage } from './websocket-broadcast'
 
 export const getConversations = createServerFn({ method: 'GET' })
   .handler(async () => {
@@ -232,6 +233,9 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
         data: { matchId, senderId: myId, content },
       })
 
+      // Broadcast WebSocket message for instant delivery
+      broadcastChatMessage(chatId, { ...message, isMine: false }, peerId)
+
       await createNotification({
         userId: peerId,
         type: 'message',
@@ -261,6 +265,9 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
       const message = await prisma.eventOrganizerMessage.create({
         data: { eventId, senderId: myId, receiverId: peerId, content },
       })
+
+      // Broadcast WebSocket message for instant delivery
+      broadcastChatMessage(chatId, { ...message, isMine: false }, peerId)
 
       await createNotification({
         userId: peerId,

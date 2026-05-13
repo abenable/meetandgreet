@@ -4,6 +4,7 @@ import Footer from '../components/Footer'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import PWAInstallPrompt from '../components/PWAInstallPrompt'
+import { WebSocketProvider } from '../integrations/websocket/WebSocketProvider'
 
 import appCss from '../styles.css?url'
 
@@ -116,7 +117,7 @@ function RootLayout() {
   }, [])
 
   return (
-    <>
+    <WebSocketProvider>
       <Header />
       <main className="flex flex-1 flex-col bg-[var(--mag-bg)]">
         <Outlet />
@@ -124,7 +125,7 @@ function RootLayout() {
       <Footer />
       <BottomNav />
       <PWAInstallPrompt />
-    </>
+    </WebSocketProvider>
   )
 }
 

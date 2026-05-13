@@ -6,6 +6,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { devWebSocketPlugin } from './dev-ws-plugin'
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
@@ -14,6 +15,7 @@ const config = defineConfig({
     tailwindcss(),
     tanstackStart(),
     viteReact(),
+    devWebSocketPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,

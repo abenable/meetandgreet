@@ -5,6 +5,9 @@ dist-ssr
 dev-dist
 *.local
 .env
+.env.local
+.env.development
+.env.production
 .nitro
 .tanstack
 .wrangler

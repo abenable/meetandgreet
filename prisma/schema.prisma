@@ -98,6 +98,9 @@ model Event {
   swipes      EventSwipe[]
   matches     EventMatch[]
   waitlist    EventWaitlist[]
+
+  @@index([isPublic, isActive])
+  @@index([createdById])
 }
 
 model EventAttendee {
@@ -111,6 +114,8 @@ model EventAttendee {
   removedAt   DateTime?
 
   @@unique([eventId, userId])
+  @@index([userId])
+  @@index([eventId, leftAt])
 }
 
 model EventWaitlist {
@@ -156,6 +161,8 @@ model EventSwipe {
   createdAt DateTime @default(now())
 
   @@unique([eventId, swiperId, swipedId])
+  @@index([eventId, swipedId, direction])
+  @@index([swiperId])
 }
 
 model EventMatch {
@@ -166,6 +173,9 @@ model EventMatch {
   user2Id   String
   createdAt DateTime        @default(now())
   messages  EventMessage[]
+
+  @@index([eventId, user1Id])
+  @@index([eventId, user2Id])
 }
 
 model EventMessage {
@@ -176,6 +186,9 @@ model EventMessage {
   content   String
   createdAt DateTime   @default(now())
   readAt    DateTime?
+
+  @@index([matchId, createdAt])
+  @@index([senderId])
 }
 
 model Report {
@@ -196,6 +209,9 @@ model Notification {
   link      String?
   readAt    DateTime?
   createdAt DateTime @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
 }
 
 model Todo {

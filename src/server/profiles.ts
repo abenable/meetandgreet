@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { prisma } from '#/db'
 import { requireSession } from '#/server/auth'
+import { sanitizeProfile } from '#/lib/sanitize'
 
 export const getMyProfile = createServerFn({ method: 'GET' })
   .handler(async () => {
@@ -48,27 +49,28 @@ export const updateProfile = createServerFn({ method: 'POST' })
   }))
   .handler(async ({ data }) => {
     const session = await requireSession()
+    const sanitized = sanitizeProfile(data)
 
     return prisma.profile.upsert({
       where: { userId: session.user.id },
       update: {
-        ...(data.bio !== undefined && { bio: data.bio }),
+        ...(sanitized.bio !== undefined && { bio: sanitized.bio }),
         ...(data.photos !== undefined && { photos: data.photos }),
-        ...(data.name !== undefined && { name: data.name }),
+        ...(sanitized.name !== undefined && { name: sanitized.name }),
         ...(data.gender !== undefined && { gender: data.gender }),
         ...(data.birthDate !== undefined && { birthDate: data.birthDate }),
-        ...(data.location !== undefined && { location: data.location }),
-        ...(data.interests !== undefined && { interests: data.interests }),
-        ...(data.job !== undefined && { job: data.job }),
+        ...(sanitized.location !== undefined && { location: sanitized.location }),
+        ...(sanitized.interests !== undefined && { interests: sanitized.interests }),
+        ...(sanitized.job !== undefined && { job: sanitized.job }),
       },
       create: {
         userId: session.user.id,
-        name: data.name || session.user.name || session.user.email.split('@')[0],
-        bio: data.bio ?? '',
+        name: sanitized.name || session.user.name || session.user.email.split('@')[0],
+        bio: sanitized.bio ?? '',
         photos: data.photos ?? [],
         gender: data.gender ?? '',
-        location: data.location ?? '',
-        interests: data.interests ?? [],
+        location: sanitized.location ?? '',
+        interests: sanitized.interests ?? [],
       },
     })
   })

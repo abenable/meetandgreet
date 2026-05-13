@@ -3,6 +3,12 @@ import { z } from 'zod'
 import { prisma } from '#/db'
 import { requireSession } from '#/server/auth'
 import { createNotification } from './notifications.server'
+import { rateLimit } from '#/lib/rate-limit'
+import { getClientIdentifier } from '#/lib/rate-limit.server'
+import { sanitizeText } from '#/lib/sanitize'
+import { broadcastMatchCreated } from './websocket-broadcast'
+
+const swipeRateLimit = rateLimit({ windowMs: 60 * 1000, maxRequests: 30 })
 
 export const recordSwipe = createServerFn({ method: 'POST' })
   .inputValidator(z.object({
@@ -13,6 +19,13 @@ export const recordSwipe = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const session = await requireSession()
     const swiperId = session.user.id
+
+    const identifier = `${getClientIdentifier()}:${swiperId}`
+    const rateLimitResult = await swipeRateLimit(identifier)
+    
+    if (!rateLimitResult.success) {
+      throw new Error('Too many swipes. Please slow down.')
+    }
 
     if (swiperId === data.swipedId) {
       throw new Error('Cannot swipe yourself')
@@ -91,6 +104,10 @@ export const recordSwipe = createServerFn({ method: 'POST' })
               user2Id: u2,
             },
           })
+          
+          // Broadcast WebSocket notification for instant match alert
+          broadcastMatchCreated(data.eventId, swiperId, data.swipedId, match.id)
+          
           // Notify both users about the match
           await Promise.all([
             createNotification({
@@ -281,6 +298,7 @@ export const sendMessage = createServerFn({ method: 'POST' })
   }))
   .handler(async ({ data }) => {
     const session = await requireSession()
+    const sanitizedContent = sanitizeText(data.content)
 
     const match = await prisma.eventMatch.findFirst({
       where: {
@@ -303,7 +321,7 @@ export const sendMessage = createServerFn({ method: 'POST' })
       data: {
         matchId: data.matchId,
         senderId: session.user.id,
-        content: data.content,
+        content: sanitizedContent,
       },
     })
   })

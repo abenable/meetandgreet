@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Camera } from 'lucide-react'
+import { ArrowLeft, Camera, Heart, Users, Briefcase } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 
 export const Route = createFileRoute('/profile/edit')({ component: EditProfilePage })
@@ -16,6 +16,14 @@ function EditProfilePage() {
   const [location, setLocation] = useState(profile?.location || '')
   const [gender, setGender] = useState(profile?.gender || '')
   const [interests, setInterests] = useState((profile?.interests || []).join(', '))
+  type IntentOption = 'dating' | 'friends' | 'networking'
+  const [lookingFor, setLookingFor] = useState<IntentOption[]>((profile?.lookingFor as IntentOption[]) || [])
+
+  const toggleLookingFor = (value: IntentOption) => {
+    setLookingFor((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
 
   const handleSave = async () => {
     await updateProfile({
@@ -25,6 +33,7 @@ function EditProfilePage() {
         location,
         gender,
         interests: interests.split(',').map((i) => i.trim()).filter(Boolean),
+        lookingFor,
       },
     })
     qc.invalidateQueries({ queryKey: ['my-profile'] })
@@ -69,6 +78,29 @@ function EditProfilePage() {
           <div className="flex flex-wrap gap-2">
             {['Male', 'Female'].map((g) => (
               <button key={g} onClick={() => setGender(g)} className={`rounded-full px-4 py-2 text-xs font-medium ${g === gender ? 'bg-[var(--mag-green)] text-white' : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)]'}`}>{g}</button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">I'm Looking For</label>
+          <div className="flex flex-wrap gap-2">
+            {([
+              { value: 'dating' as const, label: 'Dating', icon: Heart },
+              { value: 'friends' as const, label: 'Friends', icon: Users },
+              { value: 'networking' as const, label: 'Networking', icon: Briefcase },
+            ] as const).map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                onClick={() => toggleLookingFor(value)}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium transition ${
+                  lookingFor.includes(value)
+                    ? 'bg-[var(--mag-green)] text-white'
+                    : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)]'
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </button>
             ))}
           </div>
         </div>

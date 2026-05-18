@@ -217,14 +217,17 @@ export const getAllReports = createServerFn({ method: 'GET' })
   .inputValidator(z.object({
     cursor: z.string().optional(),
     limit: z.number().min(1).max(100).default(50),
+    status: z.string().optional(),
   }).optional())
   .handler(async ({ data }) => {
     await requireAdmin()
 
     const limit = data?.limit || 50
     const cursor = data?.cursor
+    const where = data?.status ? { status: data.status } : undefined
 
     const reports = await prisma.report.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
       take: limit + 1,
       ...(cursor && { cursor: { id: cursor }, skip: 1 }),
@@ -272,6 +275,115 @@ export const deleteReport = createServerFn({ method: 'POST' })
 
     await prisma.report.delete({
       where: { id: reportId },
+    })
+
+    return { success: true }
+  })
+
+export const getFlaggedUsers = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    await requireAdmin()
+
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+
+    const flagged = await prisma.report.groupBy({
+      by: ['reportedId'],
+      where: {
+        status: 'pending',
+        createdAt: { gte: twentyFourHoursAgo },
+      },
+      _count: {
+        id: true,
+      },
+      having: {
+        id: {
+          _count: {
+            gte: 2,
+          },
+        },
+      },
+    })
+
+    const userIds = flagged.map((f) => f.reportedId)
+    if (userIds.length === 0) return []
+
+    const [users, latestReports] = await Promise.all([
+      prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          disabledAt: true,
+        },
+      }),
+      prisma.report.findMany({
+        where: {
+          reportedId: { in: userIds },
+          status: 'pending',
+          createdAt: { gte: twentyFourHoursAgo },
+        },
+        orderBy: { createdAt: 'desc' },
+        distinct: ['reportedId'],
+        select: {
+          reportedId: true,
+          reason: true,
+          createdAt: true,
+        },
+      }),
+    ])
+
+    const reportCountByUser = new Map(flagged.map((f) => [f.reportedId, f._count.id]))
+    const latestReportByUser = new Map(latestReports.map((r) => [r.reportedId, r]))
+
+    return users.map((user) => ({
+      ...user,
+      reportCount: reportCountByUser.get(user.id) ?? 0,
+      latestReason: latestReportByUser.get(user.id)?.reason ?? '',
+    }))
+  })
+
+export const dismissReport = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({
+    reportId: z.string(),
+  }))
+  .handler(async ({ data }) => {
+    await requireAdmin()
+
+    await prisma.report.update({
+      where: { id: data.reportId },
+      data: { status: 'dismissed' },
+    })
+
+    return { success: true }
+  })
+
+export const reviewReport = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({
+    reportId: z.string(),
+  }))
+  .handler(async ({ data }) => {
+    await requireAdmin()
+
+    await prisma.report.update({
+      where: { id: data.reportId },
+      data: { status: 'reviewed' },
+    })
+
+    return { success: true }
+  })
+
+export const dismissAllReportsForUser = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({
+    userId: z.string(),
+  }))
+  .handler(async ({ data }) => {
+    await requireAdmin()
+
+    await prisma.report.updateMany({
+      where: { reportedId: data.userId, status: 'pending' },
+      data: { status: 'dismissed' },
     })
 
     return { success: true }

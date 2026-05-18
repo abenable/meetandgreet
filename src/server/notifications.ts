@@ -41,3 +41,53 @@ export const markAllNotificationsRead = createServerFn({ method: 'POST' })
     })
     return { success: true }
   })
+
+export const getVapidPublicKey = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    return process.env.VAPID_PUBLIC_KEY || null
+  })
+
+export const subscribePush = createServerFn({ method: 'POST' })
+  .inputValidator(
+    z.object({
+      endpoint: z.string(),
+      p256dh: z.string(),
+      auth: z.string(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+    await prisma.pushSubscription.upsert({
+      where: {
+        userId_endpoint: {
+          userId: session.user.id,
+          endpoint: data.endpoint,
+        },
+      },
+      update: {
+        p256dh: data.p256dh,
+        auth: data.auth,
+      },
+      create: {
+        userId: session.user.id,
+        endpoint: data.endpoint,
+        p256dh: data.p256dh,
+        auth: data.auth,
+      },
+    })
+    return { success: true }
+  })
+
+export const unsubscribePush = createServerFn({ method: 'POST' })
+  .inputValidator(
+    z.object({
+      endpoint: z.string(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+    await prisma.pushSubscription.deleteMany({
+      where: { userId: session.user.id, endpoint: data.endpoint },
+    })
+    return { success: true }
+  })

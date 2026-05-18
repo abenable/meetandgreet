@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -15,22 +15,26 @@ import {
   ChevronRight,
   Activity,
   AlertTriangle,
-  Eye,
   Lock,
   Unlock,
   Crown,
   User as UserIcon,
+  XCircle,
 } from 'lucide-react'
 import {
   getAdminStats,
   getAllUsers,
   getAllEvents,
   getAllReports,
+  getFlaggedUsers,
   updateUserRole,
   toggleUserDisabled,
   adminDeleteEvent,
   adminToggleEventActive,
   deleteReport,
+  dismissReport,
+  reviewReport,
+  dismissAllReportsForUser,
 } from '#/server/admin'
 import { getSession } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
@@ -53,11 +57,10 @@ export const Route = createFileRoute('/admin/')({
   component: AdminPage,
 })
 
-type Tab = 'overview' | 'users' | 'events' | 'reports'
+type Tab = 'overview' | 'users' | 'events' | 'reports' | 'moderation'
 
 function AdminPage() {
   const [tab, setTab] = useState<Tab>('overview')
-  const queryClient = useQueryClient()
 
   return (
     <div className="page-wrap flex flex-1 flex-col px-4 py-4">
@@ -72,12 +75,14 @@ function AdminPage() {
         <TabButton active={tab === 'users'} onClick={() => setTab('users')} icon={<Users className="h-4 w-4" />} label="Users" />
         <TabButton active={tab === 'events'} onClick={() => setTab('events')} icon={<Calendar className="h-4 w-4" />} label="Events" />
         <TabButton active={tab === 'reports'} onClick={() => setTab('reports')} icon={<Flag className="h-4 w-4" />} label="Reports" />
+        <TabButton active={tab === 'moderation'} onClick={() => setTab('moderation')} icon={<Shield className="h-4 w-4" />} label="Moderation" />
       </div>
 
       {tab === 'overview' && <OverviewTab />}
       {tab === 'users' && <UsersTab />}
       {tab === 'events' && <EventsTab />}
       {tab === 'reports' && <ReportsTab />}
+      {tab === 'moderation' && <ModerationTab />}
     </div>
   )
 }
@@ -494,6 +499,177 @@ function ReportsTab() {
           )}
         </>
       )}
+    </div>
+  )
+}
+
+/* ---------- MODERATION ---------- */
+function ModerationTab() {
+  const queryClient = useQueryClient()
+
+  const { data: flaggedUsers, isLoading: flaggedLoading } = useQuery({
+    queryKey: ['admin-flagged-users'],
+    queryFn: () => getFlaggedUsers(),
+  })
+
+  const { data: pendingReports, isLoading: reportsLoading } = useQuery({
+    queryKey: ['admin-pending-reports'],
+    queryFn: () => getAllReports({ data: { status: 'pending', limit: 100 } }),
+  })
+
+  const dismissMutation = useMutation({
+    mutationFn: dismissReport,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-flagged-users'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-pending-reports'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-reports'] })
+    },
+  })
+
+  const reviewMutation = useMutation({
+    mutationFn: reviewReport,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-flagged-users'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-pending-reports'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-reports'] })
+    },
+  })
+
+  const dismissAllMutation = useMutation({
+    mutationFn: dismissAllReportsForUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-flagged-users'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-pending-reports'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-reports'] })
+    },
+  })
+
+  const disableMutation = useMutation({
+    mutationFn: toggleUserDisabled,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-flagged-users'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
+  })
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Flagged Users */}
+      <div>
+        <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--mag-ink-muted)]">
+          Flagged Users ({flaggedUsers?.length ?? 0})
+        </h2>
+        {flaggedLoading ? (
+          <div className="text-sm text-[var(--mag-ink-muted)]">Loading flagged users...</div>
+        ) : !flaggedUsers || flaggedUsers.length === 0 ? (
+          <div className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No flagged users</div>
+        ) : (
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+            {flaggedUsers.map((user: any) => (
+              <div key={user.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
+                <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-[var(--mag-surface)]">
+                  <AvatarImage src={user.image} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{user.name || user.email}</span>
+                    <span className="shrink-0 rounded bg-red-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                      {user.reportCount} reports
+                    </span>
+                    {user.disabledAt && (
+                      <span className="shrink-0 rounded bg-red-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                        disabled
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-[var(--mag-ink-muted)]">{user.email}</div>
+                  <div className="mt-0.5 text-[10px] text-[var(--mag-ink-muted)]">
+                    Latest: {user.latestReason}
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      if (confirm(`Ban ${user.name || user.email}? This will disable their account and end all sessions.`)) {
+                        disableMutation.mutate({ data: { userId: user.id, disabled: true } })
+                      }
+                    }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-600 transition hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400"
+                    title="Ban user"
+                    disabled={disableMutation.isPending || user.disabledAt}
+                  >
+                    <Ban className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Dismiss all pending reports for ${user.name || user.email}?`)) {
+                        dismissAllMutation.mutate({ data: { userId: user.id } })
+                      }
+                    }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:bg-[var(--mag-line)]"
+                    title="Dismiss all reports"
+                    disabled={dismissAllMutation.isPending}
+                  >
+                    <CheckCircle className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Pending Reports */}
+      <div>
+        <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--mag-ink-muted)]">
+          Pending Reports
+        </h2>
+        {reportsLoading ? (
+          <div className="text-sm text-[var(--mag-ink-muted)]">Loading pending reports...</div>
+        ) : !pendingReports?.items || pendingReports.items.length === 0 ? (
+          <div className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No pending reports</div>
+        ) : (
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+            {pendingReports.items.map((report: any) => (
+              <div key={report.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{report.reason}</span>
+                    <span className="shrink-0 rounded bg-amber-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                      pending
+                    </span>
+                  </div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                    <span>Reporter: {report.reporter?.name || report.reporter?.email || 'Unknown'}</span>
+                    <span className="text-[var(--mag-line)]">·</span>
+                    <span>Reported: {report.reported?.name || report.reported?.email || 'Unknown'}</span>
+                    <span className="text-[var(--mag-line)]">·</span>
+                    <span>{new Date(report.createdAt).toLocaleString()}</span>
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <button
+                    onClick={() => reviewMutation.mutate({ data: { reportId: report.id } })}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600 transition hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400"
+                    title="Mark reviewed"
+                    disabled={reviewMutation.isPending}
+                  >
+                    <CheckCircle className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => dismissMutation.mutate({ data: { reportId: report.id } })}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:bg-[var(--mag-line)]"
+                    title="Dismiss report"
+                    disabled={dismissMutation.isPending}
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

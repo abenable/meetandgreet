@@ -1,10 +1,12 @@
 import { createFileRoute, useParams, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState, useRef } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Send, Check, CheckCheck } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft, Send, Check, CheckCheck, Ban } from 'lucide-react'
 import { getChatMessages, sendChatMessage, markChatRead } from '#/server/conversations'
 import { getProfileByUserId } from '#/server/profiles'
+import { blockUser } from '#/server/blocks'
 import AvatarImage from '#/components/AvatarImage'
+import { VerifiedBadge } from '#/components/VerifiedBadge'
 import { useChatWebSocket } from '#/hooks/useWebSocket'
 
 export const Route = createFileRoute('/chats/$chatId')({ component: UnifiedChatPage })
@@ -16,6 +18,7 @@ function UnifiedChatPage() {
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout>()
 
@@ -34,6 +37,23 @@ function UnifiedChatPage() {
     queryKey: ['profile', peerId],
     queryFn: () => getProfileByUserId({ data: peerId }),
     enabled: !!peerId,
+  })
+
+  const blockMutation = useMutation({
+    mutationFn: blockUser,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['conversations'] })
+      qc.invalidateQueries({ queryKey: ['matches'] })
+      qc.invalidateQueries({ queryKey: ['blocked-users'] })
+      navigate({ to: '/chats' })
+    },
+  })
+
+  const matchId = chatId.startsWith('match_') ? chatId.slice('match_'.length) : null
+  const { data: icebreakers } = useQuery({
+    queryKey: ['icebreakers', matchId],
+    queryFn: () => getIcebreakers({ data: matchId! }),
+    enabled: !!matchId && (chatData?.messages.length ?? 0) < 3,
   })
 
   useEffect(() => {
@@ -124,12 +144,13 @@ function UnifiedChatPage() {
             <AvatarImage src={photo} alt={peerProfile?.name ?? ''} />
           </div>
           <div className="min-w-0 text-center">
-            <p className="truncate text-sm font-semibold text-[var(--mag-ink)]">
+            <p className="truncate text-sm font-semibold text-[var(--mag-ink)] flex items-center justify-center gap-1.5">
               {peerProfile?.name ?? 'User'}
+              {peerProfile?.verifiedAt && <VerifiedBadge />}
             </p>
             <p className="text-[10px] text-[var(--mag-ink-muted)]">
               {connected ? (
-                <span className="flex items-center gap-1">
+                <span className="flex items-center justify-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
                   Online
                 </span>
@@ -139,7 +160,13 @@ function UnifiedChatPage() {
             </p>
           </div>
         </div>
-        <div className="w-9" />
+        <button
+          onClick={() => setBlockDialogOpen(true)}
+          className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+          title="Block user"
+        >
+          <Ban className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Messages */}
@@ -185,6 +212,19 @@ function UnifiedChatPage() {
         )}
       </div>
 
+      {matchId && icebreakers && icebreakers.length > 0 && (chatData?.messages.length ?? 0) < 3 && (
+        <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
+          {icebreakers.map((ice) => (
+            <button
+              key={ice.id}
+              onClick={() => setInput(ice.text)}
+              className="shrink-0 rounded-full bg-[var(--mag-green)]/10 px-3 py-1.5 text-xs font-medium text-[var(--mag-green)]"
+            >
+              {ice.text}
+            </button>
+          ))}
+        </div>
+      )}
       {sendError && <p className="mb-1 text-xs text-red-500">{sendError}</p>}
       <div className="mt-3 flex items-center gap-2">
         <input type="text" value={input} onChange={(e) => handleInputChange(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -195,6 +235,38 @@ function UnifiedChatPage() {
           <Send className="h-4 w-4" />
         </button>
       </div>
+
+      {/* Block Confirmation Dialog */}
+      {blockDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+            <div className="mb-1 flex items-center gap-2 text-red-500">
+              <Ban className="h-5 w-5" />
+              <h3 className="text-sm font-semibold">Block {peerProfile?.name ?? 'User'}</h3>
+            </div>
+            <p className="mb-4 text-sm text-[var(--mag-ink-soft)]">
+              Block {peerProfile?.name ?? 'this user'}? They won't see you in events anymore.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setBlockDialogOpen(false)}
+                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (peerId) blockMutation.mutate({ data: peerId })
+                }}
+                disabled={blockMutation.isPending || !peerId}
+                className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50"
+              >
+                {blockMutation.isPending ? 'Blocking…' : 'Block'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

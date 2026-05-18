@@ -37,6 +37,7 @@ import { Route as SignupVerifyRouteImport } from './routes/signup.verify'
 import { Route as SettingsPrivacyRouteImport } from './routes/settings/privacy'
 import { Route as SettingsNotificationsRouteImport } from './routes/settings/notifications'
 import { Route as SettingsDiscoveryRouteImport } from './routes/settings/discovery'
+import { Route as SettingsBlockedRouteImport } from './routes/settings/blocked'
 import { Route as SettingsAccountRouteImport } from './routes/settings/account'
 import { Route as ProfileMediaRouteImport } from './routes/profile/media'
 import { Route as ProfileEditRouteImport } from './routes/profile/edit'
@@ -191,6 +192,11 @@ const SettingsDiscoveryRoute = SettingsDiscoveryRouteImport.update({
   path: '/settings/discovery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsBlockedRoute = SettingsBlockedRouteImport.update({
+  id: '/settings/blocked',
+  path: '/settings/blocked',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsAccountRoute = SettingsAccountRouteImport.update({
   id: '/settings/account',
   path: '/settings/account',
@@ -282,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/profile/edit': typeof ProfileEditRoute
   '/profile/media': typeof ProfileMediaRoute
   '/settings/account': typeof SettingsAccountRoute
+  '/settings/blocked': typeof SettingsBlockedRoute
   '/settings/discovery': typeof SettingsDiscoveryRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/privacy': typeof SettingsPrivacyRoute
@@ -323,6 +330,7 @@ export interface FileRoutesByTo {
   '/profile/edit': typeof ProfileEditRoute
   '/profile/media': typeof ProfileMediaRoute
   '/settings/account': typeof SettingsAccountRoute
+  '/settings/blocked': typeof SettingsBlockedRoute
   '/settings/discovery': typeof SettingsDiscoveryRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/privacy': typeof SettingsPrivacyRoute
@@ -367,6 +375,7 @@ export interface FileRoutesById {
   '/profile/edit': typeof ProfileEditRoute
   '/profile/media': typeof ProfileMediaRoute
   '/settings/account': typeof SettingsAccountRoute
+  '/settings/blocked': typeof SettingsBlockedRoute
   '/settings/discovery': typeof SettingsDiscoveryRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/privacy': typeof SettingsPrivacyRoute
@@ -412,6 +421,7 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/profile/media'
     | '/settings/account'
+    | '/settings/blocked'
     | '/settings/discovery'
     | '/settings/notifications'
     | '/settings/privacy'
@@ -453,6 +463,7 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/profile/media'
     | '/settings/account'
+    | '/settings/blocked'
     | '/settings/discovery'
     | '/settings/notifications'
     | '/settings/privacy'
@@ -496,6 +507,7 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/profile/media'
     | '/settings/account'
+    | '/settings/blocked'
     | '/settings/discovery'
     | '/settings/notifications'
     | '/settings/privacy'
@@ -539,6 +551,7 @@ export interface RootRouteChildren {
   ProfileEditRoute: typeof ProfileEditRoute
   ProfileMediaRoute: typeof ProfileMediaRoute
   SettingsAccountRoute: typeof SettingsAccountRoute
+  SettingsBlockedRoute: typeof SettingsBlockedRoute
   SettingsDiscoveryRoute: typeof SettingsDiscoveryRoute
   SettingsNotificationsRoute: typeof SettingsNotificationsRoute
   SettingsPrivacyRoute: typeof SettingsPrivacyRoute
@@ -752,6 +765,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsDiscoveryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/blocked': {
+      id: '/settings/blocked'
+      path: '/settings/blocked'
+      fullPath: '/settings/blocked'
+      preLoaderRoute: typeof SettingsBlockedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings/account': {
       id: '/settings/account'
       path: '/settings/account'
@@ -907,6 +927,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileEditRoute: ProfileEditRoute,
   ProfileMediaRoute: ProfileMediaRoute,
   SettingsAccountRoute: SettingsAccountRoute,
+  SettingsBlockedRoute: SettingsBlockedRoute,
   SettingsDiscoveryRoute: SettingsDiscoveryRoute,
   SettingsNotificationsRoute: SettingsNotificationsRoute,
   SettingsPrivacyRoute: SettingsPrivacyRoute,

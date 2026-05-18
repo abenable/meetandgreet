@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { MapPin, Camera, Link2, Pencil, Trash2, AlertTriangle, Sparkles, ShieldCheck, Heart, Users, Briefcase } from 'lucide-react'
+import { MapPin, Camera, Link2, Pencil, Trash2, AlertTriangle, Sparkles, ShieldCheck, Heart, Users, Briefcase, Flame, Calendar, BadgeCheck } from 'lucide-react'
 import { getMyProfile, updateProfile, verifyPhoto } from '#/server/profiles'
 import { disableMyAccount } from '#/server/auth'
+import { getUserBadges, getUserStreak } from '#/server/badges'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
@@ -15,11 +16,23 @@ function formatNameWithGender(name: string | null, gender: string | null): strin
   return initial ? `${name || ''}, ${initial}` : (name || '')
 }
 
+const BADGE_CONFIG: Record<string, { label: string; icon: React.ElementType; className: string }> = {
+  first_match: { label: 'First Match', icon: Heart, className: 'bg-pink-100 text-pink-700' },
+  streak_3: { label: '3 Day Streak', icon: Flame, className: 'bg-orange-100 text-orange-700' },
+  streak_7: { label: '7 Day Streak', icon: Flame, className: 'bg-orange-100 text-orange-700' },
+  social_butterfly: { label: 'Social Butterfly', icon: Users, className: 'bg-blue-100 text-blue-700' },
+  event_host: { label: 'Event Host', icon: Calendar, className: 'bg-green-100 text-green-700' },
+  verified: { label: 'Verified', icon: BadgeCheck, className: 'bg-blue-100 text-blue-700' },
+  ice_breaker: { label: 'Ice Breaker', icon: Sparkles, className: 'bg-purple-100 text-purple-700' },
+}
+
 function ProfilePage() {
   const qc = useQueryClient()
   const navigate = useNavigate()
   const fileRef = useRef<HTMLInputElement>(null)
   const { data: profile } = useQuery({ queryKey: ['my-profile'], queryFn: () => getMyProfile() })
+  const { data: badges } = useQuery({ queryKey: ['my-badges'], queryFn: () => getUserBadges() })
+  const { data: streakData } = useQuery({ queryKey: ['my-streak'], queryFn: () => getUserStreak() })
 
   const [editingField, setEditingField] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
@@ -215,6 +228,12 @@ function ProfilePage() {
             ))}
           </div>
         )}
+        {streakData && streakData.streakCount > 1 && (
+          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
+            <Flame className="h-3 w-3" />
+            <span>{streakData.streakCount} day streak</span>
+          </div>
+        )}
       </div>
 
       <div className="mb-5 flex flex-wrap justify-center gap-2">
@@ -231,6 +250,28 @@ function ProfilePage() {
         <p className="text-sm leading-relaxed text-[var(--mag-ink-soft)]">{profile.bio || 'Add a bio'}</p>
       </div>
 
+      {badges && badges.length > 0 && (
+        <div className="mb-4 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow">
+          <h3 className="mb-2 text-sm font-semibold text-[var(--mag-ink)]">Badges</h3>
+          <div className="flex flex-wrap gap-2">
+            {badges.map((badge) => {
+              const config = BADGE_CONFIG[badge.type]
+              if (!config) return null
+              const Icon = config.icon
+              return (
+                <span
+                  key={badge.id}
+                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${config.className}`}
+                >
+                  <Icon className="h-3 w-3" />
+                  {config.label}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <div onClick={() => navigate({ to: '/profile/media' })} className="mb-4 cursor-pointer rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow transition hover:border-[var(--mag-green)]/30">
         <div className="mb-2 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">My Photos</h3>
@@ -244,8 +285,14 @@ function ProfilePage() {
           ))}
           {(profile.photos || []).length === 0 && (
             <span className="text-sm text-[var(--mag-ink-muted)]">Tap to add photos</span>
-          )}
-        </div>
+        )}
+        {streakData && streakData.streakCount > 1 && (
+          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
+            <Flame className="h-3 w-3" />
+            <span>{streakData.streakCount} day streak</span>
+          </div>
+        )}
+      </div>
         {(profile.photos || []).length < 3 && (
           <div className="mt-3 flex items-center gap-2 rounded-xl bg-[var(--mag-green)]/10 px-3 py-2">
             <Sparkles className="h-4 w-4 flex-shrink-0 text-[var(--mag-green)]" />
@@ -458,7 +505,13 @@ function ProfilePage() {
                 <div className="flex flex-col items-center py-4">
                   <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-500 text-white">
                     <ShieldCheck className="h-8 w-8" />
-                  </div>
+        {streakData && streakData.streakCount > 1 && (
+          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
+            <Flame className="h-3 w-3" />
+            <span>{streakData.streakCount} day streak</span>
+          </div>
+        )}
+      </div>
                   <h3 className="text-base font-bold text-[var(--mag-ink)]">You're Verified!</h3>
                   <p className="mt-1 text-center text-xs text-[var(--mag-ink-soft)]">
                     Your profile now shows a blue checkmark badge.

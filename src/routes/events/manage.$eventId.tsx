@@ -22,6 +22,7 @@ import {
   Eye,
   Lock,
   ListOrdered,
+  Sparkles,
 } from 'lucide-react'
 import {
   getEventById,
@@ -35,6 +36,8 @@ import {
   getEventReports,
   getEventWaitlist,
   removeFromWaitlist,
+  getEventPosts,
+  createEventPost,
 } from '#/server/events'
 import { getSession } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
@@ -89,6 +92,22 @@ function ManageEventPage() {
 
   const attendeeCount = (event as any)?._count?.attendees ?? 0
 
+  const { data: eventPosts = [], isLoading: postsLoading } = useQuery({
+    queryKey: ['event-posts', eventId],
+    queryFn: () => getEventPosts({ data: { eventId } }),
+    enabled: !!eventId,
+  })
+
+  const [postContent, setPostContent] = useState('')
+
+  const createPostMutation = useMutation({
+    mutationFn: createEventPost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event-posts', eventId] })
+      setPostContent('')
+    },
+  })
+
   // Editable form state
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -97,10 +116,11 @@ function ManageEventPage() {
   const [startsAt, setStartsAt] = useState<string>('')
   const [savedMsg, setSavedMsg] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [activeTab, setActiveTab] = useState<'attendees' | 'waitlist' | 'reports' | 'blocked'>('attendees')
+  const [activeTab, setActiveTab] = useState<'attendees' | 'waitlist' | 'reports' | 'blocked' | 'activity'>('attendees')
 
   const [eventPhoto, setEventPhoto] = useState<string | null>(null)
   const [eventIsPublic, setEventIsPublic] = useState(true)
+  const [eventMysteryMode, setEventMysteryMode] = useState(false)
   const [photoError, setPhotoError] = useState('')
   const [saveError, setSaveError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
@@ -133,6 +153,7 @@ function ManageEventPage() {
       setStartsAt(event.startsAt ? toDatetimeLocalValue(event.startsAt) : '')
       setEventPhoto(event.photo ?? null)
       setEventIsPublic((event as any).isPublic ?? true)
+      setEventMysteryMode((event as any).mysteryMode ?? false)
     }
   }, [event])
 
@@ -214,6 +235,7 @@ function ManageEventPage() {
           startsAt: startsAtIso,
           photo: eventPhoto,
           isPublic: eventIsPublic,
+          mysteryMode: eventMysteryMode,
         },
       },
     })
@@ -446,6 +468,37 @@ function ManageEventPage() {
           </div>
 
           <div>
+            <label className="mb-1.5 block text-center text-xs font-medium text-[var(--mag-ink)]">Mystery Mode</label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setEventMysteryMode(true)}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                  eventMysteryMode
+                    ? 'bg-purple-600 text-white'
+                    : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+                }`}
+              >
+                <Sparkles className="h-3.5 w-3.5" /> On
+              </button>
+              <button
+                type="button"
+                onClick={() => setEventMysteryMode(false)}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                  !eventMysteryMode
+                    ? 'bg-[var(--mag-ink)] text-white'
+                    : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+                }`}
+              >
+                Off
+              </button>
+            </div>
+            <p className="mt-1 text-center text-[10px] text-[var(--mag-ink-muted)]">
+              Attendees' photos are blurred until they've exchanged 10 messages
+            </p>
+          </div>
+
+          <div>
             <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Start Time</label>
             <div className="relative">
               <Calendar className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
@@ -515,6 +568,7 @@ function ManageEventPage() {
       <div className="mb-4 flex items-center gap-1 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-1">
         {([
           { key: 'attendees', label: 'Attendees', count: attendeeCount, icon: Users },
+          { key: 'activity', label: 'Activity', count: eventPosts.length, icon: MessageCircle },
           { key: 'waitlist', label: 'Waitlist', count: waitlist.length, icon: ListOrdered },
           { key: 'reports', label: 'Reports', count: reports.length, icon: Flag },
           { key: 'blocked', label: 'Blocked', count: blockedUsers.length, icon: Ban },
@@ -604,6 +658,75 @@ function ManageEventPage() {
                 })}
               </div>
             )}
+          </>
+        )}
+
+        {activeTab === 'activity' && (
+          <>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-[var(--mag-ink)]">Activity Feed</h2>
+            </div>
+            <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+              <div className="sticky top-0 bg-[var(--mag-card)] z-10 px-4 py-3 border-b border-[var(--mag-line)]">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={postContent}
+                    onChange={(e) => setPostContent(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey && postContent.trim()) {
+                        e.preventDefault()
+                        createPostMutation.mutate({ data: { eventId, content: postContent.trim() } })
+                      }
+                    }}
+                    placeholder="Write something..."
+                    className="flex-1 rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                  />
+                  <button
+                    onClick={() => {
+                      if (postContent.trim()) {
+                        createPostMutation.mutate({ data: { eventId, content: postContent.trim() } })
+                      }
+                    }}
+                    disabled={!postContent.trim() || createPostMutation.isPending}
+                    className="shrink-0 rounded-full bg-[var(--mag-green)] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {createPostMutation.isPending ? 'Posting…' : 'Post'}
+                  </button>
+                </div>
+              </div>
+              <div className="max-h-[500px] overflow-y-auto">
+                {postsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+                  </div>
+                ) : eventPosts.length === 0 ? (
+                  <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No posts yet. Start the conversation!</p>
+                ) : (
+                  eventPosts.map((post: any) => (
+                    <div
+                      key={post.id}
+                      className="px-4 py-3 border-b border-[var(--mag-line)] last:border-b-0"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
+                          <AvatarImage src={post.author?.photo} alt={post.author?.name ?? ''} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-0.5 flex items-center gap-2">
+                            <span className="text-xs font-semibold text-[var(--mag-ink)]">{post.author?.name ?? 'Unnamed'}</span>
+                            <span className="text-[10px] text-[var(--mag-ink-muted)]" suppressHydrationWarning>
+                              {new Date(post.createdAt).toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-[var(--mag-ink)] whitespace-pre-wrap break-words">{post.content}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </>
         )}
 

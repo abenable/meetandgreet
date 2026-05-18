@@ -1,8 +1,8 @@
 import { createFileRoute, useParams, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Send, Check, CheckCheck, Ban } from 'lucide-react'
-import { getChatMessages, sendChatMessage, markChatRead } from '#/server/conversations'
+import { ArrowLeft, Send, Check, CheckCheck, Ban, Mic, Play, Pause, Square, X } from 'lucide-react'
+import { getChatMessages, sendChatMessage, markChatRead, getIcebreakers, uploadVoiceMessage } from '#/server/conversations'
 import { getProfileByUserId } from '#/server/profiles'
 import { blockUser } from '#/server/blocks'
 import AvatarImage from '#/components/AvatarImage'
@@ -10,6 +10,56 @@ import { VerifiedBadge } from '#/components/VerifiedBadge'
 import { useChatWebSocket } from '#/hooks/useWebSocket'
 
 export const Route = createFileRoute('/chats/$chatId')({ component: UnifiedChatPage })
+
+function formatDuration(seconds: number) {
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
+
+function VoiceMessagePlayer({ url, isMine }: { url: string; isMine: boolean }) {
+  const [playing, setPlaying] = useState(false)
+  const [duration, setDuration] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  useEffect(() => {
+    const audio = new Audio(url)
+    audioRef.current = audio
+    audio.onloadedmetadata = () => setDuration(audio.duration)
+    audio.onended = () => setPlaying(false)
+    audio.ontimeupdate = () => setCurrentTime(audio.currentTime)
+    return () => {
+      audio.pause()
+      audio.src = ''
+    }
+  }, [url])
+
+  const toggle = () => {
+    if (!audioRef.current) return
+    if (playing) {
+      audioRef.current.pause()
+      setPlaying(false)
+    } else {
+      audioRef.current.play()
+      setPlaying(true)
+    }
+  }
+
+  return (
+    <div className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 ${isMine ? 'bg-[var(--mag-green)] text-white' : 'border border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
+      <button
+        onClick={toggle}
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isMine ? 'bg-white/20 text-white' : 'bg-[var(--mag-line)] text-[var(--mag-ink)]'}`}
+        aria-label={playing ? 'Pause voice message' : 'Play voice message'}
+      >
+        {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+      </button>
+      <span className="min-w-[3rem] text-xs font-medium">{playing ? formatDuration(currentTime) : formatDuration(duration)}</span>
+      <audio src={url} preload="metadata" className="hidden" />
+    </div>
+  )
+}
 
 function UnifiedChatPage() {
   const { chatId } = useParams({ from: '/chats/$chatId' })
@@ -19,8 +69,18 @@ function UnifiedChatPage() {
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
   const [blockDialogOpen, setBlockDialogOpen] = useState(false)
+  const [showRevealToast, setShowRevealToast] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout>()
+  const prevUnlockedRef = useRef<boolean | undefined>(undefined)
+
+  // Voice recording state
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordingDuration, setRecordingDuration] = useState(0)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Use WebSocket for real-time updates
   const { connected, sendTyping, typingUsers } = useChatWebSocket(chatId)
@@ -50,6 +110,8 @@ function UnifiedChatPage() {
   })
 
   const matchId = chatId.startsWith('match_') ? chatId.slice('match_'.length) : null
+  const isPhotosLocked = !!matchId && !chatData?.messagesUnlockedAt
+  const remainingMessages = isPhotosLocked ? Math.max(0, 10 - (chatData?.messages.length ?? 0)) : 0
   const { data: icebreakers } = useQuery({
     queryKey: ['icebreakers', matchId],
     queryFn: () => getIcebreakers({ data: matchId! }),
@@ -63,10 +125,40 @@ function UnifiedChatPage() {
     })
   }, [chatId, qc])
 
+  // Detect photo unlock for mystery mode toast
+  useEffect(() => {
+    const isNowUnlocked = !!chatData?.messagesUnlockedAt
+    if (prevUnlockedRef.current === false && isNowUnlocked) {
+      setShowRevealToast(true)
+      setTimeout(() => setShowRevealToast(false), 3000)
+    }
+    prevUnlockedRef.current = isNowUnlocked
+  }, [chatData?.messagesUnlockedAt])
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatData?.messages])
+
+  // Recording timer
+  useEffect(() => {
+    if (isRecording) {
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingDuration((d) => {
+          if (d >= 59) {
+            mediaRecorderRef.current?.stop()
+            return d
+          }
+          return d + 1
+        })
+      }, 1000)
+    } else {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current)
+    }
+    return () => {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current)
+    }
+  }, [isRecording])
 
   // Handle typing indicator
   const handleInputChange = (value: string) => {
@@ -116,6 +208,91 @@ function UnifiedChatPage() {
     }
   }
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg'
+      const recorder = new MediaRecorder(stream, { mimeType })
+      const chunks: BlobPart[] = []
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data)
+      }
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType })
+        const url = URL.createObjectURL(blob)
+        setAudioBlob(blob)
+        setPreviewUrl(url)
+        setIsRecording(false)
+        // Stop all tracks to release microphone
+        stream.getTracks().forEach((t) => t.stop())
+      }
+
+      recorder.start()
+      mediaRecorderRef.current = recorder
+      setIsRecording(true)
+      setRecordingDuration(0)
+      setAudioBlob(null)
+      setPreviewUrl(null)
+
+      // Auto-stop after 60 seconds
+      setTimeout(() => {
+        if (recorder.state === 'recording') {
+          recorder.stop()
+        }
+      }, 60000)
+    } catch (e) {
+      console.error('Failed to start recording', e)
+      setSendError('Microphone access denied or unavailable')
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop()
+    }
+  }
+
+  const cancelRecording = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    setAudioBlob(null)
+    setPreviewUrl(null)
+    setRecordingDuration(0)
+    setIsRecording(false)
+    setSendError(null)
+  }
+
+  const handleSendVoice = async () => {
+    if (!audioBlob || !matchId) return
+    setSending(true)
+    setSendError(null)
+
+    try {
+      const reader = new FileReader()
+      const base64Promise = new Promise<string>((resolve) => {
+        reader.onloadend = () => resolve(reader.result as string)
+        reader.readAsDataURL(audioBlob)
+      })
+      const base64Audio = await base64Promise
+
+      const { audioUrl } = await uploadVoiceMessage({ data: { base64Audio, matchId } })
+      await sendChatMessage({
+        data: { chatId, content: 'Voice message', type: 'voice', audioUrl },
+      })
+
+      cancelRecording()
+      if (!connected) {
+        qc.invalidateQueries({ queryKey: ['chat', chatId] })
+        qc.invalidateQueries({ queryKey: ['conversations'] })
+      }
+    } catch (e: any) {
+      setSendError(e?.message || 'Failed to send voice message.')
+    } finally {
+      setSending(false)
+    }
+  }
+
   const photo = peerProfile?.photos?.[0]
 
   if (error) {
@@ -140,7 +317,7 @@ function UnifiedChatPage() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="flex flex-1 items-center justify-center gap-2">
-          <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
+          <div className={`h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)] ${isPhotosLocked ? 'blur-[20px] grayscale-[0.5]' : ''}`}>
             <AvatarImage src={photo} alt={peerProfile?.name ?? ''} />
           </div>
           <div className="min-w-0 text-center">
@@ -169,6 +346,23 @@ function UnifiedChatPage() {
         </button>
       </div>
 
+      {/* Unlock progress */}
+      {isPhotosLocked && remainingMessages > 0 && (
+        <div className="mb-2 rounded-xl bg-purple-50 px-3 py-2 text-center text-xs font-medium text-purple-700">
+          Send {remainingMessages} more message{remainingMessages !== 1 ? 's' : ''} to reveal their photo 🔒
+        </div>
+      )}
+      {isPhotosLocked && remainingMessages === 0 && (
+        <div className="mb-2 rounded-xl bg-purple-50 px-3 py-2 text-center text-xs font-medium text-purple-700">
+          Almost there! Send one more message to reveal 🔒
+        </div>
+      )}
+      {showRevealToast && (
+        <div className="mb-2 rounded-xl bg-purple-600 px-3 py-2 text-center text-xs font-bold text-white shadow-lg transition-all duration-500">
+          ✨ Photos revealed!
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         {isLoading ? (
@@ -179,19 +373,35 @@ function UnifiedChatPage() {
           <>
             {chatData?.messages.map((msg: any) => (
               <div key={msg.id} className={`flex ${msg.isMine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${msg.isMine ? 'rounded-br-sm bg-[var(--mag-green)] text-white' : 'rounded-bl-sm bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
-                  {msg.content}
-                  <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${msg.isMine ? 'text-white/70' : 'text-[var(--mag-ink-muted)]'}`}>
-                    <span suppressHydrationWarning>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    {msg.isMine && (
-                      msg.readAt ? (
-                        <CheckCheck className="h-3 w-3" />
-                      ) : (
-                        <Check className="h-3 w-3" />
-                      )
-                    )}
+                {msg.type === 'voice' && msg.audioUrl ? (
+                  <div className="max-w-[75%]">
+                    <VoiceMessagePlayer url={msg.audioUrl} isMine={msg.isMine} />
+                    <div className="mt-1 flex items-center justify-end gap-1 text-[10px] text-[var(--mag-ink-muted)]">
+                      <span suppressHydrationWarning>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      {msg.isMine && (
+                        msg.readAt ? (
+                          <CheckCheck className="h-3 w-3" />
+                        ) : (
+                          <Check className="h-3 w-3" />
+                        )
+                      )}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${msg.isMine ? 'rounded-br-sm bg-[var(--mag-green)] text-white' : 'rounded-bl-sm bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
+                    {msg.content}
+                    <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${msg.isMine ? 'text-white/70' : 'text-[var(--mag-ink-muted)]'}`}>
+                      <span suppressHydrationWarning>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      {msg.isMine && (
+                        msg.readAt ? (
+                          <CheckCheck className="h-3 w-3" />
+                        ) : (
+                          <Check className="h-3 w-3" />
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
             <div ref={messagesEndRef} />
@@ -227,13 +437,73 @@ function UnifiedChatPage() {
       )}
       {sendError && <p className="mb-1 text-xs text-red-500">{sendError}</p>}
       <div className="mt-3 flex items-center gap-2">
-        <input type="text" value={input} onChange={(e) => handleInputChange(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Type a message..."
-          disabled={sending}
-          className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20 disabled:opacity-60" />
-        <button onClick={handleSend} disabled={sending} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)] text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60">
-          <Send className="h-4 w-4" />
-        </button>
+        {isRecording ? (
+          <>
+            <div className="flex flex-1 items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+              <span>Recording {formatDuration(recordingDuration)}</span>
+            </div>
+            <button
+              onClick={stopRecording}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-surface)] text-red-500"
+              aria-label="Stop recording"
+            >
+              <Square className="h-4 w-4 animate-pulse" />
+            </button>
+            <button disabled className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)] text-white opacity-60">
+              <Send className="h-4 w-4" />
+            </button>
+          </>
+        ) : previewUrl ? (
+          <>
+            <div className="flex flex-1 items-center gap-2 rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2 text-sm">
+              <button
+                onClick={() => {
+                  const audio = new Audio(previewUrl)
+                  audio.play()
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-line)]"
+                aria-label="Play voice preview"
+              >
+                <Play className="h-4 w-4" />
+              </button>
+              <span className="text-[var(--mag-ink)]">Voice message</span>
+            </div>
+            <button
+              onClick={cancelRecording}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-muted)]"
+              aria-label="Cancel voice message"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <button
+              onClick={handleSendVoice}
+              disabled={sending}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)] text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </>
+        ) : (
+          <>
+            <input type="text" value={input} onChange={(e) => handleInputChange(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="Type a message..."
+              disabled={sending}
+              className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20 disabled:opacity-60" />
+            {matchId && (
+              <button
+                onClick={startRecording}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-muted)]"
+                aria-label="Record voice message"
+              >
+                <Mic className="h-5 w-5" />
+              </button>
+            )}
+            <button onClick={handleSend} disabled={sending} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)] text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60">
+              <Send className="h-4 w-4" />
+            </button>
+          </>
+        )}
       </div>
 
       {/* Block Confirmation Dialog */}

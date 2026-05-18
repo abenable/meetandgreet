@@ -2,7 +2,7 @@
 // Supports both Bun server (production) and dev-mode Vite plugin
 
 export interface WSMessage {
-  type: 'chat_message' | 'match_created' | 'typing' | 'read_receipt' | 'online_status' | 'error'
+  type: 'chat_message' | 'match_created' | 'typing' | 'read_receipt' | 'online_status' | 'event_post' | 'error'
   payload: any
   timestamp: number
 }

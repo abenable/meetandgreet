@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Calendar, MapPin, Plus, Users, X, ImageIcon, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Calendar, MapPin, Plus, Users, X, ImageIcon, Eye, EyeOff, Sparkles } from 'lucide-react'
 import { createEvent, getMyActiveEvent } from '#/server/events'
 import { localDatetimeToUTCISO } from '#/lib/datetime'
 
@@ -38,6 +38,7 @@ function CreateEventPage() {
   const [copied, setCopied] = useState(false)
   const [photo, setPhoto] = useState<string | null>(null)
   const [isPublic, setIsPublic] = useState(true)
+  const [mysteryMode, setMysteryMode] = useState(false)
   const [photoError, setPhotoError] = useState('')
   const [createError, setCreateError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
@@ -85,6 +86,7 @@ function CreateEventPage() {
         startsAt: startsAtIso,
         photo: photo || undefined,
         isPublic,
+        mysteryMode,
         force,
       } })
 
@@ -202,6 +204,37 @@ function CreateEventPage() {
             {isPublic 
               ? 'Anyone can find this event on the browse page.' 
               : 'Only people with the code or link can join.'}
+          </p>
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-center text-xs font-medium text-[var(--mag-ink)]">Mystery Mode</label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMysteryMode(true)}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                mysteryMode
+                  ? 'bg-purple-600 text-white'
+                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+              }`}
+            >
+              <Sparkles className="h-3.5 w-3.5" /> On
+            </button>
+            <button
+              type="button"
+              onClick={() => setMysteryMode(false)}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                !mysteryMode
+                  ? 'bg-[var(--mag-ink)] text-white'
+                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+              }`}
+            >
+              Off
+            </button>
+          </div>
+          <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">
+            Attendees' photos are blurred until they've exchanged 10 messages
           </p>
         </div>
 

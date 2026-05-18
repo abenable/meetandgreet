@@ -2,6 +2,9 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { prisma } from '#/db'
 import { requireSession } from '#/server/auth'
+import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
+import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { randomUUID } from 'node:crypto'
 import { createNotification } from './notifications.server'
 import { broadcastChatMessage } from './websocket-broadcast'
 
@@ -145,6 +148,7 @@ export const getConversations = createServerFn({ method: 'GET' })
           peerName: getPeerName(peerId),
           peerPhoto: getPeerPhoto(peerId),
           peerVerifiedAt: getPeerVerifiedAt(peerId),
+          messagesUnlockedAt: match.messagesUnlockedAt,
           lastMessage: match.messages[0]?.content ?? 'New match!',
           lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
           unreadCount: 0,
@@ -202,6 +206,7 @@ export const getChatMessages = createServerFn({ method: 'GET' })
       return {
         type: 'match' as const,
         peerId: match.user1Id === myId ? match.user2Id : match.user1Id,
+        messagesUnlockedAt: match.messagesUnlockedAt,
         messages: msgs.map((m) => ({ ...m, isMine: m.senderId === myId })),
       }
     }
@@ -246,12 +251,14 @@ export const getChatMessages = createServerFn({ method: 'GET' })
 export const sendChatMessage = createServerFn({ method: 'POST' })
   .inputValidator(z.object({
     chatId: z.string(),
-    content: z.string().min(1).max(2000),
+    content: z.string().max(2000),
+    type: z.enum(['text', 'voice']).optional(),
+    audioUrl: z.string().optional(),
   }))
   .handler(async ({ data }) => {
     const session = await requireSession()
     const myId = session.user.id
-    const { chatId, content } = data
+    const { chatId, content, type, audioUrl } = data
 
     if (chatId.startsWith('match_')) {
       const matchId = chatId.slice('match_'.length)
@@ -273,8 +280,25 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
       })
       if (block) throw new Error('Unable to send message')
 
+      // Mystery mode: unlock photos after 10 messages
+      const existingCount = await prisma.eventMessage.count({ where: { matchId } })
+      let unlocked = false
+      if (!match.messagesUnlockedAt && existingCount >= 10) {
+        await prisma.eventMatch.update({
+          where: { id: matchId },
+          data: { messagesUnlockedAt: new Date() },
+        })
+        unlocked = true
+      }
+
       const message = await prisma.eventMessage.create({
-        data: { matchId, senderId: myId, content },
+        data: {
+          matchId,
+          senderId: myId,
+          content,
+          type: type === 'voice' ? 'voice' : 'text',
+          audioUrl: audioUrl || null,
+        },
       })
 
       // Broadcast WebSocket message for instant delivery
@@ -288,12 +312,16 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
         link: `/chats/${chatId}`,
       })
 
-      return { ...message, isMine: true }
+      return { ...message, isMine: true, unlocked }
     }
 
     if (chatId.startsWith('org_')) {
       const [, eventId, peerId] = chatId.split('_')
       if (!eventId || !peerId) throw new Error('Invalid chat id')
+
+      if (type === 'voice') {
+        throw new Error('Voice messages are not supported in organizer chats')
+      }
 
       const event = await prisma.event.findUnique({ where: { id: eventId } })
       if (!event) throw new Error('Event not found')
@@ -337,6 +365,51 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
 
     throw new Error('Unknown chat type')
   })
+
+export const uploadVoiceMessage = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({
+    base64Audio: z.string().min(1),
+    matchId: z.string().min(1),
+  }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+    const myId = session.user.id
+
+    // Verify user is part of the match
+    const match = await prisma.eventMatch.findFirst({
+      where: { id: data.matchId, OR: [{ user1Id: myId }, { user2Id: myId }] },
+    })
+    if (!match) throw new Error('Match not found')
+
+    // Validate data URL prefix
+    if (!/^data:audio\/(webm|ogg|mp4|mpeg);base64,/.test(data.base64Audio)) {
+      throw new Error('Invalid audio format')
+    }
+
+    const base64Data = data.base64Audio.split(',')[1]
+    if (!base64Data) throw new Error('Invalid audio data')
+
+    const buffer = Buffer.from(base64Data, 'base64')
+
+    // Max 5MB
+    if (buffer.length > 5 * 1024 * 1024) {
+      throw new Error('Audio file too large')
+    }
+
+    const key = `voice/${data.matchId}/${randomUUID()}.webm`
+
+    await r2Client.send(
+      new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: key,
+        Body: buffer,
+        ContentType: 'audio/webm',
+      })
+    )
+
+    return { audioUrl: `${R2_PUBLIC_URL}/${key}` }
+  })
+
 export const getIcebreakers = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
   .handler(async ({ data: matchId }) => {

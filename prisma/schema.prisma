@@ -15,6 +15,8 @@ model User {
   image         String?
   role          String    @default("user")
   disabledAt    DateTime?
+  streakCount   Int       @default(0)
+  lastActiveDate DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
@@ -22,6 +24,7 @@ model User {
   pushSubscriptions PushSubscription[]
   blockedUsers      UserBlock[]       @relation("BlockedBy")
   blockingUsers     UserBlock[]       @relation("Blocking")
+  badges            UserBadge[]
 }
 
 model Session {
@@ -118,6 +121,7 @@ model Event {
   createdById String
   isActive    Boolean                 @default(true)
   isPublic    Boolean                 @default(true)
+  mysteryMode Boolean                 @default(false)
   createdAt   DateTime                @default(now())
   expiresAt    DateTime?
   maxAttendees Int?
@@ -129,6 +133,7 @@ model Event {
   swipes      EventSwipe[]
   matches     EventMatch[]
   waitlist    EventWaitlist[]
+  posts       EventPost[]
 
   @@index([isPublic, isActive])
   @@index([createdById])
@@ -182,6 +187,17 @@ model EventOrganizerMessage {
   readAt     DateTime?
 }
 
+model EventPost {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([eventId, createdAt])
+}
+
 model EventSwipe {
   id        String   @id @default(uuid())
   eventId   String
@@ -197,13 +213,14 @@ model EventSwipe {
 }
 
 model EventMatch {
-  id        String          @id @default(uuid())
-  eventId   String
-  event     Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user1Id   String
-  user2Id   String
-  createdAt DateTime        @default(now())
-  messages  EventMessage[]
+  id                 String          @id @default(uuid())
+  eventId            String
+  event              Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user1Id            String
+  user2Id            String
+  createdAt          DateTime        @default(now())
+  messagesUnlockedAt DateTime?
+  messages           EventMessage[]
 
   @@index([eventId, user1Id])
   @@index([eventId, user2Id])
@@ -214,7 +231,9 @@ model EventMessage {
   matchId   String
   match     EventMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
   senderId  String
+  type      String     @default("text")
   content   String
+  audioUrl  String?
   createdAt DateTime   @default(now())
   readAt    DateTime?
 
@@ -244,6 +263,17 @@ model Notification {
 
   @@index([userId, readAt])
   @@index([userId, createdAt])
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  earnedAt  DateTime @default(now())
+
+  @@unique([userId, type])
+  @@index([userId])
 }
 
 model Todo {

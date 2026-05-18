@@ -3,7 +3,9 @@ import { z } from 'zod'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { prisma } from '#/db'
 import { requireSession } from '#/server/auth'
+import { broadcastToEvent } from '#/server/websocket-broadcast'
 import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
+import { awardBadgeIfNotExists } from './badges.server'
 import type { Profile } from '@prisma/client'
 
 function generateCode(): string {
@@ -211,6 +213,7 @@ export const createEvent = createServerFn({ method: 'POST' })
     maxAttendees: z.number().int().min(1).max(1000).optional(),
     startsAt: z.string().datetime().optional(),
     isPublic: z.boolean().optional(),
+    mysteryMode: z.boolean().optional(),
     force: z.boolean().optional(),
   }))
   .handler(async ({ data }) => {
@@ -239,6 +242,7 @@ export const createEvent = createServerFn({ method: 'POST' })
           startsAt: data.startsAt ? new Date(data.startsAt) : null,
           createdById: session.user.id,
           isPublic: data.isPublic ?? true,
+          mysteryMode: data.mysteryMode ?? false,
         },
       })
       await tx.eventAttendee.create({
@@ -273,6 +277,9 @@ export const createEvent = createServerFn({ method: 'POST' })
         console.error('[Create Event] R2 photo upload failed:', err)
       }
     }
+
+    // Award event_host badge
+    await awardBadgeIfNotExists(session.user.id, 'event_host')
 
     return { success: true as const, event }
   })
@@ -412,6 +419,7 @@ export const updateEvent = createServerFn({ method: 'POST' })
       endedAt: z.string().datetime().optional(),
       isActive: z.boolean().optional(),
       isPublic: z.boolean().optional(),
+      mysteryMode: z.boolean().optional(),
     }),
   }))
   .handler(async ({ data }) => {
@@ -441,6 +449,7 @@ export const updateEvent = createServerFn({ method: 'POST' })
         endedAt: data.data.endedAt ? new Date(data.data.endedAt) : undefined,
         isActive: data.data.isActive,
         isPublic: data.data.isPublic,
+        mysteryMode: data.data.mysteryMode,
       },
     })
   })
@@ -992,4 +1001,108 @@ export const getEventReports = createServerFn({ method: 'GET' })
         reporter: profileByUserId.get(r.reporterId),
         reported: profileByUserId.get(r.reportedId),
       }))
+  })
+
+export const getEventPosts = createServerFn({ method: 'GET' })
+  .inputValidator(z.object({ eventId: z.string() }))
+  .handler(async ({ data: { eventId } }) => {
+    const session = await requireSession()
+
+    const event = await prisma.event.findUnique({ where: { id: eventId } })
+    if (!event) throw new Error('Event not found')
+
+    const isCreator = event.createdById === session.user.id
+    const isAttendee = await prisma.eventAttendee.findFirst({
+      where: { eventId, userId: session.user.id, leftAt: null },
+    })
+
+    if (!isCreator && !isAttendee) {
+      throw new Error('Unauthorized')
+    }
+
+    const posts = await prisma.eventPost.findMany({
+      where: { eventId },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    })
+
+    const userIds = [...new Set(posts.map((p) => p.userId))]
+    const [profiles, users] = await Promise.all([
+      prisma.profile.findMany({
+        where: { userId: { in: userIds } },
+        select: { userId: true, name: true, photos: true },
+      }),
+      prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, name: true, image: true },
+      }),
+    ])
+
+    const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
+    const userById = new Map(users.map((u) => [u.id, u]))
+
+    return posts.map((post) => {
+      const profile = profileByUserId.get(post.userId)
+      const user = userById.get(post.userId)
+      return {
+        ...post,
+        author: {
+          name: profile?.name || user?.name || 'Unnamed',
+          photo: profile?.photos?.[0] || user?.image || null,
+        },
+      }
+    })
+  })
+
+export const createEventPost = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ eventId: z.string(), content: z.string().min(1).max(1000) }))
+  .handler(async ({ data: { eventId, content } }) => {
+    const session = await requireSession()
+
+    const event = await prisma.event.findUnique({ where: { id: eventId } })
+    if (!event) throw new Error('Event not found')
+
+    const isCreator = event.createdById === session.user.id
+    const isAttendee = await prisma.eventAttendee.findFirst({
+      where: { eventId, userId: session.user.id, leftAt: null },
+    })
+
+    if (!isCreator && !isAttendee) {
+      throw new Error('Unauthorized')
+    }
+
+    const post = await prisma.eventPost.create({
+      data: {
+        eventId,
+        userId: session.user.id,
+        content: content.trim(),
+      },
+    })
+
+    const [profile, user] = await Promise.all([
+      prisma.profile.findUnique({
+        where: { userId: session.user.id },
+        select: { name: true, photos: true },
+      }),
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true, image: true },
+      }),
+    ])
+
+    const postWithAuthor = {
+      ...post,
+      author: {
+        name: profile?.name || user?.name || 'Unnamed',
+        photo: profile?.photos?.[0] || user?.image || null,
+      },
+    }
+
+    broadcastToEvent(eventId, {
+      type: 'event_post',
+      payload: { eventId, post: postWithAuthor },
+      timestamp: Date.now(),
+    })
+
+    return postWithAuthor
   })

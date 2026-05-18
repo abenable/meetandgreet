@@ -7,6 +7,7 @@ import { rateLimit } from '#/lib/rate-limit'
 import { getClientIdentifier } from '#/lib/rate-limit.server'
 import { sanitizeText } from '#/lib/sanitize'
 import { broadcastMatchCreated } from './websocket-broadcast'
+import { awardBadgeIfNotExists } from './badges.server'
 
 const swipeRateLimit = rateLimit({ windowMs: 60 * 1000, maxRequests: 30 })
 
@@ -97,16 +98,27 @@ export const recordSwipe = createServerFn({ method: 'POST' })
         })
 
         if (!existingMatch) {
+          const event = await prisma.event.findUnique({
+            where: { id: data.eventId },
+            select: { mysteryMode: true },
+          })
           const match = await prisma.eventMatch.create({
             data: {
               eventId: data.eventId,
               user1Id: u1,
               user2Id: u2,
+              messagesUnlockedAt: event?.mysteryMode ? null : new Date(),
             },
           })
           
           // Broadcast WebSocket notification for instant match alert
           broadcastMatchCreated(data.eventId, swiperId, data.swipedId, match.id)
+
+          // Award first_match badge to both users
+          await Promise.all([
+            awardBadgeIfNotExists(swiperId, 'first_match'),
+            awardBadgeIfNotExists(data.swipedId, 'first_match'),
+          ])
           
           // Notify both users about the match
           await Promise.all([

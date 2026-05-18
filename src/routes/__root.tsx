@@ -6,6 +6,7 @@ import BottomNav from '../components/BottomNav'
 import PWAInstallPrompt from '../components/PWAInstallPrompt'
 import { WebSocketProvider } from '../integrations/websocket/WebSocketProvider'
 import { getVapidPublicKey, subscribePush } from '#/server/notifications'
+import { checkAndUpdateStreak } from '#/server/badges'
 
 import appCss from '../styles.css?url'
 
@@ -150,6 +151,25 @@ function RootLayout() {
     }
 
     void setupPush()
+  }, [session?.user])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!session?.user) return
+
+    const lastCheck = localStorage.getItem('mag-last-streak-check')
+    const today = new Date().toISOString().slice(0, 10)
+    if (lastCheck === today) return
+
+    const run = async () => {
+      try {
+        await checkAndUpdateStreak()
+        localStorage.setItem('mag-last-streak-check', today)
+      } catch (err) {
+        console.error('[Streak] Check failed:', err)
+      }
+    }
+    void run()
   }, [session?.user])
 
   return (

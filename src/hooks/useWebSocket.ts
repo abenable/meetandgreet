@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
 export interface WSMessage {
-  type: 'chat_message' | 'match_created' | 'typing' | 'read_receipt' | 'online_status' | 'error'
+  type: 'chat_message' | 'match_created' | 'typing' | 'read_receipt' | 'online_status' | 'event_post' | 'error'
   payload: any
   timestamp: number
 }
@@ -133,6 +133,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
       case 'online_status':
         // Handle online/offline status
+        break
+
+      case 'event_post':
+        queryClient.invalidateQueries({ queryKey: ['event-posts', message.payload.eventId] })
         break
 
       case 'error':

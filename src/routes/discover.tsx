@@ -28,6 +28,7 @@ function DiscoverPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { data: activeEvent } = useQuery({ queryKey: ['active-event'], queryFn: () => getMyActiveEvent() })
   const eventId = activeEvent?.id ?? ''
+  const isMystery = activeEvent?.mysteryMode === true
 
   const [selectedIntent, setSelectedIntent] = useState<'dating' | 'friends' | 'networking' | ''>('')
 
@@ -205,9 +206,27 @@ function DiscoverPage() {
               className="relative h-full w-full shrink-0 snap-start snap-stop overflow-hidden"
             >
               <div className="h-full w-full">
-                <AvatarImage src={pic} alt={profile.name ?? ''} />
+                <AvatarImage
+                  src={pic}
+                  alt={profile.name ?? ''}
+                  imgClassName={isMystery ? 'blur-[20px] grayscale-[0.5] transition-all duration-1000' : ''}
+                />
               </div>
               <div className="gradient-overlay absolute inset-0" />
+              {isMystery && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="rounded-lg bg-black/50 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
+                    🔒 Reveal after 10 messages
+                  </span>
+                </div>
+              )}
+              {isMystery && (
+                <div className="absolute top-4 right-4 z-10">
+                  <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700">
+                    MYSTERY
+                  </span>
+                </div>
+              )}
               {hasPhotos && (
                 <>
                   <div className="absolute top-4 left-4 right-4 flex gap-1.5">

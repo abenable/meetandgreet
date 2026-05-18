@@ -15,7 +15,6 @@ console.log('✅ Environment variables validated')
 
 // @ts-ignore - built output, not present at type-check time
 import serverEntry from './dist/server/server.js'
-import { setBunServer } from './dist/server/websocket-broadcast.js'
 
 const port = Number(process.env.PORT) || 3000
 const clientDir = './dist/client'
@@ -113,7 +112,7 @@ const server = Bun.serve({
 })
 
 // Initialize WebSocket broadcasting
-setBunServer(server)
+;(globalThis as any).__bunServer__ = server
 
 async function handleWebSocketMessage(ws: any, message: any) {
   // Handle WebSocket messages

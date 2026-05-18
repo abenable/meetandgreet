@@ -23,6 +23,15 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const reconnectAttemptsRef = useRef(0)
   const queryClient = useQueryClient()
 
+  const onMessageRef = useRef(onMessage)
+  const onConnectRef = useRef(onConnect)
+  const onDisconnectRef = useRef(onDisconnect)
+
+  // Keep refs up to date so the stable connect callback always sees latest handlers
+  onMessageRef.current = onMessage
+  onConnectRef.current = onConnect
+  onDisconnectRef.current = onDisconnect
+
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return
 
@@ -33,14 +42,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       console.log('WebSocket connected')
       setConnected(true)
       reconnectAttemptsRef.current = 0
-      onConnect?.()
+      onConnectRef.current?.()
     }
 
     ws.onmessage = (event) => {
       try {
         const message: WSMessage = JSON.parse(event.data)
         setLastMessage(message)
-        onMessage?.(message)
+        onMessageRef.current?.(message)
         handleMessage(message)
       } catch (error) {
         console.error('Failed to parse WebSocket message:', error)
@@ -51,7 +60,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       console.log('WebSocket disconnected')
       setConnected(false)
       wsRef.current = null
-      onDisconnect?.()
+      onDisconnectRef.current?.()
 
       if (autoReconnect) {
         const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000)
@@ -66,7 +75,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     }
 
     wsRef.current = ws
-  }, [autoReconnect, onConnect, onDisconnect, onMessage])
+  }, [autoReconnect])
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {

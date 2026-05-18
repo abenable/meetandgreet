@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import { Mail, Lock, Eye, EyeOff, ArrowRight, UserPlus } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { authClient } from '#/lib/auth-client'
 import { isEmailVerified, sendEmailVerificationOtp } from '#/server/auth'
 import { normalizeAuthError, EMAIL_REGEX } from '#/lib/auth-errors'
@@ -138,9 +138,6 @@ function LoginPage() {
         </form>
 
         <div className="mt-2 flex flex-col gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-5 text-center">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[var(--mag-green)]/10">
-            <UserPlus className="h-5 w-5 text-[var(--mag-green)]" />
-          </div>
           <div>
             <p className="text-sm font-semibold text-[var(--mag-ink)]">Don't have an account?</p>
             <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">Join now and start meeting people.</p>

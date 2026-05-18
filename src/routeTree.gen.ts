@@ -31,6 +31,7 @@ import { Route as ProfileIndexRouteImport } from './routes/profile/index'
 import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password.index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as ChatsIndexRouteImport } from './routes/chats.index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VerifyCaptureRouteImport } from './routes/verify/capture'
 import { Route as SignupVerifyRouteImport } from './routes/signup.verify'
 import { Route as SettingsPrivacyRouteImport } from './routes/settings/privacy'
@@ -160,6 +161,11 @@ const ChatsIndexRoute = ChatsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ChatsRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifyCaptureRoute = VerifyCaptureRouteImport.update({
   id: '/verify/capture',
   path: '/verify/capture',
@@ -281,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/settings/privacy': typeof SettingsPrivacyRoute
   '/signup/verify': typeof SignupVerifyRoute
   '/verify/capture': typeof VerifyCaptureRoute
+  '/admin/': typeof AdminIndexRoute
   '/chats/': typeof ChatsIndexRoute
   '/events/': typeof EventsIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
@@ -321,6 +328,7 @@ export interface FileRoutesByTo {
   '/settings/privacy': typeof SettingsPrivacyRoute
   '/signup/verify': typeof SignupVerifyRoute
   '/verify/capture': typeof VerifyCaptureRoute
+  '/admin': typeof AdminIndexRoute
   '/chats': typeof ChatsIndexRoute
   '/events': typeof EventsIndexRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
@@ -364,6 +372,7 @@ export interface FileRoutesById {
   '/settings/privacy': typeof SettingsPrivacyRoute
   '/signup/verify': typeof SignupVerifyRoute
   '/verify/capture': typeof VerifyCaptureRoute
+  '/admin/': typeof AdminIndexRoute
   '/chats/': typeof ChatsIndexRoute
   '/events/': typeof EventsIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
@@ -408,6 +417,7 @@ export interface FileRouteTypes {
     | '/settings/privacy'
     | '/signup/verify'
     | '/verify/capture'
+    | '/admin/'
     | '/chats/'
     | '/events/'
     | '/forgot-password/'
@@ -448,6 +458,7 @@ export interface FileRouteTypes {
     | '/settings/privacy'
     | '/signup/verify'
     | '/verify/capture'
+    | '/admin'
     | '/chats'
     | '/events'
     | '/forgot-password'
@@ -490,6 +501,7 @@ export interface FileRouteTypes {
     | '/settings/privacy'
     | '/signup/verify'
     | '/verify/capture'
+    | '/admin/'
     | '/chats/'
     | '/events/'
     | '/forgot-password/'
@@ -531,6 +543,7 @@ export interface RootRouteChildren {
   SettingsNotificationsRoute: typeof SettingsNotificationsRoute
   SettingsPrivacyRoute: typeof SettingsPrivacyRoute
   VerifyCaptureRoute: typeof VerifyCaptureRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
   ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
@@ -696,6 +709,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/chats/'
       preLoaderRoute: typeof ChatsIndexRouteImport
       parentRoute: typeof ChatsRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/verify/capture': {
       id: '/verify/capture'
@@ -891,6 +911,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsNotificationsRoute: SettingsNotificationsRoute,
   SettingsPrivacyRoute: SettingsPrivacyRoute,
   VerifyCaptureRoute: VerifyCaptureRoute,
+  AdminIndexRoute: AdminIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
   ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,

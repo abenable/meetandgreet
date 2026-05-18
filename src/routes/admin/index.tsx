@@ -1,0 +1,431 @@
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  Users,
+  Calendar,
+  MessageSquare,
+  Flag,
+  Shield,
+  Ban,
+  CheckCircle,
+  Trash2,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Activity,
+  AlertTriangle,
+  Eye,
+  Lock,
+  Unlock,
+  Crown,
+  User as UserIcon,
+} from 'lucide-react'
+import {
+  getAdminStats,
+  getAllUsers,
+  getAllEvents,
+  getAllReports,
+  updateUserRole,
+  toggleUserDisabled,
+  adminDeleteEvent,
+  adminToggleEventActive,
+  deleteReport,
+} from '#/server/admin'
+import { getSession } from '#/server/auth'
+import AvatarImage from '#/components/AvatarImage'
+
+export const Route = createFileRoute('/admin/')({
+  beforeLoad: async () => {
+    const session = await getSession()
+    if (!session?.user) {
+      throw redirect({ to: '/login' })
+    }
+    // Re-fetch user to check role (getSession may not include role)
+    const { requireAdmin } = await import('#/server/auth')
+    try {
+      await requireAdmin()
+    } catch {
+      throw redirect({ to: '/' })
+    }
+    return { session }
+  },
+  component: AdminPage,
+})
+
+type Tab = 'overview' | 'users' | 'events' | 'reports'
+
+function AdminPage() {
+  const [tab, setTab] = useState<Tab>('overview')
+  const queryClient = useQueryClient()
+
+  return (
+    <div className="page-wrap flex flex-1 flex-col px-4 py-4">
+      <div className="mb-4 flex items-center gap-2">
+        <Shield className="h-5 w-5 text-[var(--mag-green)]" />
+        <h1 className="text-lg font-bold text-[var(--mag-ink)]">Admin Dashboard</h1>
+      </div>
+
+      {/* Tabs */}
+      <div className="mb-4 flex gap-1 overflow-x-auto">
+        <TabButton active={tab === 'overview'} onClick={() => setTab('overview')} icon={<Activity className="h-4 w-4" />} label="Overview" />
+        <TabButton active={tab === 'users'} onClick={() => setTab('users')} icon={<Users className="h-4 w-4" />} label="Users" />
+        <TabButton active={tab === 'events'} onClick={() => setTab('events')} icon={<Calendar className="h-4 w-4" />} label="Events" />
+        <TabButton active={tab === 'reports'} onClick={() => setTab('reports')} icon={<Flag className="h-4 w-4" />} label="Reports" />
+      </div>
+
+      {tab === 'overview' && <OverviewTab />}
+      {tab === 'users' && <UsersTab />}
+      {tab === 'events' && <EventsTab />}
+      {tab === 'reports' && <ReportsTab />}
+    </div>
+  )
+}
+
+function TabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
+        active
+          ? 'bg-[var(--mag-green)] text-white'
+          : 'bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-line)]'
+      }`}
+    >
+      {icon}
+      {label}
+    </button>
+  )
+}
+
+/* ---------- OVERVIEW ---------- */
+function OverviewTab() {
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: () => getAdminStats(),
+  })
+
+  if (isLoading) return <div className="text-sm text-[var(--mag-ink-muted)]">Loading stats...</div>
+  if (!stats) return <div className="text-sm text-red-500">Failed to load stats</div>
+
+  const cards = [
+    { label: 'Total Users', value: stats.totalUsers, icon: <Users className="h-5 w-5" />, color: 'text-blue-500' },
+    { label: 'Active Events', value: stats.activeEvents, icon: <Calendar className="h-5 w-5" />, color: 'text-[var(--mag-green)]' },
+    { label: 'Total Matches', value: stats.totalMatches, icon: <MessageSquare className="h-5 w-5" />, color: 'text-purple-500' },
+    { label: 'Total Messages', value: stats.totalMessages, icon: <Activity className="h-5 w-5" />, color: 'text-amber-500' },
+    { label: 'Total Reports', value: stats.totalReports, icon: <Flag className="h-5 w-5" />, color: 'text-red-500' },
+    { label: 'New Users (7d)', value: stats.recentUsers, icon: <UserIcon className="h-5 w-5" />, color: 'text-cyan-500' },
+  ]
+
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {cards.map((c) => (
+        <div key={c.label} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+          <div className={`mb-2 ${c.color}`}>{c.icon}</div>
+          <div className="text-2xl font-bold text-[var(--mag-ink)]">{c.value.toLocaleString()}</div>
+          <div className="text-xs text-[var(--mag-ink-muted)]">{c.label}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ---------- USERS ---------- */
+function UsersTab() {
+  const [search, setSearch] = useState('')
+  const [cursor, setCursor] = useState<string | undefined>()
+  const queryClient = useQueryClient()
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-users', search, cursor],
+    queryFn: () => getAllUsers({ data: { search: search || undefined, cursor, limit: 50 } }),
+  })
+
+  const roleMutation = useMutation({
+    mutationFn: updateUserRole,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
+  })
+
+  const disableMutation = useMutation({
+    mutationFn: toggleUserDisabled,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
+  })
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setCursor(undefined) }}
+          placeholder="Search users by email or name..."
+          className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-2.5 pl-9 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+        />
+      </div>
+
+      {isLoading ? (
+        <div className="text-sm text-[var(--mag-ink-muted)]">Loading users...</div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {data?.items.map((user: any) => (
+              <div key={user.id} className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+                <AvatarImage src={user.image} className="h-10 w-10 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{user.name || user.email}</span>
+                    {user.role === 'admin' && <Crown className="h-3.5 w-3.5 text-amber-500" />}
+                    {user.disabledAt && <Ban className="h-3.5 w-3.5 text-red-500" />}
+                  </div>
+                  <div className="text-xs text-[var(--mag-ink-muted)]">{user.email}</div>
+                  <div className="mt-1 flex gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                    <span>{new Date(user.createdAt).toLocaleDateString()}</span>
+                    <span>·</span>
+                    <span>{user._count.sessions} sessions</span>
+                  </div>
+                </div>
+                <div className="flex shrink-0 flex-col gap-1">
+                  <button
+                    onClick={() => roleMutation.mutate({ data: { userId: user.id, role: user.role === 'admin' ? 'user' : 'admin' } })}
+                    className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-1 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)]"
+                    disabled={roleMutation.isPending}
+                  >
+                    {user.role === 'admin' ? <Unlock className="h-3 w-3" /> : <Crown className="h-3 w-3" />}
+                    {user.role === 'admin' ? 'Demote' : 'Promote'}
+                  </button>
+                  <button
+                    onClick={() => disableMutation.mutate({ data: { userId: user.id, disabled: !user.disabledAt } })}
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium transition ${
+                      user.disabledAt
+                        ? 'bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20'
+                        : 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20'
+                    }`}
+                    disabled={disableMutation.isPending}
+                  >
+                    {user.disabledAt ? <CheckCircle className="h-3 w-3" /> : <Ban className="h-3 w-3" />}
+                    {user.disabledAt ? 'Enable' : 'Disable'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {data && data.items.length === 0 && (
+            <div className="py-8 text-center text-sm text-[var(--mag-ink-muted)]">No users found</div>
+          )}
+
+          {(data?.nextCursor || cursor) && (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <button
+                onClick={() => setCursor(undefined)}
+                disabled={!cursor}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setCursor(data?.nextCursor || undefined)}
+                disabled={!data?.nextCursor}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ---------- EVENTS ---------- */
+function EventsTab() {
+  const [cursor, setCursor] = useState<string | undefined>()
+  const queryClient = useQueryClient()
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-events', cursor],
+    queryFn: () => getAllEvents({ data: { cursor, limit: 50 } }),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: adminDeleteEvent,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-events'] }),
+  })
+
+  const toggleMutation = useMutation({
+    mutationFn: adminToggleEventActive,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-events'] }),
+  })
+
+  return (
+    <div className="flex flex-col gap-3">
+      {isLoading ? (
+        <div className="text-sm text-[var(--mag-ink-muted)]">Loading events...</div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {data?.items.map((event: any) => (
+              <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+                <div className="flex items-start gap-3">
+                  {event.photo ? (
+                    <img src={event.photo} alt={event.name} className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+                  ) : (
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--mag-surface)]">
+                      <Calendar className="h-5 w-5 text-[var(--mag-ink-muted)]" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</span>
+                      {!event.isActive && <span className="shrink-0 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600 dark:bg-red-900/20">Inactive</span>}
+                      {event.endedAt && <span className="shrink-0 rounded-full bg-[var(--mag-ink-muted)]/10 px-1.5 py-0.5 text-[10px] font-bold text-[var(--mag-ink-muted)]">Ended</span>}
+                    </div>
+                    <div className="text-xs text-[var(--mag-ink-muted)]">{event.location || 'No location'}</div>
+                    <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                      <span>{event._count.attendees} attendees</span>
+                      <span>{event._count.swipes} swipes</span>
+                      <span>{event._count.matches} matches</span>
+                      <span>{event._count.waitlist} waitlist</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    onClick={() => toggleMutation.mutate({ data: { eventId: event.id, active: !event.isActive } })}
+                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-surface)] py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)]"
+                    disabled={toggleMutation.isPending}
+                  >
+                    {event.isActive ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+                    {event.isActive ? 'Deactivate' : 'Activate'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm('Delete this event and all its data?')) {
+                        deleteMutation.mutate({ data: event.id })
+                      }
+                    }}
+                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-red-50 py-1.5 text-[10px] font-medium text-red-600 transition hover:bg-red-100 dark:bg-red-900/20"
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="h-3 w-3" /> Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {data && data.items.length === 0 && (
+            <div className="py-8 text-center text-sm text-[var(--mag-ink-muted)]">No events found</div>
+          )}
+
+          {(data?.nextCursor || cursor) && (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <button
+                onClick={() => setCursor(undefined)}
+                disabled={!cursor}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setCursor(data?.nextCursor || undefined)}
+                disabled={!data?.nextCursor}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ---------- REPORTS ---------- */
+function ReportsTab() {
+  const [cursor, setCursor] = useState<string | undefined>()
+  const queryClient = useQueryClient()
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-reports', cursor],
+    queryFn: () => getAllReports({ data: { cursor, limit: 50 } }),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteReport,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-reports'] }),
+  })
+
+  return (
+    <div className="flex flex-col gap-3">
+      {isLoading ? (
+        <div className="text-sm text-[var(--mag-ink-muted)]">Loading reports...</div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {data?.items.map((report: any) => (
+              <div key={report.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+                <div className="mb-2 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                  <span className="text-xs font-medium text-[var(--mag-ink-soft)]">{new Date(report.createdAt).toLocaleString()}</span>
+                </div>
+                <div className="mb-2 text-sm text-[var(--mag-ink)]">{report.reason}</div>
+                <div className="mb-2 flex gap-3 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <AvatarImage src={report.reporter?.image} className="h-5 w-5" />
+                    <span className="text-[var(--mag-ink-muted)]">Reporter:</span>
+                    <span className="font-medium text-[var(--mag-ink)]">{report.reporter?.name || report.reporter?.email || 'Unknown'}</span>
+                    {report.reporter?.disabledAt && <Ban className="h-3 w-3 text-red-500" />}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <AvatarImage src={report.reported?.image} className="h-5 w-5" />
+                    <span className="text-[var(--mag-ink-muted)]">Reported:</span>
+                    <span className="font-medium text-[var(--mag-ink)]">{report.reported?.name || report.reported?.email || 'Unknown'}</span>
+                    {report.reported?.disabledAt && <Ban className="h-3 w-3 text-red-500" />}
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    if (confirm('Delete this report?')) {
+                      deleteMutation.mutate({ data: report.id })
+                    }
+                  }}
+                  className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-1 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)]"
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="h-3 w-3" /> Delete Report
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {data && data.items.length === 0 && (
+            <div className="py-8 text-center text-sm text-[var(--mag-ink-muted)]">No reports found</div>
+          )}
+
+          {(data?.nextCursor || cursor) && (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <button
+                onClick={() => setCursor(undefined)}
+                disabled={!cursor}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setCursor(data?.nextCursor || undefined)}
+                disabled={!data?.nextCursor}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}

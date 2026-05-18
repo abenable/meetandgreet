@@ -30,9 +30,10 @@ async function fetchSessionFromAuthHandler(): Promise<{ session: any; user: any 
   if (data.user?.id) {
     const user = await prisma.user.findUnique({
       where: { id: data.user.id },
-      select: { disabledAt: true },
+      select: { disabledAt: true, role: true },
     })
     if (user?.disabledAt) return null
+    data.user.role = user?.role ?? 'user'
   }
 
   return data
@@ -53,6 +54,22 @@ export const requireSession = createServerFn({ method: 'GET' })
     const data = await fetchSessionFromAuthHandler()
     if (!data?.user?.id) {
       throw new Error('Unauthorized')
+    }
+    return data
+  })
+
+export const requireAdmin = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    const data = await fetchSessionFromAuthHandler()
+    if (!data?.user?.id) {
+      throw new Error('Unauthorized')
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: data.user.id },
+      select: { role: true },
+    })
+    if (user?.role !== 'admin') {
+      throw new Error('Forbidden')
     }
     return data
   })

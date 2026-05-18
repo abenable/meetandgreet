@@ -92,13 +92,24 @@ function ManageEventPage() {
 
   const attendeeCount = (event as any)?._count?.attendees ?? 0
 
-  const { data: eventPosts = [], isLoading: postsLoading } = useQuery({
+  const { data: postsData, isLoading: postsLoading } = useQuery({
     queryKey: ['event-posts', eventId],
-    queryFn: () => getEventPosts({ data: { eventId } }),
+    queryFn: () => getEventPosts({ data: { eventId, limit: 20 } }),
     enabled: !!eventId,
   })
+  const eventPosts = postsData?.items ?? []
 
   const [postContent, setPostContent] = useState('')
+  const [postsCursor, setPostsCursor] = useState<string | undefined>()
+
+  const loadMorePosts = async () => {
+    if (!postsData?.nextCursor) return
+    const more = await getEventPosts({ data: { eventId, cursor: postsData.nextCursor, limit: 20 } })
+    queryClient.setQueryData(['event-posts', eventId], {
+      items: [...eventPosts, ...more.items],
+      nextCursor: more.nextCursor,
+    })
+  }
 
   const createPostMutation = useMutation({
     mutationFn: createEventPost,
@@ -724,6 +735,14 @@ function ManageEventPage() {
                       </div>
                     </div>
                   ))
+                )}
+                {postsData?.nextCursor && (
+                  <button
+                    onClick={loadMorePosts}
+                    className="w-full py-2 text-center text-xs font-medium text-[var(--mag-ink-muted)] transition hover:text-[var(--mag-green)]"
+                  >
+                    Load more posts
+                  </button>
                 )}
               </div>
             </div>

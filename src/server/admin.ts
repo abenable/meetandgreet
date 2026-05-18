@@ -2,6 +2,8 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { prisma } from '#/db'
 import { requireAdmin } from '#/server/auth'
+import { r2Client, R2_BUCKET_NAME } from '#/lib/r2'
+import { DeleteObjectCommand } from '@aws-sdk/client-s3'
 
 export const getAdminStats = createServerFn({ method: 'GET' })
   .handler(async () => {
@@ -189,6 +191,27 @@ export const adminDeleteEvent = createServerFn({ method: 'POST' })
   .inputValidator(z.string())
   .handler(async ({ data: eventId }) => {
     await requireAdmin()
+
+    // Find and delete orphaned voice files from R2 before cascading DB delete
+    const voiceMessages = await prisma.eventMessage.findMany({
+      where: {
+        match: { eventId },
+        type: 'voice',
+        audioUrl: { not: null },
+      },
+      select: { audioUrl: true },
+    })
+
+    for (const msg of voiceMessages) {
+      if (!msg.audioUrl) continue
+      try {
+        const key = msg.audioUrl.replace(`https://${R2_BUCKET_NAME}.r2.cloudflarestorage.com/`, '')
+          .replace(`${process.env.R2_PUBLIC_URL}/`, '')
+        await r2Client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key }))
+      } catch (err) {
+        console.warn('[R2 Cleanup] Failed to delete voice file:', err)
+      }
+    }
 
     await prisma.event.delete({
       where: { id: eventId },

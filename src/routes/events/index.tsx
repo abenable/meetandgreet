@@ -220,6 +220,11 @@ function EventsExplorePage() {
                     <div className="flex items-center gap-2">
                       <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
                       {isJoined && <span className="shrink-0 rounded-full bg-[var(--mag-green)] px-2 py-0.5 text-[10px] font-bold text-white">Joined</span>}
+                      {(event as any).mysteryMode && (
+                        <span className="shrink-0 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                          Mystery
+                        </span>
+                      )}
                     </div>
                     <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
@@ -314,6 +319,11 @@ function EventsExplorePage() {
                       )}
                       <div className="min-w-0 flex-1">
                         <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                        {(event as any).mysteryMode && (
+                          <span className="shrink-0 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                            Mystery
+                          </span>
+                        )}
                         <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
                         <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
                           <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>

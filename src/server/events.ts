@@ -75,6 +75,7 @@ export const listEvents = createServerFn({ method: 'GET' })
         createdAt: true,
         startsAt: true,
         maxAttendees: true,
+        mysteryMode: true,
         _count: { select: { attendees: { where: { leftAt: null } } } },
       },
       orderBy: { createdAt: 'desc' },
@@ -373,6 +374,19 @@ export const joinEvent = createServerFn({ method: 'POST' })
         create: { eventId: event.id, userId: session.user.id },
       })
     })
+
+    // Check if user has joined 3+ events and award social_butterfly badge
+    const totalJoinedEvents = await prisma.eventAttendee.count({
+      where: { 
+        userId: session.user.id, 
+        leftAt: null,
+        createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+      },
+    })
+    if (totalJoinedEvents >= 3) {
+      const { awardBadgeIfNotExists } = await import('./badges.server')
+      await awardBadgeIfNotExists(session.user.id, 'social_butterfly')
+    }
 
     return { success: true }
   })
@@ -1004,8 +1018,12 @@ export const getEventReports = createServerFn({ method: 'GET' })
   })
 
 export const getEventPosts = createServerFn({ method: 'GET' })
-  .inputValidator(z.object({ eventId: z.string() }))
-  .handler(async ({ data: { eventId } }) => {
+  .inputValidator(z.object({ 
+    eventId: z.string(),
+    cursor: z.string().optional(),
+    limit: z.number().min(1).max(50).default(20),
+  }))
+  .handler(async ({ data: { eventId, cursor, limit } }) => {
     const session = await requireSession()
 
     const event = await prisma.event.findUnique({ where: { id: eventId } })
@@ -1023,10 +1041,14 @@ export const getEventPosts = createServerFn({ method: 'GET' })
     const posts = await prisma.eventPost.findMany({
       where: { eventId },
       orderBy: { createdAt: 'desc' },
-      take: 50,
+      take: limit + 1,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
     })
 
-    const userIds = [...new Set(posts.map((p) => p.userId))]
+    const hasMore = posts.length > limit
+    const items = hasMore ? posts.slice(0, limit) : posts
+
+    const userIds = [...new Set(items.map((p) => p.userId))]
     const [profiles, users] = await Promise.all([
       prisma.profile.findMany({
         where: { userId: { in: userIds } },
@@ -1041,17 +1063,20 @@ export const getEventPosts = createServerFn({ method: 'GET' })
     const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
     const userById = new Map(users.map((u) => [u.id, u]))
 
-    return posts.map((post) => {
-      const profile = profileByUserId.get(post.userId)
-      const user = userById.get(post.userId)
-      return {
-        ...post,
-        author: {
-          name: profile?.name || user?.name || 'Unnamed',
-          photo: profile?.photos?.[0] || user?.image || null,
-        },
-      }
-    })
+    return {
+      items: items.map((post) => {
+        const profile = profileByUserId.get(post.userId)
+        const user = userById.get(post.userId)
+        return {
+          ...post,
+          author: {
+            name: profile?.name || user?.name || 'Unnamed',
+            photo: profile?.photos?.[0] || user?.image || null,
+          },
+        }
+      }),
+      nextCursor: hasMore ? items[items.length - 1].id : null,
+    }
   })
 
 export const createEventPost = createServerFn({ method: 'POST' })

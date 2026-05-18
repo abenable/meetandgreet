@@ -77,6 +77,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     }
 
     if (isPublic) {
+      if (session?.session && location.pathname === '/') {
+        throw redirect({ to: '/discover' })
+      }
       return { session }
     }
 

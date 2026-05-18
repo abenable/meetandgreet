@@ -39,7 +39,9 @@ import {
   getEventPosts,
   createEventPost,
 } from '#/server/events'
+import { updateEventSponsor, removeEventSponsor } from '#/server/sponsors'
 import { getSession } from '#/server/auth'
+import { getEffectiveTier } from '#/lib/tiers'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
@@ -136,6 +138,13 @@ function ManageEventPage() {
   const [saveError, setSaveError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
+  // Sponsor branding state
+  const [sponsorName, setSponsorName] = useState('')
+  const [sponsorLogo, setSponsorLogo] = useState('')
+  const [sponsorFrameUrl, setSponsorFrameUrl] = useState('')
+  const [sponsorSaved, setSponsorSaved] = useState(false)
+  const [sponsorError, setSponsorError] = useState('')
+
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -165,10 +174,20 @@ function ManageEventPage() {
       setEventPhoto(event.photo ?? null)
       setEventIsPublic((event as any).isPublic ?? true)
       setEventMysteryMode((event as any).mysteryMode ?? false)
+      setSponsorName((event as any).sponsorName ?? '')
+      setSponsorLogo((event as any).sponsorLogo ?? '')
+      setSponsorFrameUrl((event as any).sponsorFrameUrl ?? '')
     }
   }, [event])
 
   const isCreator = !!session?.user?.id && (event as any)?.createdById === session.user.id
+
+  const isHostOrAdmin = (() => {
+    if (!session?.user) return false
+    if (session.user.role === 'admin') return true
+    const tier = getEffectiveTier(session.user.subscriptionTier, session.user.subscriptionExpiresAt)
+    return tier === 'host'
+  })()
 
   const updateMutation = useMutation({
     mutationFn: updateEvent,
@@ -230,6 +249,37 @@ function ManageEventPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['event-waitlist', eventId] })
       queryClient.invalidateQueries({ queryKey: ['event', eventId] })
+    },
+  })
+
+  const updateSponsorMutation = useMutation({
+    mutationFn: updateEventSponsor,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+      setSponsorError('')
+      setSponsorSaved(true)
+      setTimeout(() => setSponsorSaved(false), 2000)
+    },
+    onError: (err: any) => {
+      const message = err?.message || err?.error?.message || 'Failed to update sponsor.'
+      setSponsorError(message)
+    },
+  })
+
+  const removeSponsorMutation = useMutation({
+    mutationFn: removeEventSponsor,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+      setSponsorName('')
+      setSponsorLogo('')
+      setSponsorFrameUrl('')
+      setSponsorError('')
+    },
+    onError: (err: any) => {
+      const message = err?.message || err?.error?.message || 'Failed to remove sponsor.'
+      setSponsorError(message)
     },
   })
 
@@ -574,6 +624,126 @@ function ManageEventPage() {
           </button>
         </div>
       </section>
+
+      {/* Sponsor Branding */}
+      {isCreator && isHostOrAdmin && (
+        <section className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+          <h2 className="mb-3 text-sm font-bold text-[var(--mag-ink)]">Sponsor Branding</h2>
+
+          {!(event as any)?.sponsorName && !(event as any)?.sponsorLogo && !(event as any)?.sponsorFrameUrl ? (
+            <p className="mb-3 text-xs text-[var(--mag-ink-muted)]">
+              Add sponsor branding (Host tier)
+            </p>
+          ) : (
+            <div className="mb-3 flex items-center gap-3">
+              {(event as any)?.sponsorLogo && (
+                <img
+                  src={(event as any).sponsorLogo}
+                  alt={(event as any).sponsorName || 'Sponsor logo'}
+                  className="h-8 max-w-[140px] object-contain"
+                />
+              )}
+              <div className="min-w-0">
+                {(event as any)?.sponsorName && (
+                  <p className="text-xs font-semibold text-[var(--mag-ink)]">{(event as any).sponsorName}</p>
+                )}
+                {(event as any)?.sponsorFrameUrl && (
+                  <p className="text-[10px] text-[var(--mag-ink-muted)]">Frame image set</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="mx-auto max-w-md space-y-4">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Sponsor Name</label>
+              <input
+                type="text"
+                value={sponsorName}
+                onChange={(e) => setSponsorName(e.target.value)}
+                placeholder="e.g. Acme Corp"
+                className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Sponsor Logo URL</label>
+              <input
+                type="url"
+                value={sponsorLogo}
+                onChange={(e) => setSponsorLogo(e.target.value)}
+                placeholder="https://example.com/logo.png"
+                className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              />
+              {sponsorLogo && (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-[10px] text-[var(--mag-ink-muted)]">Preview:</span>
+                  <img src={sponsorLogo} alt="Logo preview" className="h-6 max-w-[120px] object-contain" />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Sponsor Frame URL</label>
+              <input
+                type="url"
+                value={sponsorFrameUrl}
+                onChange={(e) => setSponsorFrameUrl(e.target.value)}
+                placeholder="https://example.com/frame.png"
+                className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              />
+              <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">
+                A decorative border/frame image that wraps the event card
+              </p>
+            </div>
+          </div>
+
+          {sponsorError && (
+            <p className="mt-2 text-center text-xs font-semibold text-red-500">{sponsorError}</p>
+          )}
+
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <button
+              onClick={() => {
+                updateSponsorMutation.mutate({
+                  data: {
+                    eventId,
+                    sponsorName: sponsorName.trim() || undefined,
+                    sponsorLogo: sponsorLogo.trim() || null,
+                    sponsorFrameUrl: sponsorFrameUrl.trim() || null,
+                  },
+                })
+              }}
+              disabled={updateSponsorMutation.isPending}
+              className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-2.5 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save className="h-3.5 w-3.5" />
+              {updateSponsorMutation.isPending ? 'Saving…' : 'Save Sponsor'}
+            </button>
+            {sponsorSaved && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--mag-green)]">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Saved
+              </span>
+            )}
+          </div>
+
+          {((event as any)?.sponsorName || (event as any)?.sponsorLogo || (event as any)?.sponsorFrameUrl) && (
+            <div className="mt-3 flex items-center justify-center">
+              <button
+                onClick={() => {
+                  if (confirm('Remove sponsor branding from this event?')) {
+                    removeSponsorMutation.mutate({ data: eventId })
+                  }
+                }}
+                disabled={removeSponsorMutation.isPending}
+                className="inline-flex items-center gap-1.5 rounded-full border border-red-300 px-4 py-2 text-[10px] font-bold text-red-500 transition hover:bg-red-50 disabled:opacity-50"
+              >
+                <Trash2 className="h-3 w-3" /> Remove Sponsor
+              </button>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Tabs */}
       <div className="mb-4 flex items-center gap-1 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-1">

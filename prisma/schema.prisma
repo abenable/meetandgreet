@@ -17,6 +17,8 @@ model User {
   disabledAt    DateTime?
   streakCount   Int       @default(0)
   lastActiveDate DateTime?
+  subscriptionTier String @default("free")
+  subscriptionExpiresAt DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
@@ -82,7 +84,9 @@ model Profile {
   lookingFor  String[] @default([])
   job         String?
   verifiedAt  DateTime?
-  createdAt   DateTime @default(now())
+  boostedUntil DateTime?
+  lastBoostedAt DateTime?
+  createdAt   DateTime  @default(now())
   updatedAt   DateTime @updatedAt
 }
 
@@ -122,6 +126,9 @@ model Event {
   isActive    Boolean                 @default(true)
   isPublic    Boolean                 @default(true)
   mysteryMode Boolean                 @default(false)
+  sponsorName String?
+  sponsorLogo String?
+  sponsorFrameUrl String?
   createdAt   DateTime                @default(now())
   expiresAt    DateTime?
   maxAttendees Int?
@@ -292,4 +299,16 @@ model EventMessageRequest {
   updatedAt  DateTime @updatedAt
 
   @@unique([eventId, senderId, receiverId])
+}
+
+model DailySwipeLimit {
+  id        String   @id @default(uuid())
+  userId    String
+  eventId   String
+  date      DateTime @default(now())
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, eventId, date])
 }

@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useRef, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, Briefcase } from 'lucide-react'
-import { getMyActiveEvent, getEventProfiles, reportUser } from '#/server/events'
-import { recordSwipe } from '#/server/swipes'
+import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, Briefcase, Zap } from 'lucide-react'
+import { getMyActiveEvent, reportUser } from '#/server/events'
+import { recordSwipe, getSwipeDeck } from '#/server/swipes'
 import { sendMessageRequest } from '#/server/requests'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
@@ -34,7 +34,7 @@ function DiscoverPage() {
 
   const { data: baseProfiles = [] } = useQuery({
     queryKey: ['event-profiles', eventId, selectedIntent],
-    queryFn: () => getEventProfiles({ data: { eventId, intent: selectedIntent || undefined } }),
+    queryFn: () => getSwipeDeck({ data: { eventId, intent: selectedIntent || undefined } }),
     enabled: !!eventId,
   })
 
@@ -216,7 +216,7 @@ function DiscoverPage() {
               {isMystery && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="rounded-lg bg-black/50 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
-                    🔒 Reveal after 10 messages
+                    Locked - Reveal after 10 messages
                   </span>
                 </div>
               )}
@@ -224,6 +224,13 @@ function DiscoverPage() {
                 <div className="absolute top-4 right-4 z-10">
                   <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700">
                     MYSTERY
+                  </span>
+                </div>
+              )}
+              {(profile as any).isBoosted && (
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/90 px-2 py-0.5 text-[10px] font-bold text-white">
+                    <Zap className="h-3 w-3" /> BOOSTED
                   </span>
                 </div>
               )}

@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getUnreadNotificationCount } from '#/server/notifications'
 import Logo from './Logo'
 import AvatarImage from './AvatarImage'
+import { getEffectiveTier } from '#/lib/tiers'
 
 const rootRoute = getRouteApi('__root__')
 
@@ -40,6 +41,10 @@ export default function Header() {
     }
   }
 
+  const tier = session?.user
+    ? getEffectiveTier(session.user.subscriptionTier, session.user.subscriptionExpiresAt)
+    : 'free'
+
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--mag-line)] bg-[var(--header-bg)] backdrop-blur-lg">
       <div className="page-wrap flex items-center justify-between py-3">
@@ -47,9 +52,14 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <Link
               to="/profile"
-              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)]"
+              className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)]"
             >
               <AvatarImage src={session.user.image} />
+              {tier !== 'free' && (
+                <span className="absolute -bottom-1 -right-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-1.5 py-[1px] text-[9px] font-bold text-white uppercase leading-none">
+                  {tier}
+                </span>
+              )}
             </Link>
           </div>
         ) : (

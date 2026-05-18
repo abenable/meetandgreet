@@ -8,6 +8,8 @@ import { getClientIdentifier } from '#/lib/rate-limit.server'
 import { sanitizeText } from '#/lib/sanitize'
 import { broadcastMatchCreated } from './websocket-broadcast'
 import { awardBadgeIfNotExists } from './badges.server'
+import { canSwipeToday } from '#/server/subscriptions'
+import { getEventProfiles } from '#/server/events'
 
 const swipeRateLimit = rateLimit({ windowMs: 60 * 1000, maxRequests: 30 })
 
@@ -30,6 +32,11 @@ export const recordSwipe = createServerFn({ method: 'POST' })
 
     if (swiperId === data.swipedId) {
       throw new Error('Cannot swipe yourself')
+    }
+
+    const swipeCheck = await canSwipeToday({ data: data.eventId })
+    if (!swipeCheck.allowed) {
+      throw new Error(swipeCheck.error)
     }
 
     const [swiperAttendee, swipedAttendee] = await Promise.all([
@@ -366,4 +373,17 @@ export const sendMessage = createServerFn({ method: 'POST' })
         content: sanitizedContent,
       },
     })
+  })
+
+export const getSwipeDeck = createServerFn({ method: 'GET' })
+  .inputValidator(
+    z.object({
+      eventId: z.string(),
+      intent: z.enum(['dating', 'friends', 'networking']).optional(),
+    })
+  )
+  .handler(async ({ data }) => {
+    // getEventProfiles handles boost sorting internally: boosted profiles
+    // appear first, each group is shuffled separately, then concatenated.
+    return getEventProfiles({ data })
   })

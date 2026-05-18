@@ -303,6 +303,51 @@ export const deleteReport = createServerFn({ method: 'POST' })
     return { success: true }
   })
 
+export const getEventsWithSponsors = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    await requireAdmin()
+
+    const events = await prisma.event.findMany({
+      where: {
+        OR: [
+          { sponsorName: { not: null } },
+          { sponsorLogo: { not: null } },
+          { sponsorFrameUrl: { not: null } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        code: true,
+        photo: true,
+        location: true,
+        sponsorName: true,
+        sponsorLogo: true,
+        sponsorFrameUrl: true,
+        createdById: true,
+        createdAt: true,
+        _count: {
+          select: {
+            attendees: { where: { leftAt: null } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    const userIds = [...new Set(events.map((e) => e.createdById))]
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true, email: true },
+    })
+    const userById = new Map(users.map((u) => [u.id, u]))
+
+    return events.map((event) => ({
+      ...event,
+      creator: userById.get(event.createdById) ?? null,
+    }))
+  })
+
 export const getFlaggedUsers = createServerFn({ method: 'GET' })
   .handler(async () => {
     await requireAdmin()

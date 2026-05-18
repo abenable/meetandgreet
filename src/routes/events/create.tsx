@@ -98,6 +98,11 @@ function CreateEventPage() {
         return
       }
 
+      if ((result as any).success === false) {
+        setCreateError((result as any).message || 'Could not create event.')
+        return
+      }
+
       if ((result as any).success) {
         setCode((result as any).event.code)
         setTimeout(() => navigate({ to: '/events' }), 1500)

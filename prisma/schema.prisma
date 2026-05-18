@@ -312,3 +312,13 @@ model DailySwipeLimit {
 
   @@unique([userId, eventId, date])
 }
+
+model AdView {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // 'rewarded_boost' | 'rewarded_swipes'
+  reward    String   // what was granted
+  createdAt DateTime @default(now())
+
+  @@index([userId, type, createdAt])
+}

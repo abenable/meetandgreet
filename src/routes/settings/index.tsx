@@ -18,6 +18,8 @@ import {
 import { getUserTier, setUserTier } from '#/server/subscriptions'
 import { getSession } from '#/server/auth'
 import { getBoostStatus } from '#/server/boosts'
+import { getAdStatus } from '#/server/ads'
+import { Film } from 'lucide-react'
 
 export const Route = createFileRoute('/settings/')({ component: SettingsPage })
 
@@ -39,6 +41,11 @@ function SettingsPage() {
   const { data: boostStatus } = useQuery({
     queryKey: ['boost-status'],
     queryFn: () => getBoostStatus(),
+  })
+
+  const { data: adStatus } = useQuery({
+    queryKey: ['ad-status'],
+    queryFn: () => getAdStatus(),
   })
 
   useEffect(() => {
@@ -171,6 +178,33 @@ function SettingsPage() {
             </div>
           </div>
         </div>
+
+        {/* Ads */}
+        {adStatus?.showAds && (
+          <div>
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
+              Ads
+            </h2>
+            <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <Film className="h-5 w-5 text-[var(--mag-ink-soft)]" />
+                <div className="flex-1">
+                  <p className="text-sm text-[var(--mag-ink)]">
+                    Ads are enabled
+                  </p>
+                  <p className="text-xs text-[var(--mag-ink-muted)]">
+                    {adStatus.adsRemainingToday} rewarded ads remaining today
+                  </p>
+                </div>
+              </div>
+              <div className="border-t border-[var(--mag-line)] px-4 py-3">
+                <p className="text-xs text-[var(--mag-ink-muted)]">
+                  Upgrade to Pro to remove all ads and get unlimited swipes, events, and weekly boosts.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {sections.map((section) => (
           <div key={section.title}>

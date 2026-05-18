@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, Lock, LogIn, ListOrdered, X, Star } from 'lucide-react'
 import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents, joinEvent, getMyWaitlistedEvents, removeFromWaitlist } from '#/server/events'
 import { getSession } from '#/server/auth'
+import { AdBanner } from '#/components/AdBanner'
 
 export const Route = createFileRoute('/events/')({ component: EventsExplorePage })
 
@@ -520,6 +521,9 @@ function EventsExplorePage() {
           </div>
         </div>
       )}
+      <div className="px-4 pb-4">
+        <AdBanner />
+      </div>
     </div>
   )
 }

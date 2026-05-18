@@ -5,6 +5,8 @@ import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, Briefcase, Za
 import { getMyActiveEvent, reportUser } from '#/server/events'
 import { recordSwipe, getSwipeDeck } from '#/server/swipes'
 import { sendMessageRequest } from '#/server/requests'
+import { getAdStatus } from '#/server/ads'
+import { RewardedAdButton } from '#/components/RewardedAdButton'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
 
@@ -31,6 +33,12 @@ function DiscoverPage() {
   const isMystery = activeEvent?.mysteryMode === true
 
   const [selectedIntent, setSelectedIntent] = useState<'dating' | 'friends' | 'networking' | ''>('')
+  const [swipeError, setSwipeError] = useState('')
+
+  const { data: adStatus } = useQuery({
+    queryKey: ['ad-status'],
+    queryFn: () => getAdStatus(),
+  })
 
   const { data: baseProfiles = [] } = useQuery({
     queryKey: ['event-profiles', eventId, selectedIntent],
@@ -53,8 +61,15 @@ function DiscoverPage() {
   const swipeMutation = useMutation({
     mutationFn: recordSwipe,
     onSuccess: () => {
+      setSwipeError('')
       queryClient.invalidateQueries({ queryKey: ['likes'] })
       queryClient.invalidateQueries({ queryKey: ['matches'] })
+    },
+    onError: (error: any) => {
+      const msg = error?.message || 'Something went wrong'
+      if (msg.includes('Daily swipe limit')) {
+        setSwipeError('Daily swipe limit reached')
+      }
     },
   })
 
@@ -189,6 +204,25 @@ function DiscoverPage() {
           ))}
         </div>
       </div>
+      {swipeError && adStatus?.showAds && (
+        <div className="shrink-0 px-4 py-2">
+          <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-center">
+            <p className="text-sm font-medium text-amber-800">{swipeError}</p>
+            <div className="mt-2">
+              <RewardedAdButton
+                type="rewarded_swipes"
+                eventId={eventId}
+                onReward={() => {
+                  setSwipeError('')
+                  queryClient.invalidateQueries({ queryKey: ['ad-status'] })
+                }}
+              >
+                Watch ad for 5 extra swipes
+              </RewardedAdButton>
+            </div>
+          </div>
+        </div>
+      )}
       <div
         ref={containerRef}
         onScroll={onScroll}

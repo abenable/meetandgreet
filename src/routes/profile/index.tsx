@@ -6,6 +6,8 @@ import { getMyProfile, updateProfile, verifyPhoto } from '#/server/profiles'
 import { disableMyAccount } from '#/server/auth'
 import { getUserBadges, getUserStreak } from '#/server/badges'
 import { activateBoost, getBoostStatus } from '#/server/boosts'
+import { getAdStatus } from '#/server/ads'
+import { RewardedAdButton } from '#/components/RewardedAdButton'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
@@ -48,8 +50,10 @@ function ProfilePage() {
   const verifyFileRef = useRef<HTMLInputElement>(null)
 
   const { data: boostStatus } = useQuery({ queryKey: ['boost-status'], queryFn: () => getBoostStatus() })
+  const { data: adStatus } = useQuery({ queryKey: ['ad-status'], queryFn: () => getAdStatus() })
   const [boostCountdown, setBoostCountdown] = useState('')
   const [cooldownCountdown, setCooldownCountdown] = useState('')
+  const [adRewardMessage, setAdRewardMessage] = useState('')
 
   useEffect(() => {
     const tick = () => {
@@ -299,6 +303,22 @@ function ProfilePage() {
                 ? `Boost in ${cooldownCountdown}`
                 : 'Boost Profile'}
           </button>
+        )}
+        {adStatus?.showAds && !boostStatus?.isBoosted && (
+          <div className="mt-2">
+            <RewardedAdButton
+              type="rewarded_boost"
+              onReward={(reward) => {
+                setAdRewardMessage(`Boost activated! ${reward}`)
+                setTimeout(() => setAdRewardMessage(''), 3000)
+              }}
+            >
+              Watch ad for free boost
+            </RewardedAdButton>
+            {adRewardMessage && (
+              <p className="mt-1 text-xs text-green-600">{adRewardMessage}</p>
+            )}
+          </div>
         )}
       </div>
 

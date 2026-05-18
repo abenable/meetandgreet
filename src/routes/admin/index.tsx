@@ -134,6 +134,7 @@ function OverviewTab() {
 function UsersTab() {
   const [search, setSearch] = useState('')
   const [cursor, setCursor] = useState<string | undefined>()
+  const [filter, setFilter] = useState<'all' | 'admin' | 'user' | 'active' | 'disabled'>('all')
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
@@ -151,89 +152,156 @@ function UsersTab() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
   })
 
+  const filteredItems =
+    data?.items.filter((user: any) => {
+      switch (filter) {
+        case 'admin':
+          return user.role === 'admin'
+        case 'user':
+          return user.role !== 'admin'
+        case 'active':
+          return !user.disabledAt
+        case 'disabled':
+          return user.disabledAt
+        default:
+          return true
+      }
+    }) ?? []
+
+  const statCounts = {
+    all: data?.items.length ?? 0,
+    admin: data?.items.filter((u: any) => u.role === 'admin').length ?? 0,
+    user: data?.items.filter((u: any) => u.role !== 'admin').length ?? 0,
+    active: data?.items.filter((u: any) => !u.disabledAt).length ?? 0,
+    disabled: data?.items.filter((u: any) => u.disabledAt).length ?? 0,
+  }
+
+  const filters: { key: typeof filter; label: string }[] = [
+    { key: 'all', label: `All (${statCounts.all})` },
+    { key: 'admin', label: `Admins (${statCounts.admin})` },
+    { key: 'user', label: `Users (${statCounts.user})` },
+    { key: 'active', label: `Active (${statCounts.active})` },
+    { key: 'disabled', label: `Disabled (${statCounts.disabled})` },
+  ]
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
+      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
         <input
           type="text"
           value={search}
-          onChange={(e) => { setSearch(e.target.value); setCursor(undefined) }}
-          placeholder="Search users by email or name..."
+          onChange={(e) => { setSearch(e.target.value); setCursor(undefined); setFilter('all') }}
+          placeholder="Search by name or email..."
           className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-2.5 pl-9 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
         />
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap gap-1.5">
+        {filters.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${
+              filter === f.key
+                ? 'bg-[var(--mag-green)] text-white'
+                : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* List */}
       {isLoading ? (
-        <div className="text-sm text-[var(--mag-ink-muted)]">Loading users...</div>
+        <div className="py-8 text-center text-sm text-[var(--mag-ink-muted)]">Loading users...</div>
+      ) : filteredItems.length === 0 ? (
+        <div className="py-8 text-center text-sm text-[var(--mag-ink-muted)]">
+          {search ? 'No users match your search.' : 'No users found.'}
+        </div>
       ) : (
-        <>
-          <div className="space-y-2">
-            {data?.items.map((user: any) => (
-              <div key={user.id} className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
-                <AvatarImage src={user.image} className="h-10 w-10 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{user.name || user.email}</span>
-                    {user.role === 'admin' && <Crown className="h-3.5 w-3.5 text-amber-500" />}
-                    {user.disabledAt && <Ban className="h-3.5 w-3.5 text-red-500" />}
-                  </div>
-                  <div className="text-xs text-[var(--mag-ink-muted)]">{user.email}</div>
-                  <div className="mt-1 flex gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                    <span>{new Date(user.createdAt).toLocaleDateString()}</span>
-                    <span>·</span>
-                    <span>{user._count.sessions} sessions</span>
-                  </div>
+        <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+          {filteredItems.map((user: any) => (
+            <div key={user.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
+              {/* Avatar — always wrapped in fixed-size rounded container */}
+              <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-[var(--mag-surface)]">
+                <AvatarImage src={user.image} />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{user.name || user.email}</span>
+                  {user.role === 'admin' && (
+                    <span className="shrink-0 rounded bg-amber-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                      admin
+                    </span>
+                  )}
+                  {user.disabledAt && (
+                    <span className="shrink-0 rounded bg-red-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                      disabled
+                    </span>
+                  )}
                 </div>
-                <div className="flex shrink-0 flex-col gap-1">
-                  <button
-                    onClick={() => roleMutation.mutate({ data: { userId: user.id, role: user.role === 'admin' ? 'user' : 'admin' } })}
-                    className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-1 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)]"
-                    disabled={roleMutation.isPending}
-                  >
-                    {user.role === 'admin' ? <Unlock className="h-3 w-3" /> : <Crown className="h-3 w-3" />}
-                    {user.role === 'admin' ? 'Demote' : 'Promote'}
-                  </button>
-                  <button
-                    onClick={() => disableMutation.mutate({ data: { userId: user.id, disabled: !user.disabledAt } })}
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium transition ${
-                      user.disabledAt
-                        ? 'bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20'
-                        : 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20'
-                    }`}
-                    disabled={disableMutation.isPending}
-                  >
-                    {user.disabledAt ? <CheckCircle className="h-3 w-3" /> : <Ban className="h-3 w-3" />}
-                    {user.disabledAt ? 'Enable' : 'Disable'}
-                  </button>
+                <div className="text-xs text-[var(--mag-ink-muted)]">{user.email}</div>
+                <div className="mt-0.5 flex items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                  <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
+                  <span className="text-[var(--mag-line)]">·</span>
+                  <span>{user._count.sessions} sessions</span>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {data && data.items.length === 0 && (
-            <div className="py-8 text-center text-sm text-[var(--mag-ink-muted)]">No users found</div>
-          )}
-
-          {(data?.nextCursor || cursor) && (
-            <div className="flex items-center justify-center gap-2 pt-2">
-              <button
-                onClick={() => setCursor(undefined)}
-                disabled={!cursor}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setCursor(data?.nextCursor || undefined)}
-                disabled={!data?.nextCursor}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <button
+                  onClick={() => roleMutation.mutate({ data: { userId: user.id, role: user.role === 'admin' ? 'user' : 'admin' } })}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
+                  title={user.role === 'admin' ? 'Demote to user' : 'Promote to admin'}
+                  disabled={roleMutation.isPending}
+                >
+                  {user.role === 'admin' ? <Unlock className="h-3.5 w-3.5" /> : <Crown className="h-3.5 w-3.5" />}
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm(`${user.disabledAt ? 'Enable' : 'Disable'} ${user.name || user.email}?`)) {
+                      disableMutation.mutate({ data: { userId: user.id, disabled: !user.disabledAt } })
+                    }
+                  }}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full transition disabled:opacity-40 ${
+                    user.disabledAt
+                      ? 'bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400'
+                      : 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400'
+                  }`}
+                  title={user.disabledAt ? 'Enable account' : 'Disable account'}
+                  disabled={disableMutation.isPending}
+                >
+                  {user.disabledAt ? <CheckCircle className="h-3.5 w-3.5" /> : <Ban className="h-3.5 w-3.5" />}
+                </button>
+              </div>
             </div>
-          )}
-        </>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {(data?.nextCursor || cursor) && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => setCursor(undefined)}
+            disabled={!cursor}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setCursor(data?.nextCursor || undefined)}
+            disabled={!data?.nextCursor}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] disabled:opacity-40"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       )}
     </div>
   )

@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useRef, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle } from 'lucide-react'
+import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, Briefcase } from 'lucide-react'
 import { getMyActiveEvent, getEventProfiles, reportUser } from '#/server/events'
 import { recordSwipe } from '#/server/swipes'
 import { sendMessageRequest } from '#/server/requests'
 import AvatarImage from '#/components/AvatarImage'
+import { VerifiedBadge } from '#/components/VerifiedBadge'
 
 export const Route = createFileRoute('/discover')({ component: DiscoverPage })
 
@@ -28,9 +29,11 @@ function DiscoverPage() {
   const { data: activeEvent } = useQuery({ queryKey: ['active-event'], queryFn: () => getMyActiveEvent() })
   const eventId = activeEvent?.id ?? ''
 
+  const [selectedIntent, setSelectedIntent] = useState<'dating' | 'friends' | 'networking' | ''>('')
+
   const { data: baseProfiles = [] } = useQuery({
-    queryKey: ['event-profiles', eventId],
-    queryFn: () => getEventProfiles({ data: eventId }),
+    queryKey: ['event-profiles', eventId, selectedIntent],
+    queryFn: () => getEventProfiles({ data: { eventId, intent: selectedIntent || undefined } }),
     enabled: !!eventId,
   })
 
@@ -162,11 +165,33 @@ function DiscoverPage() {
   }
 
   return (
-    <div className="h-[calc(100dvh-112px)] bg-[var(--mag-bg)]">
+    <div className="flex h-[calc(100dvh-112px)] flex-col bg-[var(--mag-bg)]">
+      <div className="shrink-0 px-4 py-2">
+        <div className="flex gap-2 overflow-x-auto hide-scrollbar">
+          {[
+            { value: 'dating' as const, label: 'Dating', icon: Heart },
+            { value: 'friends' as const, label: 'Friends', icon: Users },
+            { value: 'networking' as const, label: 'Networking', icon: Briefcase },
+          ].map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              onClick={() => setSelectedIntent((prev) => (prev === value ? '' : value))}
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
+                selectedIntent === value
+                  ? 'bg-[var(--mag-green)] text-white'
+                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)]'
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div
         ref={containerRef}
         onScroll={onScroll}
-        className="hide-scrollbar h-full w-full snap-y snap-mandatory overflow-y-auto"
+        className="hide-scrollbar flex-1 w-full snap-y snap-mandatory overflow-y-auto"
         style={{ scrollBehavior: 'smooth' }}
       >
         {baseProfiles.map((profile, index) => {
@@ -206,9 +231,28 @@ function DiscoverPage() {
                 </>
               )}
               <div className="absolute bottom-0 left-0 right-0 p-5 pb-28">
-                <h2 className="text-3xl font-bold text-white">
+                <h2 className="text-3xl font-bold text-white flex items-center gap-2">
                   {formatNameWithGender(profile.name, profile.gender)}
+                  {profile.verifiedAt && <VerifiedBadge />}
                 </h2>
+                {profile.lookingFor && profile.lookingFor.length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {profile.lookingFor.map((intent) => (
+                      <span
+                        key={intent}
+                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm ${
+                          intent === 'dating'
+                            ? 'bg-pink-500/80'
+                            : intent === 'friends'
+                              ? 'bg-blue-500/80'
+                              : 'bg-amber-500/80'
+                        }`}
+                      >
+                        {intent.charAt(0).toUpperCase() + intent.slice(1)}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="mt-1 flex items-center gap-1.5 text-sm text-white/80">
                   <MapPin className="h-4 w-4" />
                   <span>{profile.location}</span>

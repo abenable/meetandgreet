@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { prisma } from '#/db'
 import { requireSession } from '#/server/auth'
 import { sanitizeProfile } from '#/lib/sanitize'
+import { r2Client, R2_BUCKET_NAME } from '#/lib/r2'
+import { PutObjectCommand } from '@aws-sdk/client-s3'
 
 export const getMyProfile = createServerFn({ method: 'GET' })
   .handler(async () => {
@@ -46,6 +48,7 @@ export const updateProfile = createServerFn({ method: 'POST' })
     location: z.string().max(200).optional(),
     interests: z.array(z.string().max(50)).max(20).optional(),
     job: z.string().max(200).optional(),
+    lookingFor: z.array(z.enum(['dating', 'friends', 'networking'])).optional(),
   }))
   .handler(async ({ data }) => {
     const session = await requireSession()
@@ -62,6 +65,7 @@ export const updateProfile = createServerFn({ method: 'POST' })
         ...(sanitized.location !== undefined && { location: sanitized.location }),
         ...(sanitized.interests !== undefined && { interests: sanitized.interests }),
         ...(sanitized.job !== undefined && { job: sanitized.job }),
+        ...(data.lookingFor !== undefined && { lookingFor: data.lookingFor }),
       },
       create: {
         userId: session.user.id,
@@ -71,6 +75,42 @@ export const updateProfile = createServerFn({ method: 'POST' })
         gender: data.gender ?? '',
         location: sanitized.location ?? '',
         interests: sanitized.interests ?? [],
+        lookingFor: data.lookingFor ?? [],
       },
     })
+  })
+
+export const verifyPhoto = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({
+    imageBase64: z.string().min(1),
+  }))
+  .handler(async ({ data }) => {
+    const { user } = await requireSession()
+
+    // Validate data URL prefix
+    if (!/^data:image\/(jpeg|jpg|png|webp|gif);base64,/.test(data.imageBase64)) {
+      throw new Error('Invalid image format')
+    }
+
+    const base64Data = data.imageBase64.split(',')[1]
+    if (!base64Data) throw new Error('Invalid image data')
+
+    const key = `profiles/${user.id}/verification-${crypto.randomUUID()}.jpg`
+    const buffer = Buffer.from(base64Data, 'base64')
+
+    await r2Client.send(
+      new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: key,
+        Body: buffer,
+        ContentType: 'image/jpeg',
+      })
+    )
+
+    await prisma.profile.update({
+      where: { userId: user.id },
+      data: { verifiedAt: new Date() },
+    })
+
+    return { success: true }
   })

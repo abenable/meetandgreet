@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import PWAInstallPrompt from '../components/PWAInstallPrompt'
 import { WebSocketProvider } from '../integrations/websocket/WebSocketProvider'
+import { getVapidPublicKey, subscribePush } from '#/server/notifications'
 
 import appCss from '../styles.css?url'
 
@@ -94,27 +95,62 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootLayout() {
+  const { session } = Route.useRouteContext()
+
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      const register = async () => {
-        try {
-          const { registerSW } = await import('virtual:pwa-register')
-          registerSW({
-            immediate: true,
-            onRegistered(_registration) {
-              // console.log('[PWA] Service Worker registered')
-            },
-            onRegisterError(_error) {
-              // console.error('[PWA] Service Worker registration error')
-            },
-          })
-        } catch (error) {
-          console.error('[PWA] Service Worker registration setup failed', error)
-        }
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
+
+    const register = async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js')
+        console.log('[SW] Registered:', registration.scope)
+      } catch (error) {
+        console.error('[SW] Registration failed:', error)
       }
-      void register()
     }
+
+    void register()
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
+    if (!session?.user) return
+
+    const setupPush = async () => {
+      try {
+        const registration = await navigator.serviceWorker.ready
+
+        const permission = await Notification.requestPermission()
+        if (permission !== 'granted') return
+
+        const publicKey = await getVapidPublicKey()
+        if (!publicKey) return
+
+        const existingSubscription = await registration.pushManager.getSubscription()
+        if (existingSubscription) return
+
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: publicKey,
+        })
+
+        const subJson = subscription.toJSON()
+        if (!subJson.endpoint || !subJson.keys?.p256dh || !subJson.keys?.auth) return
+
+        await subscribePush({
+          data: {
+            endpoint: subJson.endpoint,
+            p256dh: subJson.keys.p256dh,
+            auth: subJson.keys.auth,
+          },
+        })
+      } catch (error) {
+        console.error('[Push] Setup failed:', error)
+      }
+    }
+
+    void setupPush()
+  }, [session?.user])
 
   return (
     <WebSocketProvider>

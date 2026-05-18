@@ -37,6 +37,22 @@ function seededShuffle<T>(arr: T[], seed: string): T[] {
   return result
 }
 
+async function getFlaggedUserIds(): Promise<string[]> {
+  // Auto-moderation filter: users with >= 2 pending reports in the last 24h
+  // are effectively shadow-banned from discovery and attendee lists
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  const flagged = await prisma.report.groupBy({
+    by: ['reportedId'],
+    where: {
+      status: 'pending',
+      createdAt: { gte: twentyFourHoursAgo },
+    },
+    _count: { id: true },
+    having: { id: { _count: { gte: 2 } } },
+  })
+  return flagged.map((f) => f.reportedId)
+}
+
 export const listEvents = createServerFn({ method: 'GET' })
   .inputValidator(z.object({
     cursor: z.string().optional(),
@@ -477,8 +493,11 @@ export const getMyActiveEvent = createServerFn({ method: 'GET' })
   })
 
 export const getEventProfiles = createServerFn({ method: 'GET' })
-  .inputValidator(z.string())
-  .handler(async ({ data: eventId }) => {
+  .inputValidator(z.object({
+    eventId: z.string(),
+    intent: z.enum(['dating', 'friends', 'networking']).optional(),
+  }))
+  .handler(async ({ data: { eventId, intent } }) => {
     const session = await requireSession()
     const myUserId = session.user.id
 
@@ -500,11 +519,27 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
     const swipedIds = mySwipes.map((s) => s.swipedId)
     const visibleUserIds = userIds.filter((id) => !swipedIds.includes(id))
 
-    if (visibleUserIds.length === 0) return []
+    // Exclude blocked users (bidirectional)
+    const blockedRelations = await prisma.userBlock.findMany({
+      where: {
+        OR: [
+          { blockerId: myUserId, blockedId: { in: visibleUserIds } },
+          { blockerId: { in: visibleUserIds }, blockedId: myUserId },
+        ],
+      },
+      select: { blockerId: true, blockedId: true },
+    })
+    const blockedIds = new Set<string>()
+    for (const b of blockedRelations) {
+      blockedIds.add(b.blockerId === myUserId ? b.blockedId : b.blockerId)
+    }
+    const unblockedUserIds = visibleUserIds.filter((id) => !blockedIds.has(id))
 
-    const [profiles, users] = await Promise.all([
+    if (unblockedUserIds.length === 0) return []
+
+    const [profiles, users, myProfile] = await Promise.all([
       prisma.profile.findMany({
-        where: { userId: { in: visibleUserIds } },
+        where: { userId: { in: unblockedUserIds } },
         select: {
           id: true,
           userId: true,
@@ -515,26 +550,64 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
           birthDate: true,
           location: true,
           interests: true,
+          lookingFor: true,
           job: true,
+          verifiedAt: true,
           createdAt: true,
           updatedAt: true,
         },
       }),
       prisma.user.findMany({
-        where: { id: { in: visibleUserIds } },
+        where: { id: { in: unblockedUserIds } },
         select: { id: true, name: true, image: true, email: true, disabledAt: true },
+      }),
+      prisma.profile.findUnique({
+        where: { userId: myUserId },
+        select: { lookingFor: true },
       }),
     ])
 
-    const userById = new Map(users.map((u) => [u.id, u]))
+    const myLookingFor = myProfile?.lookingFor ?? []
     const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
 
-    // Filter out disabled accounts
-    const activeUserIds = visibleUserIds.filter((id) => !userById.get(id)?.disabledAt)
+    // Optional intent filter
+    let candidateUserIds = unblockedUserIds
+    if (intent) {
+      candidateUserIds = unblockedUserIds.filter((id) => {
+        const p = profileByUserId.get(id)
+        return p?.lookingFor?.includes(intent)
+      })
+      if (candidateUserIds.length === 0) return []
+    }
+
+    const userById = new Map(users.map((u) => [u.id, u]))
+
+    // Filter out disabled accounts and shadow-banned users (auto-moderation)
+    const flaggedIds = await getFlaggedUserIds()
+    const activeUserIds = candidateUserIds.filter((id) => !userById.get(id)?.disabledAt && !flaggedIds.includes(id))
 
     const shuffledUserIds = seededShuffle(activeUserIds, myUserId)
 
-    return shuffledUserIds.map((userId): Profile => {
+    // Give preference to profiles with overlapping intents (still show others)
+    const sortedUserIds = shuffledUserIds.sort((a, b) => {
+      const aProfile = profileByUserId.get(a)
+      const bProfile = profileByUserId.get(b)
+      const aLooking = aProfile?.lookingFor ?? []
+      const bLooking = bProfile?.lookingFor ?? []
+
+      const aOverlap =
+        myLookingFor.length > 0 && aLooking.length > 0
+          ? aLooking.filter((x) => myLookingFor.includes(x)).length
+          : 0
+      const bOverlap =
+        myLookingFor.length > 0 && bLooking.length > 0
+          ? bLooking.filter((x) => myLookingFor.includes(x)).length
+          : 0
+
+      return bOverlap - aOverlap
+    })
+
+    return sortedUserIds.map((userId): Profile => {
       const profile = profileByUserId.get(userId)
       const user = userById.get(userId)
       if (profile) {
@@ -559,7 +632,9 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
         birthDate: '',
         location: '',
         interests: [],
+        lookingFor: [],
         job: '',
+        verifiedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -569,7 +644,8 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
 export const getEventAttendees = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
   .handler(async ({ data: eventId }) => {
-    await requireSession()
+    const session = await requireSession()
+    const myUserId = session.user.id
 
     await promoteWaitlist(eventId)
 
@@ -581,12 +657,28 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
 
     if (userIds.length === 0) return []
 
+    // Exclude blocked users (bidirectional)
+    const blockedRelations = await prisma.userBlock.findMany({
+      where: {
+        OR: [
+          { blockerId: myUserId, blockedId: { in: userIds } },
+          { blockerId: { in: userIds }, blockedId: myUserId },
+        ],
+      },
+      select: { blockerId: true, blockedId: true },
+    })
+    const blockedIds = new Set<string>()
+    for (const b of blockedRelations) {
+      blockedIds.add(b.blockerId === myUserId ? b.blockedId : b.blockerId)
+    }
+    const unblockedUserIds = userIds.filter((id) => !blockedIds.has(id))
+
     const [profiles, users] = await Promise.all([
       prisma.profile.findMany({
-        where: { userId: { in: userIds } },
+        where: { userId: { in: unblockedUserIds } },
       }),
       prisma.user.findMany({
-        where: { id: { in: userIds } },
+        where: { id: { in: unblockedUserIds } },
         select: { id: true, name: true, image: true, email: true, disabledAt: true },
       }),
     ])
@@ -594,7 +686,9 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
     const userById = new Map(users.map((u) => [u.id, u]))
     const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
 
-    const activeUserIds = userIds.filter((id) => !userById.get(id)?.disabledAt)
+    // Filter out disabled accounts and shadow-banned users (auto-moderation)
+    const flaggedIds = await getFlaggedUserIds()
+    const activeUserIds = unblockedUserIds.filter((id) => !userById.get(id)?.disabledAt && !flaggedIds.includes(id))
 
     return activeUserIds.map((userId): Profile => {
       const profile = profileByUserId.get(userId)
@@ -610,7 +704,9 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
         birthDate: '',
         location: '',
         interests: [],
+        lookingFor: [],
         job: '',
+        verifiedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }

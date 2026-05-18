@@ -25,6 +25,30 @@ export const getConversations = createServerFn({ method: 'GET' })
       m.user1Id === myId ? m.user2Id : m.user1Id
     )
 
+    // Filter out blocked peers
+    const allPotentialPeerIds = [...new Set(matchPeerIds)]
+    const blockedRelations = await prisma.userBlock.findMany({
+      where: {
+        OR: [
+          { blockerId: myId, blockedId: { in: allPotentialPeerIds } },
+          { blockerId: { in: allPotentialPeerIds }, blockedId: myId },
+        ],
+      },
+      select: { blockerId: true, blockedId: true },
+    })
+    const blockedPeerIds = new Set<string>()
+    for (const b of blockedRelations) {
+      blockedPeerIds.add(b.blockerId === myId ? b.blockedId : b.blockerId)
+    }
+
+    const filteredMatches = matches.filter((m) => {
+      const peerId = m.user1Id === myId ? m.user2Id : m.user1Id
+      return !blockedPeerIds.has(peerId)
+    })
+    const filteredMatchPeerIds = filteredMatches.map((m) =>
+      m.user1Id === myId ? m.user2Id : m.user1Id
+    )
+
     // 2. Organizer conversations (messages where I'm sender or receiver)
     const organizerMsgs = await prisma.eventOrganizerMessage.findMany({
       where: {
@@ -43,6 +67,7 @@ export const getConversations = createServerFn({ method: 'GET' })
 
     for (const msg of organizerMsgs) {
       const peerId = msg.senderId === myId ? msg.receiverId : msg.senderId
+      if (blockedPeerIds.has(peerId)) continue
       const key = `${msg.eventId}:${peerId}`
       const existing = organizerConvoMap.get(key)
       if (!existing) {
@@ -68,7 +93,7 @@ export const getConversations = createServerFn({ method: 'GET' })
     })
 
     // 3. Fetch all peer profiles and users for fallback photos/names
-    const allPeerIds = [...new Set([...matchPeerIds, ...organizerPeerIds])]
+    const allPeerIds = [...new Set([...filteredMatchPeerIds, ...organizerPeerIds])]
     const [profiles, users] = await Promise.all([
       prisma.profile.findMany({ where: { userId: { in: allPeerIds } } }),
       prisma.user.findMany({
@@ -97,8 +122,13 @@ export const getConversations = createServerFn({ method: 'GET' })
       return profile?.name || user?.name || 'Unknown'
     }
 
+    const getPeerVerifiedAt = (peerId: string) => {
+      const profile = profileByUserId.get(peerId)
+      return profile?.verifiedAt ?? null
+    }
+
     // Build match conversation list
-    const matchConversations = matches
+    const matchConversations = filteredMatches
       .filter((match) => {
         const peerId = match.user1Id === myId ? match.user2Id : match.user1Id
         return activePeerIds.has(peerId)
@@ -114,6 +144,7 @@ export const getConversations = createServerFn({ method: 'GET' })
           peerId,
           peerName: getPeerName(peerId),
           peerPhoto: getPeerPhoto(peerId),
+          peerVerifiedAt: getPeerVerifiedAt(peerId),
           lastMessage: match.messages[0]?.content ?? 'New match!',
           lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
           unreadCount: 0,
@@ -134,6 +165,7 @@ export const getConversations = createServerFn({ method: 'GET' })
         peerId: convo.peerId,
         peerName: getPeerName(convo.peerId),
         peerPhoto: getPeerPhoto(convo.peerId),
+        peerVerifiedAt: getPeerVerifiedAt(convo.peerId),
         lastMessage: convo.lastMessage.content,
         lastMessageAt: convo.lastMessage.createdAt,
         unreadCount: convo.unreadCount,
@@ -229,6 +261,18 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
       if (!match) throw new Error('Match not found')
 
       const peerId = match.user1Id === myId ? match.user2Id : match.user1Id
+
+      // Check for blocks (bidirectional)
+      const block = await prisma.userBlock.findFirst({
+        where: {
+          OR: [
+            { blockerId: myId, blockedId: peerId },
+            { blockerId: peerId, blockedId: myId },
+          ],
+        },
+      })
+      if (block) throw new Error('Unable to send message')
+
       const message = await prisma.eventMessage.create({
         data: { matchId, senderId: myId, content },
       })
@@ -262,6 +306,17 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
       if (!meAttendee) throw new Error('You must be attending this event')
       if (!peerAttendee) throw new Error('The other user is not attending this event')
 
+      // Check for blocks (bidirectional)
+      const block = await prisma.userBlock.findFirst({
+        where: {
+          OR: [
+            { blockerId: myId, blockedId: peerId },
+            { blockerId: peerId, blockedId: myId },
+          ],
+        },
+      })
+      if (block) throw new Error('Unable to send message')
+
       const message = await prisma.eventOrganizerMessage.create({
         data: { eventId, senderId: myId, receiverId: peerId, content },
       })
@@ -281,6 +336,54 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
     }
 
     throw new Error('Unknown chat type')
+  })
+export const getIcebreakers = createServerFn({ method: 'GET' })
+  .inputValidator(z.string())
+  .handler(async ({ data: matchId }) => {
+    const session = await requireSession()
+    const myId = session.user.id
+
+    const match = await prisma.eventMatch.findFirst({
+      where: { id: matchId, OR: [{ user1Id: myId }, { user2Id: myId }] },
+    })
+    if (!match) throw new Error('Match not found')
+
+    const otherId = match.user1Id === myId ? match.user2Id : match.user1Id
+
+    const [myProfile, otherProfile] = await Promise.all([
+      prisma.profile.findUnique({ where: { userId: myId } }),
+      prisma.profile.findUnique({ where: { userId: otherId } }),
+    ])
+
+    const myInterests = myProfile?.interests ?? []
+    const otherInterests = otherProfile?.interests ?? []
+    const shared = myInterests.filter((i) => otherInterests.includes(i))
+
+    const suggestions: { id: string; text: string }[] = []
+
+    if (shared.length > 0) {
+      for (let i = 0; i < Math.min(shared.length, 3); i++) {
+        suggestions.push({
+          id: `ice-${i}`,
+          text: `I see you both love ${shared[i]}! What's your favorite thing about it?`,
+        })
+      }
+    }
+
+    const fallback = [
+      "Hey! How's the event going for you?",
+      "What's been the highlight of tonight so far?",
+      'Any recommendations at this event?',
+    ]
+
+    while (suggestions.length < 3) {
+      suggestions.push({
+        id: `ice-fb-${suggestions.length}`,
+        text: fallback[suggestions.length],
+      })
+    }
+
+    return suggestions.slice(0, 3)
   })
 
 export const markChatRead = createServerFn({ method: 'POST' })

@@ -165,6 +165,7 @@ export const getLikes = createServerFn({ method: 'GET' })
     if (swipes.length === 0) return []
 
     const swiperIds = swipes.map((s) => s.swiperId)
+
     const [profiles, users] = await Promise.all([
       prisma.profile.findMany({ where: { userId: { in: swiperIds } } }),
       prisma.user.findMany({
@@ -176,7 +177,21 @@ export const getLikes = createServerFn({ method: 'GET' })
     const userById = new Map(users.map((u) => [u.id, u]))
     const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
 
-    const activeSwiperIds = swiperIds.filter((id) => !userById.get(id)?.disabledAt)
+    // Exclude blocked users (bidirectional)
+    const blockedRelations = await prisma.userBlock.findMany({
+      where: {
+        OR: [
+          { blockerId: session.user.id, blockedId: { in: swiperIds } },
+          { blockerId: { in: swiperIds }, blockedId: session.user.id },
+        ],
+      },
+      select: { blockerId: true, blockedId: true },
+    })
+    const blockedIds = new Set<string>()
+    for (const b of blockedRelations) {
+      blockedIds.add(b.blockerId === session.user.id ? b.blockedId : b.blockerId)
+    }
+    const activeSwiperIds = swiperIds.filter((id) => !userById.get(id)?.disabledAt && !blockedIds.has(id))
 
     const swipeBySwiperId = new Map(swipes.map((s) => [s.swiperId, s]))
 
@@ -240,8 +255,23 @@ export const getMatches = createServerFn({ method: 'GET' })
     const userById = new Map(users.map((u) => [u.id, u]))
     const profileByUserId = new Map(profiles.map((p) => [p.userId, p]))
 
+    // Exclude blocked users (bidirectional)
+    const blockedRelations = await prisma.userBlock.findMany({
+      where: {
+        OR: [
+          { blockerId: session.user.id, blockedId: { in: peerIds } },
+          { blockerId: { in: peerIds }, blockedId: session.user.id },
+        ],
+      },
+      select: { blockerId: true, blockedId: true },
+    })
+    const blockedIds = new Set<string>()
+    for (const b of blockedRelations) {
+      blockedIds.add(b.blockerId === session.user.id ? b.blockedId : b.blockerId)
+    }
+
     const activePeerIds = new Set(
-      peerIds.filter((id) => !userById.get(id)?.disabledAt)
+      peerIds.filter((id) => !userById.get(id)?.disabledAt && !blockedIds.has(id))
     )
 
     return matches

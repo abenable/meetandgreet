@@ -19,6 +19,9 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  pushSubscriptions PushSubscription[]
+  blockedUsers      UserBlock[]       @relation("BlockedBy")
+  blockingUsers     UserBlock[]       @relation("Blocking")
 }
 
 model Session {
@@ -64,18 +67,45 @@ model Verification {
 }
 
 model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  name        String?
+  bio         String?
+  photos      String[]
+  gender      String?
+  birthDate   String?
+  location    String?
+  interests   String[]
+  lookingFor  String[] @default([])
+  job         String?
+  verifiedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PushSubscription {
   id        String   @id @default(uuid())
-  userId    String   @unique
-  name      String?
-  bio       String?
-  photos    String[]
-  gender    String?
-  birthDate String?
-  location  String?
-  interests String[]
-  job       String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String
+  p256dh    String
+  auth      String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  @@unique([userId, endpoint])
+}
+
+model UserBlock {
+  id         String   @id @default(uuid())
+  blockerId  String
+  blocker    User     @relation("BlockedBy", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId  String
+  blocked    User     @relation("Blocking", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
 }
 
 model Event {
@@ -198,6 +228,7 @@ model Report {
   reporterId String
   reportedId String
   reason     String
+  status     String   @default("pending")
   createdAt  DateTime @default(now())
 }
 

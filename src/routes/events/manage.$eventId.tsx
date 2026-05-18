@@ -38,6 +38,7 @@ import {
 } from '#/server/events'
 import { getSession } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
+import { VerifiedBadge } from '#/components/VerifiedBadge'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 import { localDatetimeToUTCISO, toDatetimeLocalValue } from '#/lib/datetime'
 
@@ -565,8 +566,9 @@ function ManageEventPage() {
                         <AvatarImage src={photo} alt={profile.name ?? ''} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-[var(--mag-ink)]">
+                        <p className="truncate text-sm font-medium text-[var(--mag-ink)] flex items-center gap-1.5">
                           {profile.name ?? 'Unnamed'}
+                          {profile.verifiedAt && <VerifiedBadge />}
                         </p>
                         <p className="truncate text-[10px] text-[var(--mag-ink-muted)]">
                           {profile.location ?? 'No location'}

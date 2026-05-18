@@ -11,6 +11,7 @@ import {
   Info,
   X,
   Sun,
+  Ban,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/settings/')({ component: SettingsPage })
@@ -48,6 +49,7 @@ function SettingsPage() {
       title: 'Safety & Privacy',
       items: [
         { icon: Shield, label: 'Privacy & Safety', to: '/settings/privacy' },
+        { icon: Ban, label: 'Blocked Users', to: '/settings/blocked' },
         { icon: UserCog, label: 'Account Settings', to: '/settings/account' },
       ],
     },

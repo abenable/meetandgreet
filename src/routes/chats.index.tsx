@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { MessageCircle } from 'lucide-react'
 import { getConversations } from '#/server/conversations'
 import AvatarImage from '#/components/AvatarImage'
+import { VerifiedBadge } from '#/components/VerifiedBadge'
 
 export const Route = createFileRoute('/chats/')({ component: ChatsPage })
 
@@ -50,6 +51,7 @@ function ChatRow({ convo }: { convo: any }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">{convo.peerName}</h3>
+          {convo.peerVerifiedAt && <VerifiedBadge />}
         </div>
         <p className={`truncate text-xs ${convo.unreadCount > 0 ? 'font-medium text-[var(--mag-ink)]' : 'text-[var(--mag-ink-soft)]'}`}>
           {convo.lastMessage}

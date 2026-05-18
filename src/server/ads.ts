@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { db } from "../db/index"
 import { requireSession } from "./auth"
 import { getEffectiveTier } from "../lib/tiers"
+import { z } from "zod"
 
 const MAX_ADS_PER_DAY = 3
 const REWARDED_SWIPES_COUNT = 5
@@ -40,40 +41,13 @@ export const getAdStatus = createServerFn({ method: "GET" }).handler(async () =>
   }
 })
 
-export const canWatchRewardedAd = createServerFn({ method: "GET" })
-  .validator((d: { type: string }) => d)
-  .handler(async ({ data }) => {
-    const session = await requireSession()
-    const tier = await getEffectiveTier(session.user.id)
-
-    if (tier !== "free") {
-      return { allowed: false, reason: "Ads are removed for Pro and Host users" }
-    }
-
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    const todayViews = await db.adView.count({
-      where: {
-        userId: session.user.id,
-        createdAt: { gte: today },
-      },
-    })
-
-    if (todayViews >= MAX_ADS_PER_DAY) {
-      return { allowed: false, reason: "Daily ad limit reached. Try again tomorrow." }
-    }
-
-    return { allowed: true }
-  })
+const watchAdSchema = z.object({
+  type: z.enum(["rewarded_boost", "rewarded_swipes"]),
+  eventId: z.string().optional(),
+})
 
 export const watchRewardedAd = createServerFn({ method: "POST" })
-  .validator(
-    (d: {
-      type: "rewarded_boost" | "rewarded_swipes"
-      eventId?: string
-    }) => d
-  )
+  .inputValidator(watchAdSchema)
   .handler(async ({ data }) => {
     const session = await requireSession()
     const tier = await getEffectiveTier(session.user.id)
@@ -96,7 +70,6 @@ export const watchRewardedAd = createServerFn({ method: "POST" })
       throw new Error("Daily ad limit reached")
     }
 
-    // Record the ad view
     const reward =
       data.type === "rewarded_boost"
         ? "1_hour_boost"
@@ -110,7 +83,6 @@ export const watchRewardedAd = createServerFn({ method: "POST" })
       },
     })
 
-    // Grant the reward
     if (data.type === "rewarded_boost") {
       const boostedUntil = new Date(Date.now() + 60 * 60 * 1000)
       await db.profile.updateMany({

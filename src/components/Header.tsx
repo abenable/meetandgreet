@@ -1,5 +1,5 @@
 import { Link, useRouterState, getRouteApi } from '@tanstack/react-router'
-import { Moon, Sun, Bell } from 'lucide-react'
+import { Moon, Sun, Bell, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getUnreadNotificationCount } from '#/server/notifications'
@@ -71,6 +71,14 @@ export default function Header() {
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
+            </Link>
+          )}
+          {session?.user?.role === 'admin' && (
+            <Link
+              to="/admin"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+            >
+              <Shield className="h-5 w-5" />
             </Link>
           )}
           <button

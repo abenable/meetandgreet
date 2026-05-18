@@ -210,7 +210,7 @@ export const getLikes = createServerFn({ method: 'GET' })
     for (const b of blockedRelations) {
       blockedIds.add(b.blockerId === session.user.id ? b.blockedId : b.blockerId)
     }
-    const activeSwiperIds = swiperIds.filter((id) => !userById.get(id)?.disabledAt && !blockedIds.has(id))
+    const activeSwiperIds = [...new Set(swiperIds.filter((id) => !userById.get(id)?.disabledAt && !blockedIds.has(id)))]
 
     const swipeBySwiperId = new Map(swipes.map((s) => [s.swiperId, s]))
 

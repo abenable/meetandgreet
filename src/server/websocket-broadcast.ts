@@ -17,6 +17,8 @@ function getPublisher() {
   if (bunServer) return bunServer
   const dev = (globalThis as any).__devWSS__
   if (dev) return dev
+  const prod = (globalThis as any).__bunServer__
+  if (prod) return prod
   return null
 }
 

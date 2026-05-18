@@ -10,10 +10,11 @@ export const Route = createFileRoute('/events/')({ component: EventsExplorePage 
 function EventsExplorePage() {
   const queryClient = useQueryClient()
 
-  const { data: events = [] } = useQuery({
+  const { data: eventsData } = useQuery({
     queryKey: ['events'],
     queryFn: () => listEvents(),
   })
+  const events = eventsData?.items ?? []
 
   const { data: activeEvent } = useQuery({
     queryKey: ['active-event'],

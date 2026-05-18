@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Compass,
   Bell,
@@ -12,13 +13,33 @@ import {
   X,
   Sun,
   Ban,
+  Zap,
 } from 'lucide-react'
+import { getUserTier, setUserTier } from '#/server/subscriptions'
+import { getSession } from '#/server/auth'
+import { getBoostStatus } from '#/server/boosts'
 
 export const Route = createFileRoute('/settings/')({ component: SettingsPage })
 
 function SettingsPage() {
+  const queryClient = useQueryClient()
   const [darkMode, setDarkMode] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+
+  const { data: session } = useQuery({
+    queryKey: ['session'],
+    queryFn: () => getSession(),
+  })
+
+  const { data: tierData } = useQuery({
+    queryKey: ['user-tier'],
+    queryFn: () => getUserTier(),
+  })
+
+  const { data: boostStatus } = useQuery({
+    queryKey: ['boost-status'],
+    queryFn: () => getBoostStatus(),
+  })
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains('dark')
@@ -68,6 +89,89 @@ function SettingsPage() {
       </div>
 
       <div className="space-y-6">
+        {/* Subscription */}
+        <div>
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
+            Subscription
+          </h2>
+          <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <Zap className="h-5 w-5 text-[var(--mag-ink-soft)]" />
+              <div className="flex-1">
+                <p className="text-sm text-[var(--mag-ink)]">
+                  Current Plan:{' '}
+                  <span className="font-semibold capitalize">
+                    {tierData?.tier ?? 'Free'}
+                  </span>
+                </p>
+                <p className="text-xs text-[var(--mag-ink-muted)]">
+                  {tierData?.tier === 'free'
+                    ? '2 active events, 6 swipes/day'
+                    : tierData?.tier === 'pro'
+                      ? 'Unlimited events & swipes'
+                      : tierData?.tier === 'host'
+                        ? 'Priority support + analytics'
+                        : ''}
+                </p>
+              </div>
+            </div>
+            {session?.user?.role === 'admin' && (
+              <div className="border-t border-[var(--mag-line)] px-4 py-3">
+                <p className="mb-2 text-xs font-medium text-[var(--mag-ink-muted)]">
+                  Admin: Set Tier
+                </p>
+                <div className="flex gap-2">
+                  {(['free', 'pro', 'host'] as const).map((t) => (
+                    <button
+                      key={t}
+                      onClick={async () => {
+                        await setUserTier({ data: { tier: t, durationMonths: 1 } })
+                        queryClient.invalidateQueries({ queryKey: ['user-tier'] })
+                        queryClient.invalidateQueries({ queryKey: ['session'] })
+                      }}
+                      className={`flex-1 rounded-full py-2 text-xs font-bold transition ${
+                        tierData?.tier === t
+                          ? 'bg-[var(--mag-green)] text-white'
+                          : 'border border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-green)]/10'
+                      }`}
+                    >
+                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Boosts */}
+        <div>
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
+            Boosts
+          </h2>
+          <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <Zap className={`h-5 w-5 ${boostStatus?.isBoosted ? 'text-amber-500' : 'text-[var(--mag-ink-soft)]'}`} />
+              <div className="flex-1">
+                <p className="text-sm text-[var(--mag-ink)]">
+                  {boostStatus?.isBoosted
+                    ? 'Profile is boosted'
+                    : boostStatus?.nextBoostAt
+                      ? 'Boost on cooldown'
+                      : 'Boost available'}
+                </p>
+                <p className="text-xs text-[var(--mag-ink-muted)]">
+                  {boostStatus?.isBoosted
+                    ? 'Your profile is shown first in the swipe deck'
+                    : boostStatus?.nextBoostAt
+                      ? `Next boost available soon`
+                      : 'Use a boost to be shown first for 1 hour'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {sections.map((section) => (
           <div key={section.title}>
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">

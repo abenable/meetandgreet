@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, Lock, LogIn, ListOrdered, X } from 'lucide-react'
+import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, Lock, LogIn, ListOrdered, X, Star } from 'lucide-react'
 import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents, joinEvent, getMyWaitlistedEvents, removeFromWaitlist } from '#/server/events'
 import { getSession } from '#/server/auth'
 
@@ -115,7 +115,14 @@ function EventsExplorePage() {
                   <img src={activeEvent.photo} alt={activeEvent.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
                 )}
                 <div className="min-w-0">
-                  <h2 className="text-lg font-bold text-[var(--mag-ink)]">{activeEvent.name}</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-[var(--mag-ink)]">{activeEvent.name}</h2>
+                    {(activeEvent as any).sponsorName && (
+                      <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        <Star className="h-3 w-3" /> Sponsored
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-[var(--mag-ink-soft)]">{activeEvent.description}</p>
                 </div>
               </div>
@@ -225,6 +232,11 @@ function EventsExplorePage() {
                           Mystery
                         </span>
                       )}
+                      {(event as any).sponsorName && (
+                        <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                          <Star className="h-3 w-3" /> Sponsored
+                        </span>
+                      )}
                     </div>
                     <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
@@ -270,7 +282,14 @@ function EventsExplorePage() {
                         <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
                       )}
                       <div className="min-w-0 flex-1">
-                        <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                          {(event as any).sponsorName && (
+                            <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                              <Star className="h-3 w-3" /> Sponsored
+                            </span>
+                          )}
+                        </div>
                         <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
                         <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
                           <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
@@ -318,12 +337,19 @@ function EventsExplorePage() {
                         <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
                       )}
                       <div className="min-w-0 flex-1">
-                        <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                        {(event as any).mysteryMode && (
-                          <span className="shrink-0 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                            Mystery
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                          {(event as any).mysteryMode && (
+                            <span className="shrink-0 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                              Mystery
+                            </span>
+                          )}
+                          {(event as any).sponsorName && (
+                            <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                              <Star className="h-3 w-3" /> Sponsored
+                            </span>
+                          )}
+                        </div>
                         <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
                         <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
                           <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
@@ -375,6 +401,11 @@ function EventsExplorePage() {
                         <div className="flex items-center gap-2">
                           <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
                           <span className="shrink-0 rounded-full bg-[var(--mag-ink-muted)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink-muted)]">Ended</span>
+                          {(event as any).sponsorName && (
+                            <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                              <Star className="h-3 w-3" /> Sponsored
+                            </span>
+                          )}
                         </div>
                         <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
                         <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">

@@ -1,11 +1,13 @@
 import { prisma } from '#/db'
 import webPush from 'web-push'
 
-webPush.setVapidDetails(
-  'mailto:admin@meetandgreet.tech',
-  process.env.VAPID_PUBLIC_KEY || '',
-  process.env.VAPID_PRIVATE_KEY || '',
-)
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webPush.setVapidDetails(
+    'mailto:admin@meetandgreet.tech',
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY,
+  )
+}
 
 export async function createNotification(data: {
   userId: string

@@ -6,6 +6,8 @@ import { requireSession } from '#/server/auth'
 import { broadcastToEvent } from '#/server/websocket-broadcast'
 import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
 import { awardBadgeIfNotExists } from './badges.server'
+import { canCreateEvent, canJoinEvent } from '#/server/subscriptions'
+import { getEffectiveTier } from '#/lib/tiers'
 import type { Profile } from '@prisma/client'
 
 function generateCode(): string {
@@ -76,6 +78,9 @@ export const listEvents = createServerFn({ method: 'GET' })
         startsAt: true,
         maxAttendees: true,
         mysteryMode: true,
+        sponsorName: true,
+        sponsorLogo: true,
+        sponsorFrameUrl: true,
         _count: { select: { attendees: { where: { leftAt: null } } } },
       },
       orderBy: { createdAt: 'desc' },
@@ -216,14 +221,33 @@ export const createEvent = createServerFn({ method: 'POST' })
     isPublic: z.boolean().optional(),
     mysteryMode: z.boolean().optional(),
     force: z.boolean().optional(),
+    sponsorName: z.string().max(200).optional(),
+    sponsorLogo: z.string().url().max(1000).optional(),
+    sponsorFrameUrl: z.string().url().max(1000).optional(),
   }))
   .handler(async ({ data }) => {
     const session = await requireSession()
+
+    const createCheck = await canCreateEvent()
+    if (!createCheck.allowed) {
+      return { success: false, message: createCheck.error }
+    }
 
     if (!data.force) {
       const currentEvent = await getCurrentActiveEvent(session.user.id)
       if (currentEvent) {
         return { success: false, needsConfirm: true as const, currentEvent }
+      }
+    }
+
+    if (data.sponsorName || data.sponsorLogo || data.sponsorFrameUrl) {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { role: true, subscriptionTier: true, subscriptionExpiresAt: true },
+      })
+      const tier = getEffectiveTier(user?.subscriptionTier, user?.subscriptionExpiresAt)
+      if (user?.role !== 'admin' && tier !== 'host') {
+        return { success: false, message: 'Host tier required for sponsor branding' }
       }
     }
 
@@ -244,6 +268,9 @@ export const createEvent = createServerFn({ method: 'POST' })
           createdById: session.user.id,
           isPublic: data.isPublic ?? true,
           mysteryMode: data.mysteryMode ?? false,
+          sponsorName: data.sponsorName,
+          sponsorLogo: data.sponsorLogo,
+          sponsorFrameUrl: data.sponsorFrameUrl,
         },
       })
       await tx.eventAttendee.create({
@@ -333,6 +360,11 @@ export const joinEvent = createServerFn({ method: 'POST' })
 
     if (existing && existing.leftAt === null) {
       return { success: true, alreadyJoined: true }
+    }
+
+    const joinCheck = await canJoinEvent({ data: event.id })
+    if (!joinCheck.allowed) {
+      return { success: false, message: joinCheck.error }
     }
 
     // If event hasn't started yet, add to waitlist
@@ -434,6 +466,9 @@ export const updateEvent = createServerFn({ method: 'POST' })
       isActive: z.boolean().optional(),
       isPublic: z.boolean().optional(),
       mysteryMode: z.boolean().optional(),
+      sponsorName: z.string().max(200).optional().nullable(),
+      sponsorLogo: z.string().url().max(1000).optional().nullable(),
+      sponsorFrameUrl: z.string().url().max(1000).optional().nullable(),
     }),
   }))
   .handler(async ({ data }) => {
@@ -451,6 +486,22 @@ export const updateEvent = createServerFn({ method: 'POST' })
       throw new Error('Unauthorized')
     }
 
+    const hasSponsorChange =
+      data.data.sponsorName !== undefined ||
+      data.data.sponsorLogo !== undefined ||
+      data.data.sponsorFrameUrl !== undefined
+
+    if (hasSponsorChange) {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { role: true, subscriptionTier: true, subscriptionExpiresAt: true },
+      })
+      const tier = getEffectiveTier(user?.subscriptionTier, user?.subscriptionExpiresAt)
+      if (user?.role !== 'admin' && tier !== 'host') {
+        throw new Error('Host tier required for sponsor branding')
+      }
+    }
+
     return prisma.event.update({
       where: { id: data.eventId },
       data: {
@@ -464,6 +515,9 @@ export const updateEvent = createServerFn({ method: 'POST' })
         isActive: data.data.isActive,
         isPublic: data.data.isPublic,
         mysteryMode: data.data.mysteryMode,
+        sponsorName: data.data.sponsorName,
+        sponsorLogo: data.data.sponsorLogo,
+        sponsorFrameUrl: data.data.sponsorFrameUrl,
       },
     })
   })
@@ -576,6 +630,7 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
           lookingFor: true,
           job: true,
           verifiedAt: true,
+          boostedUntil: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -609,30 +664,48 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
     const flaggedIds = await getFlaggedUserIds()
     const activeUserIds = candidateUserIds.filter((id) => !userById.get(id)?.disabledAt && !flaggedIds.includes(id))
 
-    const shuffledUserIds = seededShuffle(activeUserIds, myUserId)
+    const now = new Date()
 
-    // Give preference to profiles with overlapping intents (still show others)
-    const sortedUserIds = shuffledUserIds.sort((a, b) => {
-      const aProfile = profileByUserId.get(a)
-      const bProfile = profileByUserId.get(b)
-      const aLooking = aProfile?.lookingFor ?? []
-      const bLooking = bProfile?.lookingFor ?? []
-
-      const aOverlap =
-        myLookingFor.length > 0 && aLooking.length > 0
-          ? aLooking.filter((x) => myLookingFor.includes(x)).length
-          : 0
-      const bOverlap =
-        myLookingFor.length > 0 && bLooking.length > 0
-          ? bLooking.filter((x) => myLookingFor.includes(x)).length
-          : 0
-
-      return bOverlap - aOverlap
+    // Separate boosted and non-boosted profiles
+    const boostedIds = activeUserIds.filter((id) => {
+      const p = profileByUserId.get(id)
+      return p?.boostedUntil ? p.boostedUntil > now : false
     })
+    const nonBoostedIds = activeUserIds.filter((id) => !boostedIds.includes(id))
 
-    return sortedUserIds.map((userId): Profile => {
+    // Shuffle each group separately
+    const shuffledBoosted = seededShuffle(boostedIds, myUserId + '-boosted')
+    const shuffledNonBoosted = seededShuffle(nonBoostedIds, myUserId)
+
+    // Give preference to profiles with overlapping intents within each group
+    const sortByIntentOverlap = (userIds: string[]) => {
+      return userIds.sort((a, b) => {
+        const aProfile = profileByUserId.get(a)
+        const bProfile = profileByUserId.get(b)
+        const aLooking = aProfile?.lookingFor ?? []
+        const bLooking = bProfile?.lookingFor ?? []
+
+        const aOverlap =
+          myLookingFor.length > 0 && aLooking.length > 0
+            ? aLooking.filter((x) => myLookingFor.includes(x)).length
+            : 0
+        const bOverlap =
+          myLookingFor.length > 0 && bLooking.length > 0
+            ? bLooking.filter((x) => myLookingFor.includes(x)).length
+            : 0
+
+        return bOverlap - aOverlap
+      })
+    }
+
+    const sortedBoosted = sortByIntentOverlap(shuffledBoosted)
+    const sortedNonBoosted = sortByIntentOverlap(shuffledNonBoosted)
+    const finalUserIds = [...sortedBoosted, ...sortedNonBoosted]
+
+    return finalUserIds.map((userId) => {
       const profile = profileByUserId.get(userId)
       const user = userById.get(userId)
+      const isBoosted = !!profile?.boostedUntil && profile.boostedUntil > now
       if (profile) {
         return {
           ...profile,
@@ -643,6 +716,7 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
               : user?.image
                 ? [user.image]
                 : [],
+          isBoosted,
         }
       }
       return {
@@ -658,8 +732,10 @@ export const getEventProfiles = createServerFn({ method: 'GET' })
         lookingFor: [],
         job: '',
         verifiedAt: null,
+        boostedUntil: null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        isBoosted: false,
       }
     })
   })

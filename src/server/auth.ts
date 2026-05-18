@@ -30,10 +30,12 @@ async function fetchSessionFromAuthHandler(): Promise<{ session: any; user: any 
   if (data.user?.id) {
     const user = await prisma.user.findUnique({
       where: { id: data.user.id },
-      select: { disabledAt: true, role: true },
+      select: { disabledAt: true, role: true, subscriptionTier: true, subscriptionExpiresAt: true },
     })
     if (user?.disabledAt) return null
     data.user.role = user?.role ?? 'user'
+    data.user.subscriptionTier = user?.subscriptionTier ?? 'free'
+    data.user.subscriptionExpiresAt = user?.subscriptionExpiresAt ?? null
   }
 
   return data

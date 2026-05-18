@@ -20,6 +20,7 @@ import {
   Crown,
   User as UserIcon,
   XCircle,
+  Star,
 } from 'lucide-react'
 import {
   getAdminStats,
@@ -27,6 +28,7 @@ import {
   getAllEvents,
   getAllReports,
   getFlaggedUsers,
+  getEventsWithSponsors,
   updateUserRole,
   toggleUserDisabled,
   adminDeleteEvent,
@@ -57,7 +59,7 @@ export const Route = createFileRoute('/admin/')({
   component: AdminPage,
 })
 
-type Tab = 'overview' | 'users' | 'events' | 'reports' | 'moderation'
+type Tab = 'overview' | 'users' | 'events' | 'reports' | 'moderation' | 'sponsors'
 
 function AdminPage() {
   const [tab, setTab] = useState<Tab>('overview')
@@ -74,6 +76,7 @@ function AdminPage() {
         <TabButton active={tab === 'overview'} onClick={() => setTab('overview')} icon={<Activity className="h-4 w-4" />} label="Overview" />
         <TabButton active={tab === 'users'} onClick={() => setTab('users')} icon={<Users className="h-4 w-4" />} label="Users" />
         <TabButton active={tab === 'events'} onClick={() => setTab('events')} icon={<Calendar className="h-4 w-4" />} label="Events" />
+        <TabButton active={tab === 'sponsors'} onClick={() => setTab('sponsors')} icon={<Star className="h-4 w-4" />} label="Sponsors" />
         <TabButton active={tab === 'reports'} onClick={() => setTab('reports')} icon={<Flag className="h-4 w-4" />} label="Reports" />
         <TabButton active={tab === 'moderation'} onClick={() => setTab('moderation')} icon={<Shield className="h-4 w-4" />} label="Moderation" />
       </div>
@@ -81,6 +84,7 @@ function AdminPage() {
       {tab === 'overview' && <OverviewTab />}
       {tab === 'users' && <UsersTab />}
       {tab === 'events' && <EventsTab />}
+      {tab === 'sponsors' && <SponsorsTab />}
       {tab === 'reports' && <ReportsTab />}
       {tab === 'moderation' && <ModerationTab />}
     </div>
@@ -670,6 +674,76 @@ function ModerationTab() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+/* ---------- SPONSORS ---------- */
+function SponsorsTab() {
+  const { data: events, isLoading } = useQuery({
+    queryKey: ['admin-sponsors'],
+    queryFn: () => getEventsWithSponsors(),
+  })
+
+  return (
+    <div className="flex flex-col gap-3">
+      {isLoading ? (
+        <div className="text-sm text-[var(--mag-ink-muted)]">Loading sponsors...</div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {events?.map((event: any) => (
+              <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+                <div className="flex items-start gap-3">
+                  {event.photo ? (
+                    <img src={event.photo} alt={event.name} className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+                  ) : (
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--mag-surface)]">
+                      <Calendar className="h-5 w-5 text-[var(--mag-ink-muted)]" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</span>
+                      <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        <Star className="h-3 w-3" /> Sponsored
+                      </span>
+                    </div>
+                    <div className="text-xs text-[var(--mag-ink-muted)]">{event.location || 'No location'}</div>
+                    <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                      <span>{event._count.attendees} attendees</span>
+                      <span>Code: {event.code}</span>
+                    </div>
+                    <div className="mt-2 space-y-1">
+                      {event.sponsorName && (
+                        <p className="text-xs text-[var(--mag-ink)]">
+                          <span className="font-medium">Sponsor:</span> {event.sponsorName}
+                        </p>
+                      )}
+                      {event.sponsorLogo && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-[var(--mag-ink-muted)]">Logo:</span>
+                          <img src={event.sponsorLogo} alt="Sponsor logo" className="h-5 max-w-[120px] object-contain" />
+                        </div>
+                      )}
+                      {event.sponsorFrameUrl && (
+                        <p className="text-[10px] text-[var(--mag-ink-muted)]">Frame image set</p>
+                      )}
+                    </div>
+                    <div className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">
+                      Creator: {event.creator?.name || event.creator?.email || 'Unknown'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {events && events.length === 0 && (
+            <div className="py-8 text-center text-sm text-[var(--mag-ink-muted)]">No sponsored events found</div>
+          )}
+        </>
+      )}
     </div>
   )
 }

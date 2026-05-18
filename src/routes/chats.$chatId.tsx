@@ -359,7 +359,7 @@ function UnifiedChatPage() {
       )}
       {showRevealToast && (
         <div className="mb-2 rounded-xl bg-purple-600 px-3 py-2 text-center text-xs font-bold text-white shadow-lg transition-all duration-500">
-          ✨ Photos revealed!
+          Photos revealed!
         </div>
       )}
 

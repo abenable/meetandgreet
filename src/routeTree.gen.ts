@@ -46,6 +46,7 @@ import { Route as ForgotPasswordVerifyRouteImport } from './routes/forgot-passwo
 import { Route as ForgotPasswordResetRouteImport } from './routes/forgot-password.reset'
 import { Route as EventsJoinRouteImport } from './routes/events/join'
 import { Route as EventsCreateRouteImport } from './routes/events/create'
+import { Route as EventsEventIdRouteImport } from './routes/events/$eventId'
 import { Route as ChatsChatIdRouteImport } from './routes/chats.$chatId'
 import { Route as EventsWaitlistEventIdRouteImport } from './routes/events/waitlist.$eventId'
 import { Route as EventsManageEventIdRouteImport } from './routes/events/manage.$eventId'
@@ -237,6 +238,11 @@ const EventsCreateRoute = EventsCreateRouteImport.update({
   path: '/events/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsEventIdRoute = EventsEventIdRouteImport.update({
+  id: '/events/$eventId',
+  path: '/events/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatsChatIdRoute = ChatsChatIdRouteImport.update({
   id: '/$chatId',
   path: '/$chatId',
@@ -280,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/top-picks': typeof TopPicksRoute
   '/chats/$chatId': typeof ChatsChatIdRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/events/create': typeof EventsCreateRoute
   '/events/join': typeof EventsJoinRouteWithChildren
   '/forgot-password/reset': typeof ForgotPasswordResetRoute
@@ -322,6 +329,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/top-picks': typeof TopPicksRoute
   '/chats/$chatId': typeof ChatsChatIdRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/events/create': typeof EventsCreateRoute
   '/events/join': typeof EventsJoinRouteWithChildren
   '/forgot-password/reset': typeof ForgotPasswordResetRoute
@@ -367,6 +375,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/top-picks': typeof TopPicksRoute
   '/chats/$chatId': typeof ChatsChatIdRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/events/create': typeof EventsCreateRoute
   '/events/join': typeof EventsJoinRouteWithChildren
   '/forgot-password/reset': typeof ForgotPasswordResetRoute
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/top-picks'
     | '/chats/$chatId'
+    | '/events/$eventId'
     | '/events/create'
     | '/events/join'
     | '/forgot-password/reset'
@@ -455,6 +465,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/top-picks'
     | '/chats/$chatId'
+    | '/events/$eventId'
     | '/events/create'
     | '/events/join'
     | '/forgot-password/reset'
@@ -499,6 +510,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/top-picks'
     | '/chats/$chatId'
+    | '/events/$eventId'
     | '/events/create'
     | '/events/join'
     | '/forgot-password/reset'
@@ -543,6 +555,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRouteWithChildren
   TermsRoute: typeof TermsRoute
   TopPicksRoute: typeof TopPicksRoute
+  EventsEventIdRoute: typeof EventsEventIdRoute
   EventsCreateRoute: typeof EventsCreateRoute
   EventsJoinRoute: typeof EventsJoinRouteWithChildren
   ForgotPasswordResetRoute: typeof ForgotPasswordResetRoute
@@ -828,6 +841,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$eventId': {
+      id: '/events/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/events/$eventId'
+      preLoaderRoute: typeof EventsEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chats/$chatId': {
       id: '/chats/$chatId'
       path: '/$chatId'
@@ -919,6 +939,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRouteWithChildren,
   TermsRoute: TermsRoute,
   TopPicksRoute: TopPicksRoute,
+  EventsEventIdRoute: EventsEventIdRoute,
   EventsCreateRoute: EventsCreateRoute,
   EventsJoinRoute: EventsJoinRouteWithChildren,
   ForgotPasswordResetRoute: ForgotPasswordResetRoute,

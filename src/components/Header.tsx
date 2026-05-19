@@ -48,23 +48,6 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--mag-line)] bg-[var(--header-bg)] backdrop-blur-lg">
       <div className="page-wrap flex items-center justify-between py-3">
-        {session?.user ? (
-          <div className="flex items-center gap-2">
-            <Link
-              to="/profile"
-              className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)]"
-            >
-              <AvatarImage src={session.user.image} />
-              {tier !== 'free' && (
-                <span className="absolute -bottom-0.5 -right-0.5 rounded-full bg-[var(--mag-ink)] px-1.5 py-[1px] text-[9px] font-bold text-[var(--mag-bg)] uppercase leading-none">
-                  {tier}
-                </span>
-              )}
-            </Link>
-          </div>
-        ) : (
-          <div className="w-10" />
-        )}
         <Link to="/" className="flex items-center gap-1.5 no-underline">
           <Logo className="h-6 w-auto" />
           <span className="text-base font-medium tracking-normal text-[var(--mag-ink)]">Meet & Greet</span>
@@ -98,6 +81,19 @@ export default function Header() {
           >
             {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
+          {session?.user ? (
+            <Link
+              to="/profile"
+              className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)]"
+            >
+              <AvatarImage src={session.user.image} />
+              {tier !== 'free' && (
+                <span className="absolute -bottom-0.5 -right-0.5 rounded-full bg-[var(--mag-ink)] px-1.5 py-[1px] text-[9px] font-bold text-[var(--mag-bg)] uppercase leading-none">
+                  {tier}
+                </span>
+              )}
+            </Link>
+          ) : null}
         </div>
       </div>
     </header>

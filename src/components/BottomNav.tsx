@@ -1,21 +1,16 @@
 import { Link, useRouterState } from '@tanstack/react-router'
-import { Home, Calendar, Heart, MessageCircle, User } from 'lucide-react'
+import { Home, Calendar, Heart, MessageCircle, Settings } from 'lucide-react'
 
 export default function BottomNav() {
   const router = useRouterState()
   const path = router.location.pathname
-
-  const mainPaths = ['/discover', '/events', '/likes', '/chats', '/profile']
-  const isMainScreen = mainPaths.some((p) => path === p || path.startsWith(p + '/'))
-
-  if (!isMainScreen) return null
 
   const items = [
     { to: '/discover', label: 'Home', icon: Home },
     { to: '/events', label: 'Events', icon: Calendar },
     { to: '/likes', label: 'Likes', icon: Heart },
     { to: '/chats', label: 'Chat', icon: MessageCircle },
-    { to: '/profile', label: 'Profile', icon: User },
+    { to: '/settings', label: 'Settings', icon: Settings },
   ]
 
   return (

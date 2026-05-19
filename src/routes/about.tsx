@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Heart, Shield, Zap, Users } from 'lucide-react'
+import Logo from '../components/Logo'
 
 export const Route = createFileRoute('/about')({ component: AboutPage })
 
@@ -7,8 +8,8 @@ function AboutPage() {
   return (
     <main className="page-wrap mx-auto max-w-2xl px-4 py-6 md:px-6 md:py-8">
       <div className="mb-8 text-center">
-        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--mag-ink)]">
-          <Heart className="h-8 w-8 fill-white text-white" />
+        <div className="mb-4 inline-flex items-center justify-center rounded-full bg-[var(--mag-ink)]">
+          <Logo className="h-16 w-16" />
         </div>
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">About Meet & Greet</h1>
         <p className="mt-2 text-sm text-[var(--mag-ink-soft)]">

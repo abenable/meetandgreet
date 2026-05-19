@@ -13,14 +13,14 @@ export const TIER_CONFIG = {
     dailySwipes: Infinity,
     boosts: { intervalDays: 7 },
     canCreateEvents: true,
-    priceMonthly: 7.99,
+    priceMonthly: 10000,
   },
   host: {
     maxActiveEvents: Infinity,
     dailySwipes: Infinity,
     boosts: { intervalDays: 1 },
     canCreateEvents: true,
-    priceMonthly: 19.99,
+    priceMonthly: 25000,
     prioritySupport: true,
   },
 } as const

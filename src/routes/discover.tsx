@@ -158,7 +158,7 @@ function DiscoverPage() {
         <Users className="mb-4 h-16 w-16 text-[var(--mag-ink-muted)]" />
         <h2 className="text-xl font-bold text-[var(--mag-ink)]">Join an Event First</h2>
         <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">Discover is only available when you are checked into an event.</p>
-        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-green)] px-6 py-3 text-sm font-bold !text-white no-underline transition hover:bg-[var(--mag-green-dark)]">
+        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-bold !text-[var(--mag-bg)] no-underline transition hover:opacity-80 active:scale-95">
           Browse Events <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -173,7 +173,7 @@ function DiscoverPage() {
         <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
           Other attendees haven't joined, or you've already swiped through everyone in this event.
         </p>
-        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-green)] px-6 py-3 text-sm font-bold !text-white no-underline transition hover:bg-[var(--mag-green-dark)]">
+        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-bold !text-[var(--mag-bg)] no-underline transition hover:opacity-80 active:scale-95">
           Browse More Events <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -194,7 +194,7 @@ function DiscoverPage() {
               onClick={() => setSelectedIntent((prev) => (prev === value ? '' : value))}
               className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
                 selectedIntent === value
-                  ? 'bg-[var(--mag-green)] text-white'
+                  ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                   : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)]'
               }`}
             >
@@ -256,14 +256,14 @@ function DiscoverPage() {
               )}
               {isMystery && (
                 <div className="absolute top-4 right-4 z-10">
-                  <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700">
+                  <span className="rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
                     MYSTERY
                   </span>
                 </div>
               )}
               {(profile as any).isBoosted && (
                 <div className="absolute top-4 left-4 z-10">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/90 px-2 py-0.5 text-[10px] font-bold text-white">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-ink)]/90 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
                     <Zap className="h-3 w-3" /> BOOSTED
                   </span>
                 </div>
@@ -300,13 +300,7 @@ function DiscoverPage() {
                     {profile.lookingFor.map((intent) => (
                       <span
                         key={intent}
-                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm ${
-                          intent === 'dating'
-                            ? 'bg-pink-500/80'
-                            : intent === 'friends'
-                              ? 'bg-blue-500/80'
-                              : 'bg-amber-500/80'
-                        }`}
+                        className="rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm"
                       >
                         {intent.charAt(0).toUpperCase() + intent.slice(1)}
                       </span>
@@ -334,14 +328,14 @@ function DiscoverPage() {
                   onClick={() => handleAction('like')}
                   disabled={swipedIds.has(profile.userId)}
                   className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${
-                    swipedIds.has(profile.userId) ? 'bg-[var(--mag-green)]' : 'bg-black/30'
+                    swipedIds.has(profile.userId) ? 'bg-[var(--mag-ink)]' : 'bg-black/30'
                   }`}
                 >
                   <Heart
                     className={`h-6 w-6 ${
                       swipedIds.has(profile.userId)
                         ? 'fill-white text-white'
-                        : 'fill-transparent text-[var(--mag-green)]'
+                        : 'fill-transparent text-white'
                     }`}
                   />
                 </button>
@@ -349,18 +343,18 @@ function DiscoverPage() {
                   onClick={handleRequest}
                   disabled={requestedIds.has(profile.userId) || requestPendingIds.has(profile.userId)}
                   className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${
-                    requestedIds.has(profile.userId) ? 'bg-blue-500' : 'bg-black/30'
+                    requestedIds.has(profile.userId) ? 'bg-[var(--mag-ink)]' : 'bg-black/30'
                   }`}
                   title={requestedIds.has(profile.userId) ? 'Request sent' : 'Send message request'}
                 >
                   {requestPendingIds.has(profile.userId) ? (
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                   ) : (
                     <MessageCircle
                       className={`h-6 w-6 ${
                         requestedIds.has(profile.userId)
                           ? 'fill-white text-white'
-                          : 'fill-transparent text-blue-400'
+                          : 'fill-transparent text-white'
                       }`}
                     />
                   )}
@@ -369,13 +363,11 @@ function DiscoverPage() {
                   onClick={() => handleAction('pass')}
                   disabled={swipedIds.has(profile.userId)}
                   className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${
-                    swipedIds.has(profile.userId) ? 'bg-red-500' : 'bg-black/30'
+                    swipedIds.has(profile.userId) ? 'bg-[var(--mag-ink)]' : 'bg-black/30'
                   }`}
                 >
                   <X
-                    className={`h-6 w-6 ${
-                      swipedIds.has(profile.userId) ? 'text-white' : 'text-red-400'
-                    }`}
+                    className="h-6 w-6 text-white"
                     strokeWidth={2.5}
                   />
                 </button>
@@ -389,7 +381,7 @@ function DiscoverPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110"
                   title="Report user"
                 >
-                  <Flag className="h-4 w-4 text-yellow-400" />
+                  <Flag className="h-4 w-4 text-white" />
                 </button>
               </div>
             </section>
@@ -400,14 +392,14 @@ function DiscoverPage() {
       {/* Report Modal */}
       {reportModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 px-4 pb-20 sm:items-center sm:pb-0">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] border border-[var(--mag-line)] p-5">
             <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Report user</h3>
             <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
               This will be sent to the event organizer. Be honest — false reports may result in action against you.
             </p>
 
             {reportSuccess ? (
-              <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-xs text-green-600 dark:border-green-900 dark:bg-green-950 dark:text-green-400">
+              <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-4 py-3 text-xs text-[var(--mag-success)]">
                 {reportSuccess}
               </div>
             ) : (
@@ -416,7 +408,7 @@ function DiscoverPage() {
                   {REPORT_REASONS.map((r) => (
                     <label
                       key={r}
-                      className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 transition hover:border-[var(--mag-green)]/30"
+                      className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 transition hover:border-[var(--mag-line)]"
                     >
                       <input
                         type="radio"
@@ -424,7 +416,7 @@ function DiscoverPage() {
                         value={r}
                         checked={reportReason === r}
                         onChange={() => setReportReason(r)}
-                        className="h-4 w-4 accent-[var(--mag-green)]"
+                        className="h-4 w-4 accent-[#111111]"
                       />
                       <span className="text-sm text-[var(--mag-ink)]">{r}</span>
                     </label>
@@ -437,7 +429,7 @@ function DiscoverPage() {
                     onChange={(e) => setReportCustom(e.target.value)}
                     placeholder="Describe the issue..."
                     rows={3}
-                    className="mb-3 w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none"
+                    className="mb-3 w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
                   />
                 )}
 
@@ -453,7 +445,7 @@ function DiscoverPage() {
                     disabled={
                       !reportReason || (reportReason === 'Other' && !reportCustom.trim()) || reportMutation.isPending
                     }
-                    className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-bold text-white transition hover:bg-red-600 disabled:opacity-50"
+                    className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 active:scale-95"
                   >
                     {reportMutation.isPending ? 'Submitting…' : 'Submit Report'}
                   </button>

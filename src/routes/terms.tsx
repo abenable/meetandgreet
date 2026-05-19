@@ -11,7 +11,7 @@ function TermsPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex items-center gap-2">
-          <FileText className="h-5 w-5 text-[var(--mag-green)]" />
+          <FileText className="h-5 w-5 text-[var(--mag-ink)]" />
           <h1 className="text-lg font-bold text-[var(--mag-ink)]">Terms of Service</h1>
         </div>
       </div>
@@ -116,7 +116,7 @@ function TermsPage() {
           <h2 className="mb-2 text-sm font-bold text-[var(--mag-ink)]">11. Contact Us</h2>
           <p>
             If you have any questions about these Terms of Service, please contact us at{' '}
-            <a href="mailto:hello@meetandgreet.app" className="text-[var(--mag-green)] no-underline">hello@meetandgreet.app</a>.
+            <a href="mailto:hello@meetandgreet.app" className="text-[var(--mag-ink)] underline">hello@meetandgreet.app</a>.
           </p>
         </section>
       </div>

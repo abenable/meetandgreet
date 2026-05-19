@@ -7,7 +7,7 @@ function AboutPage() {
   return (
     <main className="page-wrap px-4 py-8">
       <div className="mb-8 text-center">
-        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--mag-green)]">
+        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--mag-ink)]">
           <Heart className="h-8 w-8 fill-white text-white" />
         </div>
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">About Meet & Greet</h1>
@@ -39,8 +39,8 @@ function AboutPage() {
             desc: 'Your safety is our priority. Report, block, and verify with confidence.',
           },
         ].map((item) => (
-          <div key={item.title} className="flex gap-4 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--mag-green)]/10 text-[var(--mag-green)]">
+          <div key={item.title} className="flex gap-4 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-none bg-[var(--mag-surface)] text-[var(--mag-ink)]">
               <item.icon className="h-5 w-5" />
             </div>
             <div>

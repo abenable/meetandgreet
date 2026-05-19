@@ -74,7 +74,7 @@ function LoginPage() {
 
       <div className="flex w-full max-w-xs flex-col gap-4">
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+          <div className="rounded-xl border border-[var(--mag-sale)] bg-[var(--mag-sale-bg)] px-4 py-3 text-xs text-[var(--mag-sale)]">
             {error}
           </div>
         )}
@@ -88,7 +88,7 @@ function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email address"
               required
-              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
           </div>
 
@@ -100,7 +100,7 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-10 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-10 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
             <button
               type="button"
@@ -116,7 +116,7 @@ function LoginPage() {
           </div>
 
           <div className="text-right">
-            <Link to="/forgot-password" className="text-xs text-[var(--mag-green)] no-underline hover:underline">
+            <Link to="/forgot-password" className="text-xs text-[var(--mag-ink)] no-underline hover:underline">
               Forgot password?
             </Link>
           </div>
@@ -124,7 +124,7 @@ function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] px-6 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-60"
           >
             {loading ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -137,7 +137,7 @@ function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-2 flex flex-col gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-5 text-center">
+        <div className="mt-2 flex flex-col gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
           <div>
             <p className="text-sm font-semibold text-[var(--mag-ink)]">Don't have an account?</p>
             <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">Join now and start meeting people.</p>
@@ -145,7 +145,7 @@ function LoginPage() {
           <Link
             to="/signup"
             search={redirect ? { redirect } : undefined}
-            className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-[var(--mag-green)] bg-transparent px-6 py-3 text-sm font-semibold text-[var(--mag-green)] transition hover:bg-[var(--mag-green)] hover:text-white no-underline"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--mag-line)] bg-[var(--mag-bg)] px-6 py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline"
           >
             Create Account
             <ArrowRight className="h-4 w-4" />

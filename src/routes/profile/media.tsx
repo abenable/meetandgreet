@@ -70,11 +70,11 @@ function MediaPage() {
       </div>
 
       {photos.length < 3 && (
-        <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[var(--mag-green)]/20 bg-[var(--mag-green)]/10 px-4 py-3">
-          <Sparkles className="h-5 w-5 flex-shrink-0 text-[var(--mag-green)]" />
+        <div className="mb-4 flex items-center gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-surface)] px-4 py-3">
+          <Sparkles className="h-5 w-5 flex-shrink-0 text-[var(--mag-ink-soft)]" />
           <div>
-            <p className="text-sm font-semibold text-[var(--mag-green)]">More photos = more matches</p>
-            <p className="text-xs text-[var(--mag-green)]/80">Profiles with 3 or more photos get noticed 10x more.</p>
+            <p className="text-sm font-semibold text-[var(--mag-ink)]">More photos = more matches</p>
+            <p className="text-xs text-[var(--mag-ink-soft)]">Profiles with 3 or more photos get noticed 10x more.</p>
           </div>
         </div>
       )}
@@ -104,7 +104,7 @@ function MediaPage() {
               <X className="h-3.5 w-3.5" />
             </button>
             {i === 0 && (
-              <div className="absolute bottom-2 left-2 rounded-full bg-[var(--mag-green)] px-2 py-0.5 text-[10px] font-bold text-white">
+              <div className="absolute bottom-2 left-2 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-bg)]">
                 Avatar
               </div>
             )}
@@ -115,10 +115,10 @@ function MediaPage() {
           <button
             onClick={() => fileRef.current?.click()}
             disabled={updateMutation.isPending}
-            className="flex aspect-[3/4] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)] disabled:opacity-60"
+            className="flex aspect-[3/4] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-ink)] hover:text-[var(--mag-ink)] disabled:opacity-60"
           >
             {updateMutation.isPending ? (
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
             ) : (
               <>
                 <Upload className="h-8 w-8" />

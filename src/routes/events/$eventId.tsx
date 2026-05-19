@@ -22,7 +22,7 @@ function EventDetailPage() {
     return (
       <main className="page-wrap px-4 py-4">
         <div className="flex items-center justify-center py-20">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--mag-line)] border-t-transparent" />
         </div>
       </main>
     )
@@ -40,7 +40,7 @@ function EventDetailPage() {
           </button>
           <h1 className="text-lg font-bold text-[var(--mag-ink)]">Event Details</h1>
         </div>
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-6 text-center">
+        <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-6 text-center">
           <p className="text-sm font-semibold text-[var(--mag-ink)]">Event not found.</p>
         </div>
       </main>
@@ -78,7 +78,7 @@ function EventDetailPage() {
       )}
 
       <div
-        className="relative rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4"
+        className="relative rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4"
         style={
           frameUrl
             ? {

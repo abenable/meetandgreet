@@ -35,7 +35,7 @@ function BlockedUsersPage() {
 
       {isLoading ? (
         <div className="flex h-40 items-center justify-center">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
         </div>
       ) : blockedUsers.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -47,7 +47,7 @@ function BlockedUsersPage() {
           {blockedUsers.map((user) => (
             <div
               key={user.userId}
-              className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-3"
+              className="flex items-center gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-3"
             >
               <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
                 <AvatarImage src={user.photo ?? ''} alt={user.name ?? ''} />

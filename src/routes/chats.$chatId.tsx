@@ -47,7 +47,7 @@ function VoiceMessagePlayer({ url, isMine }: { url: string; isMine: boolean }) {
   }
 
   return (
-    <div className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 ${isMine ? 'bg-[var(--mag-green)] text-white' : 'border border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
+    <div className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 ${isMine ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]' : 'border border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
       <button
         onClick={toggle}
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isMine ? 'bg-white/20 text-white' : 'bg-[var(--mag-line)] text-[var(--mag-ink)]'}`}
@@ -298,10 +298,10 @@ function UnifiedChatPage() {
   if (error) {
     return (
       <div className="page-wrap flex h-[calc(100dvh-112px)] flex-col items-center justify-center px-4 py-4 text-center">
-        <p className="text-sm text-red-500">{(error as any)?.message || 'Unable to open chat.'}</p>
+        <p className="text-sm text-[var(--mag-sale)]">{(error as any)?.message || 'Unable to open chat.'}</p>
         <button
           onClick={() => navigate({ to: '/chats' })}
-          className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--mag-green)] px-6 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+          className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 font-medium text-[var(--mag-bg)] transition active:scale-95 hover:opacity-80"
         >
           <ArrowLeft className="h-4 w-4" /> Go back
         </button>
@@ -328,7 +328,7 @@ function UnifiedChatPage() {
             <p className="text-[10px] text-[var(--mag-ink-muted)]">
               {connected ? (
                 <span className="flex items-center justify-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--mag-success)]"></span>
                   Online
                 </span>
               ) : (
@@ -348,17 +348,17 @@ function UnifiedChatPage() {
 
       {/* Unlock progress */}
       {isPhotosLocked && remainingMessages > 0 && (
-        <div className="mb-2 rounded-xl bg-purple-50 px-3 py-2 text-center text-xs font-medium text-purple-700">
+        <div className="mb-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 text-center text-xs font-medium text-[var(--mag-ink)]">
           Send {remainingMessages} more message{remainingMessages !== 1 ? 's' : ''} to reveal their photo 🔒
         </div>
       )}
       {isPhotosLocked && remainingMessages === 0 && (
-        <div className="mb-2 rounded-xl bg-purple-50 px-3 py-2 text-center text-xs font-medium text-purple-700">
+        <div className="mb-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 text-center text-xs font-medium text-[var(--mag-ink)]">
           Almost there! Send one more message to reveal 🔒
         </div>
       )}
       {showRevealToast && (
-        <div className="mb-2 rounded-xl bg-purple-600 px-3 py-2 text-center text-xs font-bold text-white shadow-lg transition-all duration-500">
+        <div className="mb-2 rounded-xl bg-[var(--mag-ink)] px-3 py-2 text-center text-xs font-bold text-[var(--mag-bg)] transition-all duration-500">
           Photos revealed!
         </div>
       )}
@@ -366,7 +366,7 @@ function UnifiedChatPage() {
       {/* Messages */}
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         {isLoading ? (
-          <div className="flex h-full items-center justify-center"><div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" /></div>
+          <div className="flex h-full items-center justify-center"><div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-ink-muted)] border-t-transparent" /></div>
         ) : chatData?.messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-[var(--mag-ink-muted)]">Start the conversation!</div>
         ) : (
@@ -388,7 +388,7 @@ function UnifiedChatPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${msg.isMine ? 'rounded-br-sm bg-[var(--mag-green)] text-white' : 'rounded-bl-sm bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
+                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${msg.isMine ? 'rounded-br-md bg-[var(--mag-ink)] text-[var(--mag-bg)]' : 'rounded-bl-md border border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
                     {msg.content}
                     <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${msg.isMine ? 'text-white/70' : 'text-[var(--mag-ink-muted)]'}`}>
                       <span suppressHydrationWarning>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -411,7 +411,7 @@ function UnifiedChatPage() {
         {/* Typing indicator */}
         {typingUsers.length > 0 && (
           <div className="flex justify-start">
-            <div className="rounded-2xl rounded-bl-sm bg-[var(--mag-surface)] px-4 py-2.5">
+            <div className="rounded-2xl rounded-bl-md bg-[var(--mag-surface)] px-4 py-2.5">
               <div className="flex gap-1">
                 <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--mag-ink-muted)]" style={{ animationDelay: '0ms' }}></span>
                 <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--mag-ink-muted)]" style={{ animationDelay: '150ms' }}></span>
@@ -428,29 +428,29 @@ function UnifiedChatPage() {
             <button
               key={ice.id}
               onClick={() => setInput(ice.text)}
-              className="shrink-0 rounded-full bg-[var(--mag-green)]/10 px-3 py-1.5 text-xs font-medium text-[var(--mag-green)]"
+              className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-bg)] px-3 py-1.5 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
             >
               {ice.text}
             </button>
           ))}
         </div>
       )}
-      {sendError && <p className="mb-1 text-xs text-red-500">{sendError}</p>}
+      {sendError && <p className="mb-1 text-xs text-[var(--mag-sale)]">{sendError}</p>}
       <div className="mt-3 flex items-center gap-2">
         {isRecording ? (
           <>
             <div className="flex flex-1 items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+              <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--mag-sale)]" />
               <span>Recording {formatDuration(recordingDuration)}</span>
             </div>
             <button
               onClick={stopRecording}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-surface)] text-red-500"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-sale)]"
               aria-label="Stop recording"
             >
               <Square className="h-4 w-4 animate-pulse" />
             </button>
-            <button disabled className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)] text-white opacity-60">
+            <button disabled className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)] opacity-60">
               <Send className="h-4 w-4" />
             </button>
           </>
@@ -479,7 +479,7 @@ function UnifiedChatPage() {
             <button
               onClick={handleSendVoice}
               disabled={sending}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)] text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-60"
             >
               <Send className="h-4 w-4" />
             </button>
@@ -489,7 +489,7 @@ function UnifiedChatPage() {
             <input type="text" value={input} onChange={(e) => handleInputChange(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Type a message..."
               disabled={sending}
-              className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20 disabled:opacity-60" />
+              className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-line)] disabled:opacity-60" />
             {matchId && (
               <button
                 onClick={startRecording}
@@ -499,7 +499,7 @@ function UnifiedChatPage() {
                 <Mic className="h-5 w-5" />
               </button>
             )}
-            <button onClick={handleSend} disabled={sending} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)] text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60">
+            <button onClick={handleSend} disabled={sending} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-60">
               <Send className="h-4 w-4" />
             </button>
           </>
@@ -509,8 +509,8 @@ function UnifiedChatPage() {
       {/* Block Confirmation Dialog */}
       {blockDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
-            <div className="mb-1 flex items-center gap-2 text-red-500">
+          <div className="w-full max-w-sm rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5">
+            <div className="mb-1 flex items-center gap-2 text-[var(--mag-sale)]">
               <Ban className="h-5 w-5" />
               <h3 className="text-sm font-semibold">Block {peerProfile?.name ?? 'User'}</h3>
             </div>
@@ -520,7 +520,7 @@ function UnifiedChatPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setBlockDialogOpen(false)}
-                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-bg)] px-6 py-3 font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
               >
                 Cancel
               </button>
@@ -529,7 +529,7 @@ function UnifiedChatPage() {
                   if (peerId) blockMutation.mutate({ data: peerId })
                 }}
                 disabled={blockMutation.isPending || !peerId}
-                className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50"
+                className="flex-1 rounded-full bg-[var(--mag-sale)] px-6 py-3 font-medium text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50"
               >
                 {blockMutation.isPending ? 'Blocking…' : 'Block'}
               </button>

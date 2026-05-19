@@ -63,21 +63,21 @@ function EditProfilePage() {
       <div className="mx-auto max-w-md space-y-4">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Bio</label>
-          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} className="w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
+          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}           className="w-full resize-none rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Job</label>
-          <input type="text" value={job} onChange={(e) => setJob(e.target.value)} className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
+          <input type="text" value={job} onChange={(e) => setJob(e.target.value)}           className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Location</label>
-          <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
+          <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}           className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Gender</label>
           <div className="flex flex-wrap gap-2">
             {['Male', 'Female'].map((g) => (
-              <button key={g} onClick={() => setGender(g)} className={`rounded-full px-4 py-2 text-xs font-medium ${g === gender ? 'bg-[var(--mag-green)] text-white' : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)]'}`}>{g}</button>
+              <button key={g} onClick={() => setGender(g)} className={`rounded-full px-4 py-2 text-xs font-medium ${g === gender ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]' : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)]'}`}>{g}</button>
             ))}
           </div>
         </div>
@@ -94,7 +94,7 @@ function EditProfilePage() {
                 onClick={() => toggleLookingFor(value)}
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium transition ${
                   lookingFor.includes(value)
-                    ? 'bg-[var(--mag-green)] text-white'
+                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                     : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)]'
                 }`}
               >
@@ -106,12 +106,12 @@ function EditProfilePage() {
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Interests (comma separated)</label>
-          <input type="text" value={interests} onChange={(e) => setInterests(e.target.value)} className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
+          <input type="text" value={interests} onChange={(e) => setInterests(e.target.value)}           className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
       </div>
 
       <div className="mt-6 flex justify-center">
-        <button onClick={handleSave} className="inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[var(--mag-green)] py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[var(--mag-green-dark)]">Save Changes</button>
+        <button onClick={handleSave} className="inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[var(--mag-ink)] py-3.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95">Save Changes</button>
       </div>
     </main>
   )

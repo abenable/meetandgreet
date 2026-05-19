@@ -12,7 +12,7 @@ function Toggle({ label, icon: Icon, defaultOn = true }: { label: string; icon: 
       <span className="flex-1 text-sm text-[var(--mag-ink)]">{label}</span>
       <button
         onClick={() => setOn(!on)}
-        className={`relative h-6 w-11 rounded-full transition ${on ? 'bg-[var(--mag-green)]' : 'bg-gray-200'}`}
+        className={`relative h-6 w-11 rounded-full transition ${on ? 'bg-[var(--mag-ink)]' : 'bg-[var(--mag-line)]'}`}
       >
         <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition ${on ? 'left-[22px]' : 'left-0.5'}`} />
       </button>
@@ -30,7 +30,7 @@ function NotificationsSettingsPage() {
         <h1 className="text-lg font-bold text-[var(--mag-ink)]">Notifications</h1>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+      <div className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
         <Toggle label="New Matches" icon={Heart} />
         <Toggle label="New Messages" icon={MessageSquare} />
         <Toggle label="Likes You" icon={Zap} />

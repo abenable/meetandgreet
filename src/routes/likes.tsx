@@ -82,7 +82,7 @@ function LikesPage() {
     <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-bold text-[var(--mag-ink)]">Connections</h1>
-        <span className="rounded-full bg-[var(--mag-green)]/10 px-3 py-1 text-xs font-semibold text-[var(--mag-green)]">
+        <span className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1 text-xs font-semibold text-[var(--mag-ink-soft)]">
           {likes.length + requests.length + matches.length} total
         </span>
       </div>
@@ -98,9 +98,9 @@ function LikesPage() {
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-semibold transition ${
-              activeTab === t.key
-                ? 'bg-[var(--mag-green)] text-white'
-                : 'text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+                activeTab === t.key
+                  ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
+                  : 'text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
             }`}
           >
             <t.icon className="h-3.5 w-3.5" />
@@ -114,11 +114,11 @@ function LikesPage() {
 
       {isLoading ? (
         <div className="flex h-32 items-center justify-center">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-ink-muted)] border-t-transparent" />
         </div>
       ) : activeTab === 'likes' ? (
         likes.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] p-8 text-center">
+          <div className="rounded-none border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] p-8 text-center">
             <Heart className="mx-auto mb-2 h-8 w-8 text-[var(--mag-ink-muted)]" />
             <p className="text-sm text-[var(--mag-ink-soft)]">No likes yet. Keep discovering!</p>
           </div>
@@ -128,7 +128,7 @@ function LikesPage() {
               const isPending = pendingIds.has(like.userId)
               const isMatched = justMatchedIds.has(like.userId)
               return (
-                <div key={like.userId} className="relative overflow-hidden rounded-2xl">
+                <div key={like.userId} className="relative overflow-hidden rounded-none bg-[var(--mag-card)]">
                   <div className="aspect-[3/4] w-full">
                     <AvatarImage src={(like.photos || [])[0]} alt={like.name} />
                   </div>
@@ -142,17 +142,17 @@ function LikesPage() {
                       <button
                         onClick={() => handleLikeBack(like)}
                         disabled={isPending || isMatched || !like.eventId}
-                        className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full shadow-lg transition active:scale-95 disabled:opacity-50 ${
+                        className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition active:scale-95 disabled:opacity-50 ${
                           isMatched
-                            ? 'bg-[var(--mag-green)] text-white'
-                            : 'bg-white/90 text-[var(--mag-green)] hover:scale-105 hover:bg-white'
+                            ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
+                            : 'bg-white/90 text-[var(--mag-ink)] hover:opacity-80 hover:bg-white'
                         }`}
                         title={isMatched ? 'Matched!' : 'Like back'}
                       >
                         {isPending ? (
-                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
                         ) : (
-                          <Heart className={`h-5 w-5 ${isMatched ? 'fill-white' : 'fill-[var(--mag-green)]'}`} />
+                          <Heart className={`h-5 w-5 ${isMatched ? 'fill-white' : 'fill-[#111111]'}`} />
                         )}
                       </button>
                     </div>
@@ -164,7 +164,7 @@ function LikesPage() {
         )
       ) : activeTab === 'requests' ? (
         requests.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] p-8 text-center">
+          <div className="rounded-none border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] p-8 text-center">
             <Mail className="mx-auto mb-2 h-8 w-8 text-[var(--mag-ink-muted)]" />
             <p className="text-sm text-[var(--mag-ink-soft)]">No message requests yet.</p>
           </div>
@@ -176,7 +176,7 @@ function LikesPage() {
               return (
                 <div
                   key={req.id}
-                  className={`flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 card-shadow ${isDeclined ? 'opacity-50' : ''}`}
+                  className={`flex items-center gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 ${isDeclined ? 'opacity-50' : ''}`}
                 >
                   <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
                     <AvatarImage src={(req.senderPhotos || [])[0]} alt={req.senderName} />
@@ -194,7 +194,7 @@ function LikesPage() {
                           acceptMutation.mutate(req.id)
                         }}
                         disabled={isAcceptPending}
-                        className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-green)] text-white shadow-sm transition hover:scale-105 disabled:opacity-60"
+                        className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-60 active:scale-95"
                         title="Accept"
                       >
                         {isAcceptPending ? (
@@ -206,7 +206,7 @@ function LikesPage() {
                       <button
                         onClick={() => declineMutation.mutate(req.id)}
                         disabled={isAcceptPending}
-                        className="flex h-9 w-9 items-center justify-center rounded-full bg-red-500/10 text-red-500 transition hover:bg-red-500/20 disabled:opacity-60"
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] disabled:opacity-60"
                         title="Decline"
                       >
                         <X className="h-4 w-4" />
@@ -222,7 +222,7 @@ function LikesPage() {
         )
       ) : (
         matches.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] p-8 text-center">
+          <div className="rounded-none border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] p-8 text-center">
             <Users className="mx-auto mb-2 h-8 w-8 text-[var(--mag-ink-muted)]" />
             <p className="text-sm text-[var(--mag-ink-soft)]">No matches yet. Start swiping!</p>
           </div>
@@ -233,7 +233,7 @@ function LikesPage() {
                 key={match.id}
                 to="/chats/$chatId"
                 params={{ chatId: `match_${match.id}` }}
-                className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 transition hover:border-[var(--mag-green)] no-underline card-shadow"
+                className="flex items-center gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 transition hover:border-[var(--mag-ink)] no-underline"
               >
                 <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
                   <AvatarImage src={match.peerPhoto} alt={match.peerName} />
@@ -242,7 +242,7 @@ function LikesPage() {
                   <h3 className="text-sm font-semibold text-[var(--mag-ink)]">{match.peerName}</h3>
                   <p className="truncate text-xs text-[var(--mag-ink-soft)]">{match.lastMessage || 'New match!'}</p>
                 </div>
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)] text-white">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)]">
                   <MessageCircle className="h-4 w-4" />
                 </div>
               </Link>

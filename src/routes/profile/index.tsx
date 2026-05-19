@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { MapPin, Camera, Link2, Pencil, Trash2, AlertTriangle, Sparkles, ShieldCheck, Heart, Users, Briefcase, Flame, Calendar, BadgeCheck, Zap } from 'lucide-react'
+import { MapPin, Camera, Link2, Pencil, Trash2, AlertTriangle, Sparkles, ShieldCheck, Heart, Users, Briefcase, Flame, Calendar, BadgeCheck, Zap, ChevronRight, Plus } from 'lucide-react'
 import { getMyProfile, updateProfile, verifyPhoto } from '#/server/profiles'
 import { disableMyAccount } from '#/server/auth'
 import { getUserBadges, getUserStreak } from '#/server/badges'
@@ -14,19 +14,14 @@ import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
 export const Route = createFileRoute('/profile/')({ component: ProfilePage })
 
-function formatNameWithGender(name: string | null, gender: string | null): string {
-  const initial = gender === 'Male' ? 'M' : gender === 'Female' ? 'F' : ''
-  return initial ? `${name || ''}, ${initial}` : (name || '')
-}
-
 const BADGE_CONFIG: Record<string, { label: string; icon: React.ElementType; className: string }> = {
-  first_match: { label: 'First Match', icon: Heart, className: 'bg-pink-100 text-pink-700' },
-  streak_3: { label: '3 Day Streak', icon: Flame, className: 'bg-orange-100 text-orange-700' },
-  streak_7: { label: '7 Day Streak', icon: Flame, className: 'bg-orange-100 text-orange-700' },
-  social_butterfly: { label: 'Social Butterfly', icon: Users, className: 'bg-blue-100 text-blue-700' },
-  event_host: { label: 'Event Host', icon: Calendar, className: 'bg-green-100 text-green-700' },
-  verified: { label: 'Verified', icon: BadgeCheck, className: 'bg-blue-100 text-blue-700' },
-  ice_breaker: { label: 'Ice Breaker', icon: Sparkles, className: 'bg-purple-100 text-purple-700' },
+  first_match: { label: 'First Match', icon: Heart, className: 'bg-[var(--mag-surface)] text-[var(--mag-ink)] border border-[var(--mag-line)]' },
+  streak_3: { label: '3 Day Streak', icon: Flame, className: 'bg-[var(--mag-surface)] text-[var(--mag-ink)] border border-[var(--mag-line)]' },
+  streak_7: { label: '7 Day Streak', icon: Flame, className: 'bg-[var(--mag-surface)] text-[var(--mag-ink)] border border-[var(--mag-line)]' },
+  social_butterfly: { label: 'Social Butterfly', icon: Users, className: 'bg-[var(--mag-surface)] text-[var(--mag-ink)] border border-[var(--mag-line)]' },
+  event_host: { label: 'Event Host', icon: Calendar, className: 'bg-[var(--mag-surface)] text-[var(--mag-ink)] border border-[var(--mag-line)]' },
+  verified: { label: 'Verified', icon: BadgeCheck, className: 'bg-[var(--mag-ink)] text-[var(--mag-bg)]' },
+  ice_breaker: { label: 'Ice Breaker', icon: Sparkles, className: 'bg-[var(--mag-surface)] text-[var(--mag-ink)] border border-[var(--mag-line)]' },
 }
 
 function ProfilePage() {
@@ -208,28 +203,29 @@ function ProfilePage() {
   if (!profile) {
     return (
       <div className="page-wrap flex flex-1 flex-col items-center justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--mag-ink)] border-t-transparent" />
       </div>
     )
   }
 
   const avatarPhoto = (profile.photos || [])[0]
+  const photoCount = (profile.photos || []).length
 
   return (
     <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       {/* Profile Avatar */}
       <div className="mb-4 flex flex-col items-center">
-        <div className={`relative h-24 w-24 overflow-hidden rounded-full border-4 shadow-md ${boostStatus?.isBoosted ? 'border-amber-400' : 'border-[var(--mag-card)]'}`}>
+        <div className={`relative h-28 w-28 overflow-hidden rounded-full border-4 ${boostStatus?.isBoosted ? 'border-[var(--mag-ink)]' : 'border-[var(--mag-card)]'}`}>
           <AvatarImage src={avatarPhoto} alt="Profile" />
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploadingAvatar}
-            className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-[var(--mag-green)] text-white shadow-sm transition hover:scale-105 disabled:opacity-60"
+            className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-60"
           >
             {uploadingAvatar ? (
-              <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <div className="h-3 w-3 animate-spin rounded-full border-2 border-[var(--mag-bg)] border-t-transparent" />
             ) : (
-              <Camera className="h-3.5 w-3.5" />
+              <Camera className="h-4 w-4" />
             )}
           </button>
           <input
@@ -240,32 +236,23 @@ function ProfilePage() {
             onChange={handleAvatarFile}
           />
         </div>
+
         <div className="mt-3 flex items-center gap-2">
-          <h2 className="text-xl font-bold text-[var(--mag-ink)]">{formatNameWithGender(profile.name, profile.gender) || 'You'}</h2>
+          <h2 className="text-xl font-bold text-[var(--mag-ink)]">{profile.name || 'You'}</h2>
           {profile.verifiedAt && <VerifiedBadge />}
-          <button
-            onClick={() => openEdit('name', profile.name || '', profile.gender || '')}
-            className="rounded-full p-1 text-[var(--mag-ink-muted)] transition hover:bg-[var(--mag-surface)] hover:text-[var(--mag-ink)]"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
         </div>
-        <div className="mt-0.5 inline-flex items-center gap-1 text-sm text-[var(--mag-ink-soft)]">
+
+        <div className="mt-1 inline-flex items-center gap-1 text-sm text-[var(--mag-ink-soft)]">
           <MapPin className="h-3.5 w-3.5" />
-          <span>{profile.location || 'Add your college'}</span>
+          <span>{profile.location || 'Add your location'}</span>
         </div>
+
         {profile.lookingFor && profile.lookingFor.length > 0 && (
           <div className="mt-2 flex flex-wrap justify-center gap-2">
             {profile.lookingFor.map((intent) => (
               <span
                 key={intent}
-                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
-                  intent === 'dating'
-                    ? 'bg-pink-100 text-pink-700'
-                    : intent === 'friends'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-amber-100 text-amber-700'
-                }`}
+                className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-1 text-xs font-medium text-[var(--mag-ink)]"
               >
                 {intent === 'dating' && <Heart className="h-3 w-3" />}
                 {intent === 'friends' && <Users className="h-3 w-3" />}
@@ -275,28 +262,32 @@ function ProfilePage() {
             ))}
           </div>
         )}
+
         {streakData && streakData.streakCount > 1 && (
-          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
+          <div className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-1 text-xs font-medium text-[var(--mag-ink)]">
             <Flame className="h-3 w-3" />
             <span>{streakData.streakCount} day streak</span>
           </div>
         )}
+
+        {/* Boost — prominent when active */}
         {boostStatus?.isBoosted ? (
-          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-            <Zap className="h-3 w-3" />
-            <span>Boosted {boostCountdown ? `(${boostCountdown})` : ''}</span>
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-4 py-1.5 text-xs font-bold text-[var(--mag-bg)]">
+            <Zap className="h-3.5 w-3.5 fill-current" />
+            <span>Profile Boosted</span>
+            {boostCountdown && <span className="font-mono opacity-80">{boostCountdown}</span>}
           </div>
         ) : (
           <button
             onClick={() => boostMutation.mutate()}
             disabled={boostMutation.isPending || !!cooldownCountdown}
-            className={`mt-2 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition ${
+            className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition ${
               cooldownCountdown
                 ? 'bg-[var(--mag-surface)] text-[var(--mag-ink-muted)]'
-                : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                : 'bg-[var(--mag-ink)] text-[var(--mag-bg)] hover:opacity-80'
             } disabled:opacity-60`}
           >
-            <Zap className="h-3 w-3" />
+            <Zap className="h-3.5 w-3.5" />
             {boostMutation.isPending
               ? 'Activating...'
               : cooldownCountdown
@@ -304,6 +295,7 @@ function ProfilePage() {
                 : 'Boost Profile'}
           </button>
         )}
+
         {adStatus?.showAds && !boostStatus?.isBoosted && (
           <div className="mt-2">
             <RewardedAdButton
@@ -316,28 +308,36 @@ function ProfilePage() {
               Watch ad for free boost
             </RewardedAdButton>
             {adRewardMessage && (
-              <p className="mt-1 text-xs text-green-600">{adRewardMessage}</p>
+              <p className="mt-1 text-xs text-[var(--mag-success)]">{adRewardMessage}</p>
             )}
           </div>
         )}
       </div>
 
+      {/* Interests */}
       <div className="mb-5 flex flex-wrap justify-center gap-2">
         {(profile.interests || []).map((interest: string) => (
           <span key={interest} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-xs font-medium text-[var(--mag-ink)]">{interest}</span>
         ))}
       </div>
 
-      <div onClick={() => openEdit('bio', profile.bio || '')} className="mb-4 cursor-pointer rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow transition hover:border-[var(--mag-green)]/30">
-        <div className="mb-1 flex items-center justify-between">
+      {/* About Me */}
+      <button
+        onClick={() => openEdit('bio', profile.bio || '')}
+        className="mb-4 flex w-full items-start justify-between rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 text-left transition hover:border-[var(--mag-ink)]/20"
+      >
+        <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">About Me</h3>
-          <Pencil className="h-3 w-3 text-[var(--mag-ink-muted)]" />
+          <p className="mt-1 text-sm leading-relaxed text-[var(--mag-ink-soft)]">
+            {profile.bio || <span className="text-[var(--mag-ink-muted)]">Tell people about yourself — interests, hobbies, what you're looking for…</span>}
+          </p>
         </div>
-        <p className="text-sm leading-relaxed text-[var(--mag-ink-soft)]">{profile.bio || 'Add a bio'}</p>
-      </div>
+        <Pencil className="ml-3 mt-0.5 h-4 w-4 shrink-0 text-[var(--mag-ink-muted)]" />
+      </button>
 
+      {/* Badges */}
       {badges && badges.length > 0 && (
-        <div className="mb-4 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow">
+        <div className="mb-4 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
           <h3 className="mb-2 text-sm font-semibold text-[var(--mag-ink)]">Badges</h3>
           <div className="flex flex-wrap gap-2">
             {badges.map((badge) => {
@@ -358,87 +358,114 @@ function ProfilePage() {
         </div>
       )}
 
-      <div onClick={() => navigate({ to: '/profile/media' })} className="mb-4 cursor-pointer rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow transition hover:border-[var(--mag-green)]/30">
-        <div className="mb-2 flex items-center justify-between">
+      {/* My Photos */}
+      <button
+        onClick={() => navigate({ to: '/profile/media' })}
+        className="mb-4 flex w-full flex-col rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 text-left transition hover:border-[var(--mag-ink)]/20"
+      >
+        <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">My Photos</h3>
-          <span className="text-xs text-[var(--mag-ink-muted)]">{(profile.photos || []).length} photos</span>
+          <span className="text-xs text-[var(--mag-ink-muted)]">{photoCount} photo{photoCount !== 1 ? 's' : ''}</span>
         </div>
-        <div className="flex items-center gap-2">
-          {(profile.photos || []).slice(0, 4).map((photo: string, i: number) => (
-            <div key={i} className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
-              <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+
+        {photoCount > 0 ? (
+          <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
+            {(profile.photos || []).slice(0, 5).map((photo: string, i: number) => (
+              <div key={i} className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-none">
+                <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+              </div>
+            ))}
+            <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center border border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)]">
+              <Plus className="h-6 w-6 text-[var(--mag-ink-muted)]" />
             </div>
-          ))}
-          {(profile.photos || []).length === 0 && (
+          </div>
+        ) : (
+          <div className="flex h-24 items-center justify-center border border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)]">
             <span className="text-sm text-[var(--mag-ink-muted)]">Tap to add photos</span>
-        )}
-        {streakData && streakData.streakCount > 1 && (
-          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
-            <Flame className="h-3 w-3" />
-            <span>{streakData.streakCount} day streak</span>
           </div>
         )}
-      </div>
-        {(profile.photos || []).length < 3 && (
-          <div className="mt-3 flex items-center gap-2 rounded-xl bg-[var(--mag-green)]/10 px-3 py-2">
-            <Sparkles className="h-4 w-4 flex-shrink-0 text-[var(--mag-green)]" />
-            <p className="text-xs font-medium text-[var(--mag-green)]">
-              Profiles with 3+ photos get 10x more matches. Tap to add more.
-            </p>
-          </div>
-        )}
-      </div>
 
-      <div onClick={() => openEdit('location', profile.location || '')} className="mb-4 cursor-pointer rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow transition hover:border-[var(--mag-green)]/30">
-        <div className="mb-1 flex items-center justify-between">
+        {photoCount < 3 && (
+          <div className="mt-3 flex items-center gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-3">
+            <Sparkles className="h-5 w-5 shrink-0 text-[var(--mag-ink)]" />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-[var(--mag-ink)]">Profiles with 3+ photos get 10x more matches</p>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-[var(--mag-ink-muted)]" />
+          </div>
+        )}
+      </button>
+
+      {/* Location */}
+      <button
+        onClick={() => openEdit('location', profile.location || '')}
+        className="mb-4 flex w-full items-start justify-between rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 text-left transition hover:border-[var(--mag-ink)]/20"
+      >
+        <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Location</h3>
-          <Pencil className="h-3 w-3 text-[var(--mag-ink-muted)]" />
+          <div className="mt-1 flex items-center gap-2 text-sm text-[var(--mag-ink-soft)]">
+            <MapPin className="h-4 w-4 text-[var(--mag-ink-muted)]" />
+            <span>{profile.location || 'Add your location'}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-[var(--mag-ink-soft)]">
-          <MapPin className="h-4 w-4 text-[var(--mag-ink-muted)]" /><span>{profile.location || 'Add your college'}</span>
-        </div>
-      </div>
+        <Pencil className="ml-3 mt-0.5 h-4 w-4 shrink-0 text-[var(--mag-ink-muted)]" />
+      </button>
 
-      <div className="mb-4 flex flex-wrap items-center justify-center gap-3">
-        <button className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-6 py-2.5 text-sm font-semibold text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] card-shadow">
-          <Link2 className="h-4 w-4" />Share Profile
+      {/* Action buttons */}
+      <div className="mb-4 grid grid-cols-2 gap-3">
+        <button
+          onClick={() => {
+            const link = `${window.location.origin}/events/join/${profile.userId}`
+            navigator.clipboard.writeText(link)
+          }}
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+        >
+          <Link2 className="h-4 w-4" />
+          Share Profile
         </button>
+
         {!profile.verifiedAt && (
           <button
             onClick={startVerification}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-6 py-2.5 text-sm font-semibold text-blue-500 transition hover:bg-blue-500/20"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-4 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80"
           >
-            <ShieldCheck className="h-4 w-4" />Verify Photo
+            <ShieldCheck className="h-4 w-4" />
+            Verify Photo
           </button>
         )}
-        <button
-          onClick={() => logoutMutation.mutate()}
-          disabled={logoutMutation.isPending}
-          className="inline-flex items-center justify-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-6 py-2.5 text-sm font-semibold text-red-500 transition hover:bg-red-500/20 disabled:opacity-60"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-          Log Out
-        </button>
       </div>
 
-      <div className="mb-6 mt-2 border-t border-[var(--mag-line)] pt-4">
+      {/* Log Out — neutral, not danger */}
+      <button
+        onClick={() => logoutMutation.mutate()}
+        disabled={logoutMutation.isPending}
+        className="mb-6 inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-3 text-sm font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] hover:text-[var(--mag-ink)] disabled:opacity-60"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Log Out
+      </button>
+
+      {/* Delete Account — de-emphasized, small text link */}
+      <div className="mb-8 border-t border-[var(--mag-line)] pt-4 text-center">
         <button
           onClick={() => setShowDeleteModal(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 py-2.5 text-sm font-semibold text-red-500 transition hover:bg-red-500/20"
+          className="text-xs text-[var(--mag-ink-muted)] transition hover:text-[var(--mag-sale)]"
         >
-          <Trash2 className="h-4 w-4" />
           Delete Account
         </button>
-        <p className="mt-2 text-center text-[10px] text-[var(--mag-ink-muted)]">
+        <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">
           Your account will be disabled and you will no longer appear anywhere in the app.
         </p>
       </div>
 
+      {/* Delete Account Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
             <div className="mb-3 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <AlertTriangle className="h-5 w-5 text-[var(--mag-sale)]" />
               <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Delete Account</h3>
             </div>
             <p className="mb-4 text-sm text-[var(--mag-ink-soft)]">
@@ -447,14 +474,14 @@ function ProfilePage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-bg)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
               >
                 Cancel
               </button>
               <button
                 onClick={() => disableMutation.mutate()}
                 disabled={disableMutation.isPending}
-                className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-60"
+                className="flex-1 rounded-full bg-[var(--mag-sale)] py-2.5 text-sm font-semibold text-[var(--mag-bg)] transition hover:bg-[var(--mag-sale-deep)] disabled:opacity-60"
               >
                 {disableMutation.isPending ? 'Deleting…' : 'Delete Account'}
               </button>
@@ -463,9 +490,10 @@ function ProfilePage() {
         </div>
       )}
 
+      {/* Edit Modal */}
       {editingField && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
             <h3 className="mb-3 text-sm font-semibold text-[var(--mag-ink)]">
               {editingField === 'name' ? 'Edit Profile' : editingField === 'bio' ? 'About Me' : 'Location'}
             </h3>
@@ -477,13 +505,13 @@ function ProfilePage() {
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   placeholder="Your name"
-                  className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                  className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
                 />
               </div>
             )}
             {editingField !== 'name' && (
               <textarea value={editValue} onChange={(e) => setEditValue(e.target.value)} rows={editingField === 'bio' ? 4 : 1}
-                className="mb-4 w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
+                className="mb-4 w-full resize-none rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
             )}
             {editingField === 'name' && (
               <div className="mb-4">
@@ -491,7 +519,7 @@ function ProfilePage() {
                 <select
                   value={editGender}
                   onChange={(e) => setEditGender(e.target.value)}
-                  className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                  className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
                 >
                   <option value="">Select gender</option>
                   <option value="Male">Male</option>
@@ -500,28 +528,30 @@ function ProfilePage() {
               </div>
             )}
             <div className="flex gap-2">
-              <button onClick={() => setEditingField(null)} className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]">Cancel</button>
-              <button onClick={saveEdit} disabled={updateMutation.isPending} className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60">{updateMutation.isPending ? 'Saving...' : 'Save'}</button>
+              <button onClick={() => setEditingField(null)} className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-bg)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]">Cancel</button>
+              <button onClick={saveEdit} disabled={updateMutation.isPending} className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-semibold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-60">{updateMutation.isPending ? 'Saving...' : 'Save'}</button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Verify Modal */}
       {showVerifyModal && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 px-4 pb-20 sm:items-center sm:pb-0">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
             {verifyStep === 1 && (
               <>
                 <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Photo Verification</h3>
                 <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
                   Take a real-time selfie to get a verified badge on your profile.
                 </p>
-                <div className="mb-4 rounded-xl border border-blue-500/20 bg-blue-500/10 p-4 text-center">
-                  <p className="text-sm font-semibold text-blue-500">Your pose:</p>
+                <div className="mb-4 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-4 text-center">
+                  <p className="text-sm font-semibold text-[var(--mag-ink)]">Your pose:</p>
                   <p className="mt-1 text-lg text-[var(--mag-ink)]">{verifyPose}</p>
                 </div>
                 <button
                   onClick={() => setVerifyStep(2)}
-                  className="w-full rounded-full bg-[var(--mag-green)] py-3 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+                  className="w-full rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
                 >
                   I'm Ready
                 </button>
@@ -541,7 +571,7 @@ function ProfilePage() {
                 </p>
                 <button
                   onClick={() => verifyFileRef.current?.click()}
-                  className="mb-3 flex w-full items-center justify-center rounded-xl border-2 border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] py-8 text-sm font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-ink)]"
+                  className="mb-3 flex w-full items-center justify-center rounded-xl border-2 border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] py-8 text-sm font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-ink)] hover:text-[var(--mag-ink)]"
                 >
                   <Camera className="mr-2 h-5 w-5" /> Take Selfie
                 </button>
@@ -573,7 +603,7 @@ function ProfilePage() {
                 <button
                   onClick={submitVerification}
                   disabled={verifyUploading}
-                  className="w-full rounded-full bg-[var(--mag-green)] py-3 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60"
+                  className="w-full rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-60"
                 >
                   {verifyUploading ? 'Uploading…' : 'Submit for Verification'}
                 </button>
@@ -589,23 +619,17 @@ function ProfilePage() {
             {verifyStep === 4 && (
               <>
                 <div className="flex flex-col items-center py-4">
-                  <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-500 text-white">
+                  <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)]">
                     <ShieldCheck className="h-8 w-8" />
-        {streakData && streakData.streakCount > 1 && (
-          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
-            <Flame className="h-3 w-3" />
-            <span>{streakData.streakCount} day streak</span>
-          </div>
-        )}
-      </div>
+                  </div>
                   <h3 className="text-base font-bold text-[var(--mag-ink)]">You're Verified!</h3>
                   <p className="mt-1 text-center text-xs text-[var(--mag-ink-soft)]">
-                    Your profile now shows a blue checkmark badge.
+                    Your profile now shows a verified badge.
                   </p>
                 </div>
                 <button
                   onClick={() => setShowVerifyModal(false)}
-                  className="w-full rounded-full bg-[var(--mag-green)] py-3 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+                  className="w-full rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
                 >
                   Done
                 </button>

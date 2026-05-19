@@ -22,13 +22,13 @@ function PrivacySettingsPage() {
         <h1 className="text-xl font-bold text-[var(--mag-ink)]">Privacy &amp; Safety</h1>
       </div>
 
-      <div className="mb-5 overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+      <div className="mb-5 overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
         <div className="flex items-center gap-3 border-b border-[var(--mag-line)] px-4 py-3">
           <Eye className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-sm text-[var(--mag-ink)]">Show Online Status</span>
           <button
             onClick={() => setShowOnline(!showOnline)}
-            className={`relative h-6 w-11 rounded-full transition ${showOnline ? 'bg-[var(--mag-green)]' : 'bg-gray-200'}`}
+            className={`relative h-6 w-11 rounded-full transition ${showOnline ? 'bg-[var(--mag-ink)]' : 'bg-[var(--mag-line)]'}`}
           >
             <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition ${showOnline ? 'left-[22px]' : 'left-0.5'}`} />
           </button>
@@ -38,7 +38,7 @@ function PrivacySettingsPage() {
           <span className="flex-1 text-sm text-[var(--mag-ink)]">Hide Age</span>
           <button
             onClick={() => setHideAge(!hideAge)}
-            className={`relative h-6 w-11 rounded-full transition ${hideAge ? 'bg-[var(--mag-green)]' : 'bg-gray-200'}`}
+            className={`relative h-6 w-11 rounded-full transition ${hideAge ? 'bg-[var(--mag-ink)]' : 'bg-[var(--mag-line)]'}`}
           >
             <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition ${hideAge ? 'left-[22px]' : 'left-0.5'}`} />
           </button>
@@ -48,7 +48,7 @@ function PrivacySettingsPage() {
           <span className="flex-1 text-sm text-[var(--mag-ink)]">Hide Distance</span>
           <button
             onClick={() => setHideDistance(!hideDistance)}
-            className={`relative h-6 w-11 rounded-full transition ${hideDistance ? 'bg-[var(--mag-green)]' : 'bg-gray-200'}`}
+            className={`relative h-6 w-11 rounded-full transition ${hideDistance ? 'bg-[var(--mag-ink)]' : 'bg-[var(--mag-line)]'}`}
           >
             <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition ${hideDistance ? 'left-[22px]' : 'left-0.5'}`} />
           </button>
@@ -58,30 +58,30 @@ function PrivacySettingsPage() {
       <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
         Safety Tools
       </h2>
-      <div className="space-y-2">
-        <Link to="/safety" className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-3 no-underline transition hover:bg-[var(--mag-surface)]">
-          <Shield className="h-5 w-5 text-green-500" />
+      <div className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
+        <Link to="/safety" className="flex items-center gap-3 border-b border-[var(--mag-line)] px-4 py-4 no-underline transition hover:bg-[var(--mag-surface)]">
+          <Shield className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-sm text-[var(--mag-ink)]">Safety Center</span>
         </Link>
         <button
           onClick={() => setShowBlockContacts(true)}
-          className="flex w-full items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-3 transition hover:bg-[var(--mag-surface)]"
+          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-4 py-4 transition hover:bg-[var(--mag-surface)]"
         >
           <Lock className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-left text-sm text-[var(--mag-ink)]">Block Contacts</span>
         </button>
         <button
           onClick={() => setShowBlocked(true)}
-          className="flex w-full items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-3 transition hover:bg-[var(--mag-surface)]"
+          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-4 py-4 transition hover:bg-[var(--mag-surface)]"
         >
-          <Ban className="h-5 w-5 text-red-400" />
+          <Ban className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-left text-sm text-[var(--mag-ink)]">Blocked Users</span>
         </button>
         <button
           onClick={() => setShowReport(true)}
-          className="flex w-full items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-3 transition hover:bg-[var(--mag-surface)]"
+          className="flex w-full items-center gap-3 px-4 py-4 transition hover:bg-[var(--mag-surface)]"
         >
-          <Flag className="h-5 w-5 text-orange-400" />
+          <Flag className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-left text-sm text-[var(--mag-ink)]">Report a Problem</span>
         </button>
       </div>
@@ -89,7 +89,7 @@ function PrivacySettingsPage() {
       {/* Blocked Users Dialog */}
       {showBlocked && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Blocked Users</h3>
               <button onClick={() => setShowBlocked(false)} className="rounded-full p-1 text-[var(--mag-ink-muted)] hover:bg-[var(--mag-surface)]">
@@ -101,7 +101,7 @@ function PrivacySettingsPage() {
             </p>
             <button
               onClick={() => setShowBlocked(false)}
-              className="w-full rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--mag-green-dark)]"
+              className="w-full rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-semibold text-[var(--mag-bg)] transition hover:opacity-80"
             >
               Close
             </button>
@@ -112,7 +112,7 @@ function PrivacySettingsPage() {
       {/* Block Contacts Dialog */}
       {showBlockContacts && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Block Contacts</h3>
               <button onClick={() => setShowBlockContacts(false)} className="rounded-full p-1 text-[var(--mag-ink-muted)] hover:bg-[var(--mag-surface)]">
@@ -127,7 +127,7 @@ function PrivacySettingsPage() {
                 setShowBlockContacts(false)
                 alert('Contacts uploaded and blocked (demo)')
               }}
-              className="mb-2 w-full rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--mag-green-dark)]"
+              className="mb-2 w-full rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-semibold text-[var(--mag-bg)] transition hover:opacity-80"
             >
               Upload Contacts
             </button>
@@ -144,7 +144,7 @@ function PrivacySettingsPage() {
       {/* Report Dialog */}
       {showReport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Report a Problem</h3>
               <button onClick={() => setShowReport(false)} className="rounded-full p-1 text-[var(--mag-ink-muted)] hover:bg-[var(--mag-surface)]">
@@ -156,7 +156,7 @@ function PrivacySettingsPage() {
               onChange={(e) => setReportReason(e.target.value)}
               placeholder="Describe the issue..."
               rows={4}
-              className="mb-4 w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              className="mb-4 w-full resize-none rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
             <div className="flex gap-2">
               <button
@@ -171,7 +171,7 @@ function PrivacySettingsPage() {
                   setReportReason('')
                   alert('Report submitted. Thank you!')
                 }}
-                className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--mag-green-dark)]"
+                className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-semibold text-[var(--mag-bg)] transition hover:opacity-80"
               >
                 Submit
               </button>

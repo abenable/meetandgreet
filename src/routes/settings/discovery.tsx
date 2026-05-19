@@ -20,11 +20,11 @@ function DiscoverySettingsPage() {
       </div>
 
       <div className="space-y-5">
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        <div className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
           <div className="mb-3 flex items-center gap-2">
             <MapPin className="h-4 w-4 text-[var(--mag-ink-soft)]" />
             <h2 className="text-sm font-semibold text-[var(--mag-ink)]">Maximum Distance</h2>
-            <span className="ml-auto text-sm font-medium text-[var(--mag-green)]">{distance} mi</span>
+            <span className="ml-auto text-sm font-medium text-[var(--mag-ink)]">{distance} mi</span>
           </div>
           <input
             type="range"
@@ -32,15 +32,15 @@ function DiscoverySettingsPage() {
             max={100}
             value={distance}
             onChange={(e) => setDistance(Number(e.target.value))}
-            className="w-full accent-[var(--mag-green)]"
+            className="w-full accent-[#111111]"
           />
         </div>
 
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        <div className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
           <div className="mb-3 flex items-center gap-2">
             <Users className="h-4 w-4 text-[var(--mag-ink-soft)]" />
             <h2 className="text-sm font-semibold text-[var(--mag-ink)]">Age Range</h2>
-            <span className="ml-auto text-sm font-medium text-[var(--mag-green)]">{ageMin} - {ageMax}</span>
+            <span className="ml-auto text-sm font-medium text-[var(--mag-ink)]">{ageMin} - {ageMax}</span>
           </div>
           <div className="flex gap-4">
             <input
@@ -49,7 +49,7 @@ function DiscoverySettingsPage() {
               max={80}
               value={ageMin}
               onChange={(e) => setAgeMin(Math.min(Number(e.target.value), ageMax))}
-              className="w-full accent-[var(--mag-green)]"
+              className="w-full accent-[#111111]"
             />
             <input
               type="range"
@@ -57,12 +57,12 @@ function DiscoverySettingsPage() {
               max={80}
               value={ageMax}
               onChange={(e) => setAgeMax(Math.max(Number(e.target.value), ageMin))}
-              className="w-full accent-[var(--mag-green)]"
+              className="w-full accent-[#111111]"
             />
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        <div className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
           <div className="mb-3 flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-[var(--mag-ink-soft)]" />
             <h2 className="text-sm font-semibold text-[var(--mag-ink)]">Show Me</h2>
@@ -74,7 +74,7 @@ function DiscoverySettingsPage() {
                 onClick={() => setShowMe(option)}
                 className={`rounded-full px-4 py-2 text-xs font-medium transition ${
                   showMe === option
-                    ? 'bg-[var(--mag-green)] text-white'
+                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                     : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)]'
                 }`}
               >

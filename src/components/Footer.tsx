@@ -13,9 +13,9 @@ export default function Footer() {
   const isMainScreen = mainPaths.some((p) => path === p || path.startsWith(p + '/'))
 
   return (
-    <footer className={`${isMainScreen ? 'pb-24' : 'pb-8'} pt-8 text-[var(--mag-ink-muted)]`}>
-      <div className="page-wrap flex flex-col items-center gap-2 text-center text-xs">
-        <p className="m-0">Meet & Greet — Making connections that matter.</p>
+    <footer className={`${isMainScreen ? 'pb-24' : 'pb-8'} pt-8 border-t border-[var(--mag-line)]`}>
+      <div className="page-wrap flex flex-col items-center gap-2 text-center text-xs text-[var(--mag-ink-muted)]">
+        <p className="m-0 font-medium text-[var(--mag-ink-soft)]">Meet & Greet — Making connections that matter.</p>
         <div className="flex items-center gap-3">
           <Link to="/terms" className="text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink-soft)]">Terms</Link>
           <span className="text-[var(--mag-line)]">|</span>

@@ -20,7 +20,7 @@ export function RewardedAdButton({
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: () => watchRewardedAd({ type, eventId }),
+    mutationFn: () => watchRewardedAd({ data: { type, eventId } }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["ad-status"] })
       queryClient.invalidateQueries({ queryKey: ["boost-status"] })

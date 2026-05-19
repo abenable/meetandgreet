@@ -148,7 +148,7 @@ export const getEventById = createServerFn({ method: 'GET' })
     return event
   })
 
-async function leaveAllActiveEvents(userId: string, tx?: typeof prisma) {
+async function leaveAllActiveEvents(userId: string, tx?: any) {
   const db = tx || prisma
   await db.eventAttendee.updateMany({
     where: { userId, leftAt: null },
@@ -806,6 +806,8 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
         lookingFor: [],
         job: '',
         verifiedAt: null,
+        boostedUntil: null,
+        lastBoostedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }

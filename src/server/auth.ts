@@ -8,7 +8,6 @@ import { sendOtpEmail } from '#/lib/email'
 import { rateLimit } from '#/lib/rate-limit'
 import { getClientIdentifier } from '#/lib/rate-limit.server'
 
-const authRateLimit = rateLimit({ windowMs: 15 * 60 * 1000, maxRequests: 10 })
 const otpRateLimit = rateLimit({ windowMs: 60 * 1000, maxRequests: 3 })
 
 async function fetchSessionFromAuthHandler(): Promise<{ session: any; user: any } | null> {

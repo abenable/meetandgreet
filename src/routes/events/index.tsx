@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, Lock, LogIn, ListOrdered, X, Star } from 'lucide-react'
-import { listEvents, getMyActiveEvent, leaveEvent, getMyCreatedEvents, joinEvent, getMyWaitlistedEvents, removeFromWaitlist } from '#/server/events'
+import { Skeleton } from '@heroui/react'
+import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, LogIn, ListOrdered, X, Star } from 'lucide-react'
+import { listEvents, getMyActiveEvent, leaveEvent, joinEvent, getMyWaitlistedEvents, removeFromWaitlist } from '#/server/events'
 import { getSession } from '#/server/auth'
 import { AdBanner } from '#/components/AdBanner'
 
@@ -11,25 +12,20 @@ export const Route = createFileRoute('/events/')({ component: EventsExplorePage 
 function EventsExplorePage() {
   const queryClient = useQueryClient()
 
-  const { data: eventsData } = useQuery({
+  const { data: eventsData, isLoading: eventsLoading } = useQuery({
     queryKey: ['events'],
     queryFn: () => listEvents(),
   })
   const events = eventsData?.items ?? []
 
-  const { data: activeEvent } = useQuery({
+  const { data: activeEvent, isLoading: activeEventLoading } = useQuery({
     queryKey: ['active-event'],
     queryFn: () => getMyActiveEvent(),
   })
 
-  const { data: session } = useQuery({
+  const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ['session'],
     queryFn: () => getSession(),
-  })
-
-  const { data: myEvents = [] } = useQuery({
-    queryKey: ['my-created-events'],
-    queryFn: () => getMyCreatedEvents(),
   })
 
   const { data: waitlistedEvents = [] } = useQuery({
@@ -37,16 +33,13 @@ function EventsExplorePage() {
     queryFn: () => getMyWaitlistedEvents(),
   })
 
+  const isLoading = eventsLoading || activeEventLoading || sessionLoading
+
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; eventName: string; code: string; currentEventName: string } | null>(null)
   const [joinCodeModal, setJoinCodeModal] = useState<{ open: boolean; eventName: string } | null>(null)
   const [enteredCode, setEnteredCode] = useState('')
   const [joinError, setJoinError] = useState('')
   const [joinSuccess, setJoinSuccess] = useState('')
-
-  const handleCopyShareLink = (code: string) => {
-    const link = `${window.location.origin}/events/join/${code}`
-    navigator.clipboard.writeText(link)
-  }
 
   const handleLeave = async () => {
     if (!activeEvent) return
@@ -96,9 +89,9 @@ function EventsExplorePage() {
   }
 
   const now = Date.now()
-  const currentEvents = events.filter((e) => e.isActive && !e.endedAt && (!e.startsAt || new Date(e.startsAt).getTime() <= now))
-  const upcomingEvents = events.filter((e) => e.isActive && !e.endedAt && e.startsAt && new Date(e.startsAt).getTime() > now)
-  const pastEvents = events.filter((e) => e.endedAt)
+  const currentEvents = (events as any[]).filter((e) => e.isActive && !e.endedAt && (!e.startsAt || new Date(e.startsAt).getTime() <= now))
+  const upcomingEvents = (events as any[]).filter((e) => e.isActive && !e.endedAt && e.startsAt && new Date(e.startsAt).getTime() > now)
+  const pastEvents = (events as any[]).filter((e) => e.endedAt)
 
   const attendeeCount = (activeEvent as any)?._count?.attendees ?? 0
   const hasJoinableEvents = currentEvents.length > 0 || upcomingEvents.length > 0
@@ -107,8 +100,41 @@ function EventsExplorePage() {
     <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       <h1 className="mb-6 text-sm font-medium uppercase tracking-wide text-[var(--mag-ink-muted)]">Explore Events</h1>
 
-      {/* Active Event Hero */}
-      {activeEvent ? (
+      {isLoading ? (
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+            <Skeleton className="h-40 w-full rounded-t-2xl" />
+            <div className="p-3 space-y-2">
+              <Skeleton className="h-5 w-1/2 rounded-lg" />
+              <Skeleton className="h-3 w-full rounded-lg" />
+              <div className="flex gap-2 pt-2">
+                <Skeleton className="h-10 flex-1 rounded-full" />
+                <Skeleton className="h-10 w-20 rounded-full" />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {[1, 2].map((i) => (
+              <div key={i} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+                <div className="flex items-start gap-3">
+                  <Skeleton className="h-16 w-16 shrink-0 rounded-xl" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4 rounded-lg" />
+                    <Skeleton className="h-3 w-full rounded-lg" />
+                    <div className="flex gap-2">
+                      <Skeleton className="h-3 w-16 rounded-lg" />
+                      <Skeleton className="h-3 w-20 rounded-lg" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Active Event Hero */}
+          {activeEvent ? (
         <div className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
           <div className="relative">
             {activeEvent.photo ? (
@@ -283,70 +309,11 @@ function EventsExplorePage() {
                         <LogIn className="h-3 w-3" /> Join
                       </button>
                     )}
-                    {event.createdById === session?.user?.id && (
+                    {(event as any).createdById === session?.user?.id && (
                       <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
                         Manage
                       </Link>
                     )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* My Created Events */}
-      {myEvents.length > 0 && (
-        <section className="mb-8">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[var(--mag-ink)]">My Created Events</h3>
-          </div>
-          <div className="space-y-2">
-            {myEvents.map((event) => {
-              const count = (event as any)._count?.attendees ?? 0
-              return (
-                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
-                  <div className="flex items-start gap-3">
-                    {event.photo && (
-                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                        {(event as any).sponsorName && (
-                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">
-                            <Star className="h-3 w-3" /> Sponsored
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
-                      </div>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-1 rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--mag-ink-soft)]">
-                          Code: {event.code}
-                        </span>
-                        {!event.isPublic && (
-                          <span className="inline-flex items-center gap-1 rounded bg-[var(--mag-surface)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--mag-ink)] border border-[var(--mag-line)]">
-                            <Lock className="h-3 w-3" /> Private
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex gap-2">
-                    <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
-                      Manage
-                    </Link>
-                    <button
-                      onClick={() => handleCopyShareLink(event.code)}
-                      className="inline-flex items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
-                    >
-                      Copy Link
-                    </button>
                   </div>
                 </div>
               )
@@ -400,7 +367,7 @@ function EventsExplorePage() {
                     >
                       <ListOrdered className="h-3 w-3" /> Join Waitlist
                     </button>
-                    {event.createdById === session?.user?.id && (
+                    {(event as any).createdById === session?.user?.id && (
                       <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
                         Manage
                       </Link>
@@ -446,7 +413,7 @@ function EventsExplorePage() {
                       </div>
                     </div>
                   </div>
-                  {event.createdById === session?.user?.id && (
+                  {(event as any).createdById === session?.user?.id && (
                     <div className="mt-3 flex justify-center">
                       <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] no-underline transition hover:bg-[var(--mag-surface)]">
                         Manage
@@ -554,6 +521,8 @@ function EventsExplorePage() {
           </div>
         </div>
       )}
+
+      </>)}
 
       <div className="px-4 pb-4">
         <AdBanner />

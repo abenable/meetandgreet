@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import { Skeleton } from '@heroui/react'
 import { ArrowLeft, Upload, X, GripVertical, Sparkles } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
@@ -11,7 +12,7 @@ function MediaPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const fileRef = useRef<HTMLInputElement>(null)
-  const { data: profile } = useQuery({ queryKey: ['my-profile'], queryFn: () => getMyProfile() })
+  const { data: profile, isLoading } = useQuery({ queryKey: ['my-profile'], queryFn: () => getMyProfile() })
   const [dragIndex, setDragIndex] = useState<number | null>(null)
 
   const updateMutation = useMutation({
@@ -69,17 +70,26 @@ function MediaPage() {
         <span className="ml-auto text-xs text-[var(--mag-ink-muted)]">{photos.length}/6</span>
       </div>
 
-      {photos.length < 3 && (
-        <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-3">
-          <Sparkles className="h-5 w-5 flex-shrink-0 text-[var(--mag-ink-soft)]" />
-          <div>
-            <p className="text-sm font-semibold text-[var(--mag-ink)]">More photos = more matches</p>
-            <p className="text-xs text-[var(--mag-ink-soft)]">Profiles with 3 or more photos get noticed 10x more.</p>
-          </div>
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="aspect-[3/4] w-full rounded-2xl" />
+          ))}
+          <Skeleton className="aspect-[3/4] w-full rounded-2xl" />
         </div>
-      )}
+      ) : (
+        <>
+          {photos.length < 3 && (
+            <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-3">
+              <Sparkles className="h-5 w-5 flex-shrink-0 text-[var(--mag-ink-soft)]" />
+              <div>
+                <p className="text-sm font-semibold text-[var(--mag-ink)]">More photos = more matches</p>
+                <p className="text-xs text-[var(--mag-ink-soft)]">Profiles with 3 or more photos get noticed 10x more.</p>
+              </div>
+            </div>
+          )}
 
-      <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
         {photos.map((photo: string, i: number) => (
           <div
             key={`${photo.slice(-20)}-${i}`}
@@ -128,6 +138,7 @@ function MediaPage() {
           </button>
         )}
       </div>
+      </>)}
 
       <input
         ref={fileRef}

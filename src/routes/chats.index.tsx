@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { Skeleton } from '@heroui/react'
 import { MessageCircle } from 'lucide-react'
 import { getConversations } from '#/server/conversations'
 import AvatarImage from '#/components/AvatarImage'
@@ -18,8 +19,20 @@ function ChatsPage() {
       <h1 className="mb-4 text-xl font-bold text-[var(--mag-ink)]">Chats</h1>
 
       {isLoading ? (
-        <div className="flex h-32 items-center justify-center">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-ink-muted)] border-t-transparent" />
+        <div className="space-y-0">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex items-center gap-3 border-b border-[var(--mag-line)] p-3">
+              <Skeleton className="h-14 w-14 shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-3 w-28 rounded-lg" />
+                <Skeleton className="h-3 w-3/4 rounded-lg" />
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-2">
+                <Skeleton className="h-2.5 w-10 rounded-lg" />
+                <Skeleton className="h-5 w-5 rounded-full" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : conversations.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-center">

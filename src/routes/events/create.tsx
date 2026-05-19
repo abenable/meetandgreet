@@ -1,8 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Calendar, MapPin, Plus, Users, X, ImageIcon, Eye, EyeOff, Sparkles } from 'lucide-react'
-import { createEvent, getMyActiveEvent } from '#/server/events'
+import { createEvent } from '#/server/events'
 import { localDatetimeToUTCISO } from '#/lib/datetime'
 
 export const Route = createFileRoute('/events/create')({ component: CreateEventPage })
@@ -43,11 +42,6 @@ function CreateEventPage() {
   const [createError, setCreateError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; currentEventName: string } | null>(null)
-
-  const { data: activeEvent } = useQuery({
-    queryKey: ['active-event'],
-    queryFn: () => getMyActiveEvent(),
-  })
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

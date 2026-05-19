@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import type { WebSocket, WebSocketServer } from 'ws'
+import type { WebSocket } from 'ws'
 
 export function devWebSocketPlugin(): Plugin {
   return {

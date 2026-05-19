@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useRef, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Skeleton } from '@heroui/react'
 import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, Briefcase, Zap } from 'lucide-react'
 import { getMyActiveEvent, reportUser } from '#/server/events'
 import { recordSwipe, getSwipeDeck } from '#/server/swipes'
@@ -40,7 +41,7 @@ function DiscoverPage() {
     queryFn: () => getAdStatus(),
   })
 
-  const { data: baseProfiles = [] } = useQuery({
+  const { data: baseProfiles = [], isLoading: profilesLoading } = useQuery({
     queryKey: ['event-profiles', eventId, selectedIntent],
     queryFn: () => getSwipeDeck({ data: { eventId, intent: selectedIntent || undefined } }),
     enabled: !!eventId,
@@ -161,6 +162,23 @@ function DiscoverPage() {
         <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-bold !text-[var(--mag-bg)] no-underline transition hover:opacity-80 active:scale-95">
           Browse Events <ArrowRight className="h-4 w-4" />
         </Link>
+      </div>
+    )
+  }
+
+  if (profilesLoading) {
+    return (
+      <div className="flex h-[calc(100dvh-112px)] flex-col bg-[var(--mag-bg)]">
+        <div className="shrink-0 px-4 py-2">
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-7 w-24 shrink-0 rounded-full" />
+            ))}
+          </div>
+        </div>
+        <div className="flex-1 px-4 py-4">
+          <Skeleton className="h-full w-full rounded-2xl" />
+        </div>
       </div>
     )
   }

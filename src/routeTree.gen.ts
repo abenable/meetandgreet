@@ -14,6 +14,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NotificationsRouteImport } from './routes/notifications'
@@ -76,6 +77,11 @@ const SafetyRoute = SafetyRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PremiumRoute = PremiumRouteImport.update({
@@ -280,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/safety': typeof SafetyRoute
   '/signup': typeof SignupRouteWithChildren
@@ -324,6 +331,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/safety': typeof SafetyRoute
   '/terms': typeof TermsRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/safety': typeof SafetyRoute
   '/signup': typeof SignupRouteWithChildren
@@ -416,6 +425,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/onboarding'
     | '/premium'
+    | '/pricing'
     | '/privacy'
     | '/safety'
     | '/signup'
@@ -460,6 +470,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/onboarding'
     | '/premium'
+    | '/pricing'
     | '/privacy'
     | '/safety'
     | '/terms'
@@ -504,6 +515,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/onboarding'
     | '/premium'
+    | '/pricing'
     | '/privacy'
     | '/safety'
     | '/signup'
@@ -550,6 +562,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
+  PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   SafetyRoute: typeof SafetyRoute
   SignupRoute: typeof SignupRouteWithChildren
@@ -615,6 +628,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/premium': {
@@ -934,6 +954,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,
+  PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   SafetyRoute: SafetyRoute,
   SignupRoute: SignupRouteWithChildren,

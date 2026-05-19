@@ -287,9 +287,9 @@ function SettingsPage() {
         </div>
       </div>
 
-      <button
+        <button
         onClick={() => alert('Logged out')}
-        className="mt-8 w-full max-w-xs mx-auto rounded-full border border-[var(--mag-sale)]/30 bg-[var(--mag-sale)]/10 py-3 text-sm font-semibold text-[var(--mag-sale)] transition hover:bg-[var(--mag-sale)]/20"
+        className="mt-8 block w-full max-w-xs mx-auto rounded-full border border-[var(--mag-sale)]/30 bg-[var(--mag-sale)]/10 py-3 text-sm font-semibold text-[var(--mag-sale)] transition hover:bg-[var(--mag-sale)]/20"
       >
         Log Out
       </button>

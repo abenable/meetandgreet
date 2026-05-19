@@ -8,6 +8,7 @@ import { recordSwipe, getSwipeDeck } from '#/server/swipes'
 import { sendMessageRequest } from '#/server/requests'
 import { getAdStatus } from '#/server/ads'
 import { RewardedAdButton } from '#/components/RewardedAdButton'
+import { AdCard } from '#/components/AdCard'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
 
@@ -52,6 +53,7 @@ function DiscoverPage() {
   const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set())
   const [requestedIds, setRequestedIds] = useState<Set<string>>(new Set())
   const [requestPendingIds, setRequestPendingIds] = useState<Set<string>>(new Set())
+  const [dismissedAdIndices, setDismissedAdIndices] = useState<Set<number>>(new Set())
 
   // Report modal state
   const [reportModalOpen, setReportModalOpen] = useState(false)
@@ -146,12 +148,32 @@ function DiscoverPage() {
     setPhotoIndices((prev) => ({ ...prev, [profileId]: Math.max((prev[profileId] ?? 0) - 1, 0) }))
   }
 
+  // Interleave ad cards every 3-5 profiles
+  const items = baseProfiles.flatMap((profile, i) => {
+    if (adStatus?.showAds && i > 0 && i % 4 === 0) {
+      return [{ type: 'ad' as const, index: i }, { type: 'profile' as const, profile }]
+    }
+    return [{ type: 'profile' as const, profile }]
+  })
+
+  const profileIndexMap = items.reduce((acc, item, idx) => {
+    if (item.type === 'profile') {
+      acc[idx] = (acc[idx - 1] ?? -1) + 1
+    } else {
+      acc[idx] = acc[idx - 1] ?? -1
+    }
+    return acc
+  }, {} as Record<number, number>)
+
   const onScroll = useCallback(() => {
     const container = containerRef.current
     if (!container) return
     const idx = Math.round(container.scrollTop / container.clientHeight)
-    setCurrentIndex(Math.min(idx, baseProfiles.length - 1))
-  }, [baseProfiles.length])
+    const profileIdx = profileIndexMap[idx] ?? -1
+    if (profileIdx >= 0) {
+      setCurrentIndex(Math.min(profileIdx, baseProfiles.length - 1))
+    }
+  }, [baseProfiles.length, profileIndexMap])
 
   if (!activeEvent) {
     return (
@@ -247,7 +269,20 @@ function DiscoverPage() {
         className="hide-scrollbar flex-1 w-full snap-y snap-mandatory overflow-y-auto"
         style={{ scrollBehavior: 'smooth' }}
       >
-        {baseProfiles.map((profile, index) => {
+        {items.map((item, index) => {
+          if (item.type === 'ad') {
+            if (dismissedAdIndices.has(index)) return null
+            return (
+              <AdCard
+                key={`ad-${index}`}
+                onClose={() => {
+                  setDismissedAdIndices((prev) => new Set(prev).add(index))
+                }}
+              />
+            )
+          }
+
+          const profile = item.profile
           const photoIdx = photoIndices[profile.userId] ?? 0
           const pic = profile.photos[photoIdx] ?? ''
           const hasPhotos = profile.photos.length > 0

@@ -2,15 +2,14 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@heroui/react'
-import { MapPin, Camera, Link2, Pencil, AlertTriangle, Sparkles, ShieldCheck, Heart, Users, Briefcase, Flame, Calendar, BadgeCheck, Zap, ChevronRight, Plus } from 'lucide-react'
-import { getMyProfile, updateProfile, verifyPhoto } from '#/server/profiles'
+import { MapPin, Camera, Link2, Pencil, AlertTriangle, Sparkles, Heart, Users, Briefcase, Flame, Calendar, BadgeCheck, Zap, Plus } from 'lucide-react'
+import { getMyProfile, updateProfile } from '#/server/profiles'
 import { disableMyAccount } from '#/server/auth'
 import { getUserBadges, getUserStreak } from '#/server/badges'
 import { activateBoost, getBoostStatus } from '#/server/boosts'
 import { getAdStatus } from '#/server/ads'
 import { RewardedAdButton } from '#/components/RewardedAdButton'
 import AvatarImage from '#/components/AvatarImage'
-import { VerifiedBadge } from '#/components/VerifiedBadge'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
 export const Route = createFileRoute('/profile/')({ component: ProfilePage })
@@ -38,12 +37,6 @@ function ProfilePage() {
   const [editGender, setEditGender] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showVerifyModal, setShowVerifyModal] = useState(false)
-  const [verifyStep, setVerifyStep] = useState(1)
-  const [verifyPose, setVerifyPose] = useState('')
-  const [verifyPreview, setVerifyPreview] = useState('')
-  const [verifyUploading, setVerifyUploading] = useState(false)
-  const verifyFileRef = useRef<HTMLInputElement>(null)
 
   const { data: boostStatus } = useQuery({ queryKey: ['boost-status'], queryFn: () => getBoostStatus() })
   const { data: adStatus } = useQuery({ queryKey: ['ad-status'], queryFn: () => getAdStatus() })
@@ -88,46 +81,6 @@ function ProfilePage() {
       qc.invalidateQueries({ queryKey: ['my-profile'] })
     },
   })
-
-  const poses = [
-    'Hold up 2 fingers',
-    'Thumbs up',
-    'Wink with one eye',
-    'Hand on your chin',
-    'Peace sign over your eye',
-  ]
-
-  const startVerification = () => {
-    setVerifyStep(1)
-    setVerifyPreview('')
-    setVerifyPose(poses[Math.floor(Math.random() * poses.length)])
-    setShowVerifyModal(true)
-  }
-
-  const handleVerifyFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      setVerifyPreview(ev.target?.result as string)
-      setVerifyStep(3)
-    }
-    reader.readAsDataURL(file)
-  }
-
-  const submitVerification = async () => {
-    if (!verifyPreview) return
-    setVerifyUploading(true)
-    try {
-      await verifyPhoto({ data: { imageBase64: verifyPreview } })
-      setVerifyStep(4)
-      qc.invalidateQueries({ queryKey: ['my-profile'] })
-    } catch {
-      // silently fail
-    } finally {
-      setVerifyUploading(false)
-    }
-  }
 
   const updateMutation = useMutation({
     mutationFn: async (updates: any) => {
@@ -261,7 +214,6 @@ function ProfilePage() {
 
         <div className="mt-3 flex items-center gap-2">
           <h2 className="text-xl font-bold text-[var(--mag-ink)]">{profile.name || 'You'}</h2>
-          {profile.verifiedAt && <VerifiedBadge />}
         </div>
 
         <div className="mt-1 inline-flex items-center gap-1 text-sm text-[var(--mag-ink-soft)]">
@@ -343,6 +295,35 @@ function ProfilePage() {
         ))}
       </div>
 
+      {/* My Photos */}
+      <button
+        onClick={() => navigate({ to: '/profile/media' })}
+        className="mb-4 flex w-full flex-col rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 text-left transition hover:border-[var(--mag-ink)]/20"
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-[var(--mag-ink)]">My Photos</h3>
+          <span className="text-xs text-[var(--mag-ink-muted)]">{photoCount} photo{photoCount !== 1 ? 's' : ''}</span>
+        </div>
+
+        {photoCount > 0 ? (
+          <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
+            {(profile.photos || []).slice(0, 5).map((photo: string, i: number) => (
+              <div key={i} className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl">
+                <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+              </div>
+            ))}
+            <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center border border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)]">
+              <Plus className="h-6 w-6 text-[var(--mag-ink-muted)]" />
+            </div>
+          </div>
+        ) : (
+          <div className="flex h-24 items-center justify-center border border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)]">
+            <span className="text-sm text-[var(--mag-ink-muted)]">Tap to add photos</span>
+          </div>
+        )}
+
+      </button>
+
       {/* About Me */}
       <button
         onClick={() => openEdit('bio', profile.bio || '')}
@@ -380,44 +361,6 @@ function ProfilePage() {
         </div>
       )}
 
-      {/* My Photos */}
-      <button
-        onClick={() => navigate({ to: '/profile/media' })}
-        className="mb-4 flex w-full flex-col rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 text-left transition hover:border-[var(--mag-ink)]/20"
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-[var(--mag-ink)]">My Photos</h3>
-          <span className="text-xs text-[var(--mag-ink-muted)]">{photoCount} photo{photoCount !== 1 ? 's' : ''}</span>
-        </div>
-
-        {photoCount > 0 ? (
-          <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
-            {(profile.photos || []).slice(0, 5).map((photo: string, i: number) => (
-              <div key={i} className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl">
-                <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
-              </div>
-            ))}
-            <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center border border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)]">
-              <Plus className="h-6 w-6 text-[var(--mag-ink-muted)]" />
-            </div>
-          </div>
-        ) : (
-          <div className="flex h-24 items-center justify-center border border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)]">
-            <span className="text-sm text-[var(--mag-ink-muted)]">Tap to add photos</span>
-          </div>
-        )}
-
-        {photoCount < 3 && (
-          <div className="mt-3 flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-3">
-            <Sparkles className="h-5 w-5 shrink-0 text-[var(--mag-ink)]" />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-[var(--mag-ink)]">Profiles with 3+ photos get 10x more matches</p>
-            </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-[var(--mag-ink-muted)]" />
-          </div>
-        )}
-      </button>
-
       {/* Location */}
       <button
         onClick={() => openEdit('location', profile.location || '')}
@@ -446,15 +389,13 @@ function ProfilePage() {
           Share Profile
         </button>
 
-        {!profile.verifiedAt && (
-          <button
-            onClick={startVerification}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-4 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80"
-          >
-            <ShieldCheck className="h-4 w-4" />
-            Verify Photo
-          </button>
-        )}
+        <button
+          onClick={() => navigate({ to: '/pricing' })}
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-4 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80"
+        >
+          <Zap className="h-4 w-4" />
+          Upgrade
+        </button>
       </div>
 
       {/* Log Out — neutral, not danger */}
@@ -469,15 +410,16 @@ function ProfilePage() {
         Log Out
       </button>
 
-      {/* Delete Account — de-emphasized, small text link */}
+      {/* Delete Account */}
       <div className="mb-8 border-t border-[var(--mag-line)] pt-4 text-center">
         <button
           onClick={() => setShowDeleteModal(true)}
-          className="text-xs text-[var(--mag-ink-muted)] transition hover:text-[var(--mag-sale)]"
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--mag-sale)]/30 bg-[var(--mag-sale)]/10 px-6 py-2.5 text-sm font-semibold text-[var(--mag-sale)] transition hover:bg-[var(--mag-sale)]/20"
         >
+          <AlertTriangle className="h-4 w-4" />
           Delete Account
         </button>
-        <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">
+        <p className="mt-2 text-[10px] text-[var(--mag-ink-muted)]">
           Your account will be disabled and you will no longer appear anywhere in the app.
         </p>
       </div>
@@ -557,109 +499,7 @@ function ProfilePage() {
         </div>
       )}
 
-      {/* Verify Modal */}
-      {showVerifyModal && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 px-4 pb-20 sm:items-center sm:pb-0">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
-            {verifyStep === 1 && (
-              <>
-                <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Photo Verification</h3>
-                <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
-                  Take a real-time selfie to get a verified badge on your profile.
-                </p>
-                <div className="mb-4 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-4 text-center">
-                  <p className="text-sm font-semibold text-[var(--mag-ink)]">Your pose:</p>
-                  <p className="mt-1 text-lg text-[var(--mag-ink)]">{verifyPose}</p>
-                </div>
-                <button
-                  onClick={() => setVerifyStep(2)}
-                  className="w-full rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
-                >
-                  I'm Ready
-                </button>
-                <button
-                  onClick={() => setShowVerifyModal(false)}
-                  className="mt-2 w-full rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
-                >
-                  Cancel
-                </button>
-              </>
-            )}
-            {verifyStep === 2 && (
-              <>
-                <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Capture Selfie</h3>
-                <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
-                  Show your face clearly and {verifyPose.toLowerCase()}.
-                </p>
-                <button
-                  onClick={() => verifyFileRef.current?.click()}
-                  className="mb-3 flex w-full items-center justify-center rounded-xl border-2 border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] py-8 text-sm font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-ink)] hover:text-[var(--mag-ink)]"
-                >
-                  <Camera className="mr-2 h-5 w-5" /> Take Selfie
-                </button>
-                <input
-                  ref={verifyFileRef}
-                  type="file"
-                  accept="image/*"
-                  capture="user"
-                  className="hidden"
-                  onChange={handleVerifyFile}
-                />
-                <button
-                  onClick={() => setShowVerifyModal(false)}
-                  className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
-                >
-                  Cancel
-                </button>
-              </>
-            )}
-            {verifyStep === 3 && (
-              <>
-                <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Review</h3>
-                <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
-                  Make sure your face and pose are clearly visible.
-                </p>
-                <div className="mb-4 overflow-hidden rounded-xl">
-                  <img src={verifyPreview} alt="Preview" className="w-full object-cover" />
-                </div>
-                <button
-                  onClick={submitVerification}
-                  disabled={verifyUploading}
-                  className="w-full rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-60"
-                >
-                  {verifyUploading ? 'Uploading…' : 'Submit for Verification'}
-                </button>
-                <button
-                  onClick={() => setVerifyStep(2)}
-                  disabled={verifyUploading}
-                  className="mt-2 w-full rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] disabled:opacity-60"
-                >
-                  Retake
-                </button>
-              </>
-            )}
-            {verifyStep === 4 && (
-              <>
-                <div className="flex flex-col items-center py-4">
-                  <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)]">
-                    <ShieldCheck className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-base font-bold text-[var(--mag-ink)]">You're Verified!</h3>
-                  <p className="mt-1 text-center text-xs text-[var(--mag-ink-soft)]">
-                    Your profile now shows a verified badge.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowVerifyModal(false)}
-                  className="w-full rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
-                >
-                  Done
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+
     </div>
   )
 }

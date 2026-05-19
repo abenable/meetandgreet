@@ -27,12 +27,20 @@ async function fetchSessionFromAuthHandler(): Promise<{ session: any; user: any 
 
   // Reject sessions for disabled accounts
   if (data.user?.id) {
-    const user = await prisma.user.findUnique({
-      where: { id: data.user.id },
-      select: { disabledAt: true, role: true, subscriptionTier: true, subscriptionExpiresAt: true },
-    })
+    const [user, profile] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: data.user.id },
+        select: { disabledAt: true, role: true, image: true, subscriptionTier: true, subscriptionExpiresAt: true },
+      }),
+      prisma.profile.findUnique({
+        where: { userId: data.user.id },
+        select: { photos: true },
+      }),
+    ])
     if (user?.disabledAt) return null
     data.user.role = user?.role ?? 'user'
+    const profilePhoto = profile?.photos && profile.photos.length > 0 ? profile.photos[0] : null
+    data.user.image = profilePhoto ?? user?.image ?? data.user.image ?? null
     data.user.subscriptionTier = user?.subscriptionTier ?? 'free'
     data.user.subscriptionExpiresAt = user?.subscriptionExpiresAt ?? null
   }

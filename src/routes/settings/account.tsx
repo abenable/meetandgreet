@@ -39,7 +39,7 @@ function AccountSettingsPage() {
         <h1 className="text-xl font-bold text-[var(--mag-ink)]">Account Settings</h1>
       </div>
 
-      <div className="mb-5 overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+      <div className="mb-5 overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
         <button
           onClick={() => openEdit('email', email)}
           className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-4 py-3 transition hover:bg-[var(--mag-surface)] text-left"
@@ -80,16 +80,16 @@ function AccountSettingsPage() {
       </h2>
       <button
         onClick={() => setShowDeleteConfirm(true)}
-        className="flex w-full items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 transition hover:bg-red-500/20"
+        className="flex w-full items-center gap-3 rounded-none border border-[var(--mag-sale)]/30 bg-[var(--mag-sale)]/10 px-4 py-3 transition hover:bg-[var(--mag-sale)]/20"
       >
-        <Trash2 className="h-5 w-5 text-red-500" />
-        <span className="flex-1 text-left text-sm font-semibold text-red-500">Delete Account</span>
+        <Trash2 className="h-5 w-5 text-[var(--mag-sale)]" />
+        <span className="flex-1 text-left text-sm font-semibold text-[var(--mag-sale)]">Delete Account</span>
       </button>
 
       {/* Edit Dialog */}
       {editingField && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-[var(--mag-ink)]">
                 Edit {fieldMeta[editingField]?.label}
@@ -102,7 +102,7 @@ function AccountSettingsPage() {
               type="text"
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
-              className="mb-4 w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              className="mb-4 w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
             <div className="flex gap-2">
               <button
@@ -113,7 +113,7 @@ function AccountSettingsPage() {
               </button>
               <button
                 onClick={saveEdit}
-                className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--mag-green-dark)]"
+                className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-semibold text-[var(--mag-bg)] transition hover:opacity-80"
               >
                 Save
               </button>
@@ -125,8 +125,8 @@ function AccountSettingsPage() {
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
-            <div className="mb-1 flex items-center gap-2 text-red-500">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
+            <div className="mb-1 flex items-center gap-2 text-[var(--mag-sale)]">
               <Trash2 className="h-5 w-5" />
               <h3 className="text-sm font-semibold">Delete Account</h3>
             </div>
@@ -145,7 +145,7 @@ function AccountSettingsPage() {
                   setShowDeleteConfirm(false)
                   alert('Account deleted (demo)')
                 }}
-                className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600"
+                className="flex-1 rounded-full bg-[var(--mag-sale)] py-2.5 text-sm font-semibold text-[var(--mag-bg)] transition hover:bg-[var(--mag-sale-deep)]"
               >
                 Delete
               </button>

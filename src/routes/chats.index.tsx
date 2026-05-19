@@ -19,7 +19,7 @@ function ChatsPage() {
 
       {isLoading ? (
         <div className="flex h-32 items-center justify-center">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-ink-muted)] border-t-transparent" />
         </div>
       ) : conversations.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
@@ -28,7 +28,7 @@ function ChatsPage() {
           <p className="mt-1 text-xs text-[var(--mag-ink-muted)]">Start matching or join an event to chat.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="border-t border-[var(--mag-line)]">
           {conversations.map((convo: any) => (
             <ChatRow key={convo.id} convo={convo} />
           ))}
@@ -43,7 +43,7 @@ function ChatRow({ convo }: { convo: any }) {
     <Link
       to="/chats/$chatId"
       params={{ chatId: convo.chatId }}
-      className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 transition hover:border-[var(--mag-green)] no-underline card-shadow"
+      className="flex items-center gap-3 border-b border-[var(--mag-line)] p-3 transition no-underline hover:bg-[var(--mag-surface)]"
     >
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
         <AvatarImage src={convo.peerPhoto} alt={convo.peerName} />
@@ -62,7 +62,7 @@ function ChatRow({ convo }: { convo: any }) {
           {new Date(convo.lastMessageAt).toLocaleDateString()}
         </span>
         {convo.unreadCount > 0 && (
-          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--mag-green)] px-1.5 text-[10px] font-bold text-white">
+          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--mag-ink)] px-1.5 text-[10px] font-bold text-[var(--mag-bg)]">
             {convo.unreadCount}
           </span>
         )}

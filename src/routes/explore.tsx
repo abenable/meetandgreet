@@ -51,7 +51,7 @@ function ExplorePage() {
       {showSearch && (
         <div className="mb-4">
           <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search people, interests, or locations..."
-            className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20" />
+            className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
       )}
 
@@ -71,7 +71,7 @@ function ExplorePage() {
       ) : (
         <div className="grid grid-cols-2 gap-3">
           {filteredProfiles.map((profile) => (
-            <div key={profile.id} className="relative overflow-hidden rounded-2xl">
+            <div key={profile.id} className="relative overflow-hidden rounded-none bg-[var(--mag-card)]">
               <img src={profile.photos[0]} alt={profile.name} className="aspect-[3/4] w-full object-cover" />
               <div className="gradient-overlay absolute inset-0" />
               <div className="absolute bottom-0 left-0 right-0 p-3">

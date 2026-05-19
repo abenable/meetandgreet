@@ -62,7 +62,7 @@ function ResetPasswordPage() {
         <p className="mt-2 text-sm text-[var(--mag-ink-soft)]">Please start the password reset flow again.</p>
         <button
           onClick={() => navigate({ to: '/forgot-password' })}
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-green)] px-6 py-3 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
         >
           Start over <ArrowRight className="h-4 w-4" />
         </button>
@@ -80,7 +80,7 @@ function ResetPasswordPage() {
 
       <div className="flex w-full max-w-xs flex-col gap-4">
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+          <div className="rounded-xl border border-[var(--mag-sale)] bg-[var(--mag-sale-bg)] px-4 py-3 text-xs text-[var(--mag-sale)]">
             {error}
           </div>
         )}
@@ -94,7 +94,7 @@ function ResetPasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="New password"
               required
-              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-10 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-10 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
             <button
               type="button"
@@ -117,7 +117,7 @@ function ResetPasswordPage() {
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="Confirm password"
               required
-              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
           </div>
 
@@ -125,7 +125,7 @@ function ResetPasswordPage() {
             <ul className="space-y-1">
               {requirements.map((r) => (
                 <li key={r.label} className="flex items-center gap-1.5 text-[11px] text-[var(--mag-ink-muted)]">
-                  {r.met ? <Check className="h-3 w-3 text-[var(--mag-green)]" /> : <X className="h-3 w-3 text-red-400" />}
+                  {r.met ? <Check className="h-3 w-3 text-[var(--mag-ink)]" /> : <X className="h-3 w-3 text-[var(--mag-sale)]" />}
                   <span className={r.met ? 'text-[var(--mag-ink-soft)]' : ''}>{r.label}</span>
                 </li>
               ))}
@@ -135,7 +135,7 @@ function ResetPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] px-6 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-[var(--mag-green-dark)] disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-60"
           >
             {loading ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

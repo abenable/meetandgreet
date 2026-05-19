@@ -100,14 +100,14 @@ function ShareJoinPage() {
 
       {status === 'loading' || status === 'joining' ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Loader2 className="mb-3 h-8 w-8 animate-spin text-[var(--mag-green)]" />
+          <Loader2 className="mb-3 h-8 w-8 animate-spin text-[var(--mag-ink)]" />
           <p className="text-sm text-[var(--mag-ink-soft)]">
             {status === 'joining' ? 'Joining…' : 'Loading…'}
           </p>
         </div>
       ) : status === 'success' ? (
-        <div className="rounded-2xl border border-[var(--mag-green)] bg-[var(--mag-green)]/5 p-6 text-center">
-          <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-[var(--mag-green)]" />
+        <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-6 text-center">
+          <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-[var(--mag-ink)]" />
           <h2 className="text-lg font-bold text-[var(--mag-ink)]">
             {alreadyJoined ? 'You are already in!' : waitlisted ? 'You are on the waitlist!' : 'You are in!'}
           </h2>
@@ -120,10 +120,10 @@ function ShareJoinPage() {
       ) : status === 'error' ? (
         <div className="space-y-4">
           {event && (
-            <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+            <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
               <div className="flex items-start gap-3">
                 {(event as any).photo && (
-                  <img src={(event as any).photo} alt={event.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
+                  <img src={(event as any).photo} alt={event.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
                 )}
                 <div className="min-w-0 flex-1">
                   <h2 className="text-base font-bold text-[var(--mag-ink)]">
@@ -153,14 +153,14 @@ function ShareJoinPage() {
             </div>
           )}
 
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-900/10">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-900/10">
             <div className="flex items-center gap-3">
-              <XCircle className="h-6 w-6 shrink-0 text-red-500" />
+              <XCircle className="h-6 w-6 shrink-0 text-[var(--mag-sale)]" />
               <div>
                 <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">
                   Could not join
                 </h3>
-                <p className="text-xs text-red-500 dark:text-red-400/80">
+                <p className="text-xs text-[var(--mag-sale)] dark:text-red-400/80">
                   {message}
                 </p>
               </div>
@@ -175,7 +175,7 @@ function ShareJoinPage() {
                   search: { redirect: `/events/join/${code}` },
                 })
               }
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-3 text-sm font-bold !text-white transition hover:bg-[var(--mag-green-dark)]"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold !text-[var(--mag-bg)] transition hover:opacity-80"
             >
               <LogIn className="h-4 w-4" />
               Log in to Join
@@ -192,10 +192,10 @@ function ShareJoinPage() {
       ) : (
         <div className="space-y-4">
           {event && (
-            <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+            <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
               <div className="flex items-start gap-3">
                 {(event as any).photo && (
-                  <img src={(event as any).photo} alt={event.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
+                  <img src={(event as any).photo} alt={event.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
                 )}
                 <div className="min-w-0 flex-1">
                   <h2 className="text-base font-bold text-[var(--mag-ink)]">
@@ -226,7 +226,7 @@ function ShareJoinPage() {
           )}
 
           {confirmInfo ? (
-            <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+            <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
               <h3 className="mb-2 text-sm font-bold text-[var(--mag-ink)]">Leave current event?</h3>
               <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
                 You are already checked into <strong className="text-[var(--mag-ink)]">{confirmInfo.currentEventName}</strong>. You can only be in one event at a time.
@@ -243,7 +243,7 @@ function ShareJoinPage() {
                 </button>
                 <button
                   onClick={() => doJoin(true)}
-                  className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+                  className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
                 >
                   Switch Event
                 </button>
@@ -252,7 +252,7 @@ function ShareJoinPage() {
           ) : (
             <button
               onClick={() => doJoin()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-3 text-sm font-bold !text-white transition hover:bg-[var(--mag-green-dark)]"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold !text-[var(--mag-bg)] transition hover:opacity-80"
             >
               {event && event.startsAt && new Date(event.startsAt) > new Date() ? (
                 <>

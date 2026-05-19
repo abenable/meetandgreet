@@ -353,7 +353,7 @@ function ManageEventPage() {
     return (
       <main className="page-wrap px-4 py-4">
         <div className="flex items-center justify-center py-20">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--mag-line)] border-t-transparent" />
         </div>
       </main>
     )
@@ -375,7 +375,7 @@ function ManageEventPage() {
           <p className="text-sm font-semibold text-[var(--mag-ink)]">You don't have permission to manage this event.</p>
           <button
             onClick={() => navigate({ to: '/events' })}
-            className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--mag-green)] px-6 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+            className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-2.5 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80"
           >
             Go Back
           </button>
@@ -398,13 +398,13 @@ function ManageEventPage() {
       </div>
 
       {/* Event Code */}
-      <div className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
+      <div className="mb-6 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
         <p className="text-xs font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Code</p>
         <p className="mt-2 text-4xl font-mono font-bold tracking-widest text-[var(--mag-ink)]">{(event as any).code}</p>
         <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">Share this code so others can join</p>
         <button
           onClick={handleCopyLink}
-          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full border border-[var(--mag-line)] bg-[var(--mag-surface)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
+          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full border border-[var(--mag-line)] bg-[var(--mag-surface)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:border-[var(--mag-ink)] hover:text-[var(--mag-ink)]"
         >
           <Link2 className="h-3.5 w-3.5" />
           {copied ? 'Copied!' : 'Copy Share Link'}
@@ -412,7 +412,7 @@ function ManageEventPage() {
       </div>
 
       {/* Event Details */}
-      <section className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+      <section className="mb-6 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
         <h2 className="mb-3 text-center text-sm font-bold text-[var(--mag-ink)]">Event Details</h2>
         <div className="mx-auto max-w-md space-y-4">
           <div>
@@ -429,7 +429,7 @@ function ManageEventPage() {
                     }
                     setEventPhoto(null)
                   }}
-                  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-sm"
+                  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--mag-sale)] text-[var(--mag-bg)]"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -438,7 +438,7 @@ function ManageEventPage() {
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="flex h-32 w-32 items-center justify-center rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
+                className="flex h-32 w-32 items-center justify-center rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-ink)] hover:text-[var(--mag-ink)]"
               >
                 <ImageIcon className="h-6 w-6" />
               </button>
@@ -446,7 +446,7 @@ function ManageEventPage() {
               <input type="file" accept="image/*" ref={fileRef} onChange={handleFile} className="hidden" />
             </div>
             {photoError && (
-              <p className="mt-2 text-center text-xs font-semibold text-red-500">{photoError}</p>
+              <p className="mt-2 text-center text-xs font-semibold text-[var(--mag-sale)]">{photoError}</p>
             )}
           </div>
 
@@ -456,7 +456,7 @@ function ManageEventPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
           </div>
 
@@ -466,7 +466,7 @@ function ManageEventPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              className="w-full resize-none rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
           </div>
 
@@ -478,7 +478,7 @@ function ManageEventPage() {
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
               />
             </div>
           </div>
@@ -491,7 +491,7 @@ function ManageEventPage() {
               value={maxAttendees}
               onChange={(e) => setMaxAttendees(e.target.value)}
               placeholder="Optional"
-              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
           </div>
 
@@ -503,7 +503,7 @@ function ManageEventPage() {
                 onClick={() => setEventIsPublic(true)}
                 className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
                   eventIsPublic
-                    ? 'bg-[var(--mag-green)] text-white'
+                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                     : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
                 }`}
               >
@@ -514,7 +514,7 @@ function ManageEventPage() {
                 onClick={() => setEventIsPublic(false)}
                 className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
                   !eventIsPublic
-                    ? 'bg-[var(--mag-ink)] text-white'
+                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                     : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
                 }`}
               >
@@ -536,7 +536,7 @@ function ManageEventPage() {
                 onClick={() => setEventMysteryMode(true)}
                 className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
                   eventMysteryMode
-                    ? 'bg-purple-600 text-white'
+                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                     : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
                 }`}
               >
@@ -547,7 +547,7 @@ function ManageEventPage() {
                 onClick={() => setEventMysteryMode(false)}
                 className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
                   !eventMysteryMode
-                    ? 'bg-[var(--mag-ink)] text-white'
+                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                     : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
                 }`}
               >
@@ -567,26 +567,26 @@ function ManageEventPage() {
                 type="datetime-local"
                 value={startsAt}
                 onChange={(e) => setStartsAt(e.target.value)}
-                className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
               />
             </div>
           </div>
         </div>
 
         {saveError && (
-          <p className="mt-2 text-center text-xs font-semibold text-red-500">{saveError}</p>
+          <p className="mt-2 text-center text-xs font-semibold text-[var(--mag-sale)]">{saveError}</p>
         )}
         <div className="mt-4 flex items-center justify-center gap-3">
           <button
             onClick={handleSave}
             disabled={updateMutation.isPending}
-            className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-2.5 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-2.5 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-3.5 w-3.5" />
             {updateMutation.isPending ? 'Saving…' : 'Save Changes'}
           </button>
           {savedMsg && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--mag-green)]">
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--mag-ink)]">
               <CheckCircle2 className="h-3.5 w-3.5" /> Saved
             </span>
           )}
@@ -594,14 +594,14 @@ function ManageEventPage() {
       </section>
 
       {/* Event Controls */}
-      <section className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+      <section className="mb-6 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
         <h2 className="mb-3 text-sm font-bold text-[var(--mag-ink)]">Event Controls</h2>
         <div className="flex flex-wrap items-center gap-3">
           {event.isActive ? (
             <button
               onClick={handleToggleActive}
               disabled={toggleActiveMutation.isPending}
-              className="inline-flex items-center gap-2 rounded-full bg-red-500 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--mag-sale)] px-5 py-2.5 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Square className="h-3.5 w-3.5" /> Stop Event
             </button>
@@ -609,7 +609,7 @@ function ManageEventPage() {
             <button
               onClick={handleToggleActive}
               disabled={toggleActiveMutation.isPending}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--mag-green)] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-5 py-2.5 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Play className="h-3.5 w-3.5" /> Start Event
             </button>
@@ -618,7 +618,7 @@ function ManageEventPage() {
           <button
             onClick={handleDelete}
             disabled={deleteMutation.isPending}
-            className="inline-flex items-center gap-2 rounded-full border border-red-300 bg-transparent px-5 py-2.5 text-xs font-bold text-red-500 transition hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--mag-sale)]/30 bg-transparent px-5 py-2.5 text-xs font-bold text-[var(--mag-sale)] transition hover:bg-[var(--mag-sale-bg)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Trash2 className="h-3.5 w-3.5" /> Delete Event
           </button>
@@ -627,7 +627,7 @@ function ManageEventPage() {
 
       {/* Sponsor Branding */}
       {isCreator && isHostOrAdmin && (
-        <section className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        <section className="mb-6 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
           <h2 className="mb-3 text-sm font-bold text-[var(--mag-ink)]">Sponsor Branding</h2>
 
           {!(event as any)?.sponsorName && !(event as any)?.sponsorLogo && !(event as any)?.sponsorFrameUrl ? (
@@ -662,7 +662,7 @@ function ManageEventPage() {
                 value={sponsorName}
                 onChange={(e) => setSponsorName(e.target.value)}
                 placeholder="e.g. Acme Corp"
-                className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
               />
             </div>
 
@@ -673,7 +673,7 @@ function ManageEventPage() {
                 value={sponsorLogo}
                 onChange={(e) => setSponsorLogo(e.target.value)}
                 placeholder="https://example.com/logo.png"
-                className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
               />
               {sponsorLogo && (
                 <div className="mt-2 flex items-center gap-2">
@@ -690,7 +690,7 @@ function ManageEventPage() {
                 value={sponsorFrameUrl}
                 onChange={(e) => setSponsorFrameUrl(e.target.value)}
                 placeholder="https://example.com/frame.png"
-                className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
               />
               <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">
                 A decorative border/frame image that wraps the event card
@@ -699,7 +699,7 @@ function ManageEventPage() {
           </div>
 
           {sponsorError && (
-            <p className="mt-2 text-center text-xs font-semibold text-red-500">{sponsorError}</p>
+            <p className="mt-2 text-center text-xs font-semibold text-[var(--mag-sale)]">{sponsorError}</p>
           )}
 
           <div className="mt-4 flex items-center justify-center gap-3">
@@ -715,13 +715,13 @@ function ManageEventPage() {
                 })
               }}
               disabled={updateSponsorMutation.isPending}
-              className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-green)] py-2.5 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-2.5 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-3.5 w-3.5" />
               {updateSponsorMutation.isPending ? 'Saving…' : 'Save Sponsor'}
             </button>
             {sponsorSaved && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--mag-green)]">
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--mag-ink)]">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Saved
               </span>
             )}
@@ -736,7 +736,7 @@ function ManageEventPage() {
                   }
                 }}
                 disabled={removeSponsorMutation.isPending}
-                className="inline-flex items-center gap-1.5 rounded-full border border-red-300 px-4 py-2 text-[10px] font-bold text-red-500 transition hover:bg-red-50 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--mag-sale)]/30 px-4 py-2 text-[10px] font-bold text-[var(--mag-sale)] transition hover:bg-[var(--mag-sale-bg)] disabled:opacity-50"
               >
                 <Trash2 className="h-3 w-3" /> Remove Sponsor
               </button>
@@ -759,7 +759,7 @@ function ManageEventPage() {
             onClick={() => setActiveTab(t.key)}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-semibold transition ${
               activeTab === t.key
-                ? 'bg-[var(--mag-green)] text-white'
+                ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                 : 'text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
             }`}
           >
@@ -776,7 +776,7 @@ function ManageEventPage() {
           <>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-bold text-[var(--mag-ink)]">Attendees</h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-green)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-green)]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-ink)] border border-[var(--mag-line)]">
                 <Users className="h-3 w-3" />
                 {attendeeCount} total
               </span>
@@ -784,7 +784,7 @@ function ManageEventPage() {
 
             {profilesLoading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-line)] border-t-transparent" />
               </div>
             ) : attendeeProfiles.length === 0 ? (
               <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No attendees yet.</p>
@@ -813,7 +813,7 @@ function ManageEventPage() {
                         <button
                           onClick={() => navigate({ to: '/chats/$chatId', params: { chatId: `org_${eventId}_${profile.userId}` } })}
                           title="Message"
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-green)]/10 text-[var(--mag-green)] transition hover:bg-[var(--mag-green)]/20"
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink)] transition hover:bg-[var(--mag-line)]"
                         >
                           <MessageCircle className="h-3.5 w-3.5" />
                         </button>
@@ -829,7 +829,7 @@ function ManageEventPage() {
                           onClick={() => handleBlock(profile.userId, profile.name)}
                           title="Block"
                           disabled={blockMutation.isPending}
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500/10 text-red-500 transition hover:bg-red-500/20 disabled:opacity-50"
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-sale)]/10 text-[var(--mag-sale)] transition hover:bg-[var(--mag-sale)]/20 disabled:opacity-50"
                         >
                           <Ban className="h-3.5 w-3.5" />
                         </button>
@@ -861,7 +861,7 @@ function ManageEventPage() {
                       }
                     }}
                     placeholder="Write something..."
-                    className="flex-1 rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+                    className="flex-1 rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
                   />
                   <button
                     onClick={() => {
@@ -870,7 +870,7 @@ function ManageEventPage() {
                       }
                     }}
                     disabled={!postContent.trim() || createPostMutation.isPending}
-                    className="shrink-0 rounded-full bg-[var(--mag-green)] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="shrink-0 rounded-full bg-[var(--mag-ink)] px-4 py-2.5 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {createPostMutation.isPending ? 'Posting…' : 'Post'}
                   </button>
@@ -879,7 +879,7 @@ function ManageEventPage() {
               <div className="max-h-[500px] overflow-y-auto">
                 {postsLoading ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-line)] border-t-transparent" />
                   </div>
                 ) : eventPosts.length === 0 ? (
                   <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No posts yet. Start the conversation!</p>
@@ -909,7 +909,7 @@ function ManageEventPage() {
                 {postsData?.nextCursor && (
                   <button
                     onClick={loadMorePosts}
-                    className="w-full py-2 text-center text-xs font-medium text-[var(--mag-ink-muted)] transition hover:text-[var(--mag-green)]"
+                    className="w-full py-2 text-center text-xs font-medium text-[var(--mag-ink-muted)] transition hover:text-[var(--mag-ink)]"
                   >
                     Load more posts
                   </button>
@@ -923,7 +923,7 @@ function ManageEventPage() {
           <>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-bold text-[var(--mag-ink)]">Waitlist</h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-ink)] border border-[var(--mag-line)]">
                 <ListOrdered className="h-3 w-3" />
                 {waitlist.length} waiting
               </span>
@@ -931,7 +931,7 @@ function ManageEventPage() {
 
             {waitlistLoading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-green)] border-t-transparent" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-line)] border-t-transparent" />
               </div>
             ) : waitlist.length === 0 ? (
               <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No one on the waitlist yet.</p>
@@ -959,7 +959,7 @@ function ManageEventPage() {
                     <button
                       onClick={() => handleRemoveWaitlist(person.userId, person.name)}
                       disabled={removeWaitlistMutation.isPending}
-                      className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:border-red-300 hover:text-red-500 disabled:opacity-50"
+                      className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-sale)]/30 hover:text-[var(--mag-sale)] disabled:opacity-50"
                     >
                       Remove
                     </button>
@@ -974,7 +974,7 @@ function ManageEventPage() {
           <>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-bold text-[var(--mag-ink)]">Reports</h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-500">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-sale)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-sale)]">
                 <ShieldAlert className="h-3 w-3" />
                 {reports.length} total
               </span>
@@ -1005,7 +1005,7 @@ function ManageEventPage() {
                     <div className="mt-2 flex gap-2">
                       <button
                         onClick={() => handleBlock(report.reportedId, (report.reported as any)?.name)}
-                        className="inline-flex items-center gap-1 rounded-full bg-red-500 px-3 py-1.5 text-[10px] font-bold text-white transition hover:bg-red-600"
+                        className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-sale)] px-3 py-1.5 text-[10px] font-bold text-[var(--mag-bg)] transition hover:opacity-80"
                       >
                         <Ban className="h-3 w-3" /> Block user
                       </button>
@@ -1027,7 +1027,7 @@ function ManageEventPage() {
           <>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-bold text-[var(--mag-ink)]">Blocked Users</h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-500">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-sale)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-sale)]">
                 <Ban className="h-3 w-3" />
                 {blockedUsers.length} total
               </span>
@@ -1055,7 +1055,7 @@ function ManageEventPage() {
                       <button
                         onClick={() => handleUnblock(b.userId)}
                         disabled={unblockMutation.isPending}
-                        className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)] disabled:opacity-50"
+                        className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-ink)] hover:text-[var(--mag-ink)] disabled:opacity-50"
                       >
                         Unblock
                       </button>

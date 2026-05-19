@@ -6,9 +6,9 @@ import { getNotifications, markNotificationRead, markAllNotificationsRead } from
 export const Route = createFileRoute('/notifications')({ component: NotificationsPage })
 
 const typeConfig: Record<string, { icon: typeof Heart; color: string; bg: string }> = {
-  like: { icon: Heart, color: 'text-red-500', bg: 'bg-red-500/10' },
-  match: { icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
-  message: { icon: MessageCircle, color: 'text-[var(--mag-green)]', bg: 'bg-[var(--mag-green)]/10' },
+  like: { icon: Heart, color: 'text-[var(--mag-ink)]', bg: 'bg-[var(--mag-surface)]' },
+  match: { icon: Star, color: 'text-[var(--mag-ink)]', bg: 'bg-[var(--mag-surface)]' },
+  message: { icon: MessageCircle, color: 'text-[var(--mag-ink)]', bg: 'bg-[var(--mag-surface)]' },
 }
 
 function NotificationsPage() {
@@ -81,10 +81,10 @@ function NotificationsPage() {
               <button
                 key={n.id}
                 onClick={() => handleClick(n)}
-                className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition ${
+                className={`flex w-full items-start gap-3 rounded-none border p-3 text-left transition ${
                   n.readAt
                     ? 'border-[var(--mag-line)] bg-[var(--mag-card)] opacity-70'
-                    : 'border-[var(--mag-green)]/30 bg-[var(--mag-green)]/5'
+                    : 'border-[var(--mag-line)] bg-[var(--mag-card)]'
                 }`}
               >
                 <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${cfg.bg}`}>
@@ -97,7 +97,7 @@ function NotificationsPage() {
                     {new Date(n.createdAt).toLocaleString()}
                   </p>
                 </div>
-                {!n.readAt && <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--mag-green)]" />}
+                {!n.readAt && <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--mag-ink)]" />}
               </button>
             )
           })}

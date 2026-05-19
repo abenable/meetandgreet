@@ -101,322 +101,190 @@ function EventsExplorePage() {
   const pastEvents = events.filter((e) => e.endedAt)
 
   const attendeeCount = (activeEvent as any)?._count?.attendees ?? 0
+  const hasJoinableEvents = currentEvents.length > 0 || upcomingEvents.length > 0
 
   return (
     <div className="page-wrap flex flex-1 flex-col px-4 py-4">
-      <h1 className="mb-4 text-xl font-bold text-[var(--mag-ink)]">Explore Events</h1>
+      <h1 className="mb-6 text-sm font-medium uppercase tracking-wide text-[var(--mag-ink-muted)]">Explore Events</h1>
 
+      {/* Active Event Hero */}
       {activeEvent ? (
-        <div className="mb-6 rounded-2xl border border-[var(--mag-green)] bg-gradient-to-br from-[var(--mag-green)]/10 to-[var(--mag-green)]/5 p-4">
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <span className="rounded-full bg-[var(--mag-green)] px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide">Active</span>
-              <div className="mt-1 flex items-center gap-3">
-                {activeEvent.photo && (
-                  <img src={activeEvent.photo} alt={activeEvent.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
-                )}
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-bold text-[var(--mag-ink)]">{activeEvent.name}</h2>
-                    {(activeEvent as any).sponsorName && (
-                      <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                        <Star className="h-3 w-3" /> Sponsored
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-[var(--mag-ink-soft)]">{activeEvent.description}</p>
-                </div>
+        <div className="mb-8 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
+          <div className="relative">
+            {activeEvent.photo ? (
+              <div className="relative h-40 w-full overflow-hidden">
+                <img src={activeEvent.photo} alt={activeEvent.name} className="h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               </div>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-green)]/15 text-[var(--mag-green)]">
-              <Calendar className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mb-3 flex items-center gap-3 text-xs text-[var(--mag-ink-soft)]">
-            <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{activeEvent.location}</span>
-            <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{attendeeCount} people here</span>
-            {activeEvent.createdById === session?.user?.id && (
-              <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{activeEvent.code}</span>
+            ) : (
+              <div className="flex h-32 w-full items-center justify-center bg-[var(--mag-surface)]">
+                <Calendar className="h-10 w-10 text-[var(--mag-ink-muted)]" />
+              </div>
             )}
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <span className="mb-1 inline-block rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] uppercase tracking-wide">Active</span>
+              <h2 className="text-xl font-bold text-white">{activeEvent.name}</h2>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Link to="/discover" className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-green)] py-2.5 text-xs font-bold !text-white no-underline transition hover:bg-[var(--mag-green-dark)]">
-              Discover People <ArrowRight className="h-3 w-3" />
-            </Link>
-            <button onClick={handleLeave} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">Leave</button>
-            {activeEvent.createdById === session?.user?.id && (
-              <Link to="/events/manage/$eventId" params={{ eventId: activeEvent.id }} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] no-underline">
-                Manage Event
+          <div className="p-4">
+            <p className="text-sm text-[var(--mag-ink-soft)]">{activeEvent.description}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[var(--mag-ink-muted)]">
+              <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{activeEvent.location}</span>
+              <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />{attendeeCount} people here</span>
+              {activeEvent.createdById === session?.user?.id && (
+                <span className="inline-flex items-center gap-1 rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--mag-ink-soft)]">Code: {activeEvent.code}</span>
+              )}
+            </div>
+            <div className="mt-4 flex gap-2">
+              <Link to="/discover" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--mag-ink)] py-3 text-sm font-medium !text-[var(--mag-bg)] no-underline transition hover:opacity-80">
+                Discover People <ArrowRight className="h-4 w-4" />
               </Link>
-            )}
+              {activeEvent.createdById === session?.user?.id && (
+                <Link to="/events/manage/$eventId" params={{ eventId: activeEvent.id }} className="inline-flex items-center justify-center rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-5 py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
+                  Manage
+                </Link>
+              )}
+              <button onClick={handleLeave} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-5 py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]">Leave</button>
+            </div>
           </div>
         </div>
       ) : (
-        <div className="mb-6 rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] p-6 text-center">
-          <Users className="mx-auto mb-2 h-8 w-8 text-[var(--mag-ink-muted)]" />
-          <h2 className="text-sm font-semibold text-[var(--mag-ink)]">No Active Event</h2>
-          <p className="mt-1 text-xs text-[var(--mag-ink-soft)]">Join an event below to start meeting people nearby.</p>
+        <div className="mb-8 flex flex-col items-center rounded-none border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] py-10 text-center">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--mag-surface)]">
+            <Calendar className="h-7 w-7 text-[var(--mag-ink-muted)]" />
+          </div>
+          <h2 className="text-base font-bold text-[var(--mag-ink)]">No Active Event</h2>
+          <p className="mt-1 max-w-[16rem] text-sm text-[var(--mag-ink-soft)]">
+            {hasJoinableEvents
+              ? 'Join a live event below to start meeting people nearby.'
+              : 'There are no events right now. Create one to get started.'}
+          </p>
+          <div className="mt-4 flex gap-2">
+            {hasJoinableEvents && (
+              <button
+                onClick={() => {
+                  const el = document.getElementById('current-events')
+                  el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--mag-ink)] px-5 py-2.5 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80"
+              >
+                Browse Events <ArrowRight className="h-4 w-4" />
+              </button>
+            )}
+            <Link
+              to="/events/create"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-5 py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline"
+            >
+              <Plus className="h-4 w-4" /> Create Event
+            </Link>
+          </div>
         </div>
       )}
 
+      {/* Prominent Create CTA at top */}
+      {activeEvent && (
+        <Link to="/events/create" className="mb-8 flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3.5 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 no-underline">
+          <Plus className="h-4 w-4" /> Create New Event
+        </Link>
+      )}
+
+      {/* Waitlisted */}
       {waitlistedEvents.length > 0 && (
-        <>
-          <div className="mb-2 flex items-center justify-between">
+        <section className="mb-8">
+          <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-bold text-[var(--mag-ink)]">Waitlisted</h3>
             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><ListOrdered className="h-3 w-3" />Waiting to start</span>
           </div>
-          <div className="mb-6 space-y-3">
+          <div className="space-y-3">
             {waitlistedEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
               return (
-                <div key={event.id} className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900 dark:bg-amber-900/10">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 flex-1 gap-3">
-                      {event.photo && (
-                        <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                          <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-white">Waitlisted</span>
-                        </div>
-                        <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
-                          {event.startsAt && (
-                            <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />Starts {new Date(event.startsAt).toLocaleString()}</span>
-                          )}
-                        </div>
+                <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+                  <div className="flex items-start gap-3">
+                    {event.photo && (
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-none object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                        <span className="shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-bg)]">Waitlisted</span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
+                        {event.startsAt && (
+                          <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />Starts {new Date(event.startsAt).toLocaleString()}</span>
+                        )}
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1.5">
-                      <button
-                        onClick={() => handleLeaveWaitlist(event.id)}
-                        className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-white px-3 py-1.5 text-[10px] font-bold text-amber-600 transition hover:bg-amber-100 dark:bg-transparent dark:hover:bg-amber-900/20"
-                      >
-                        <X className="h-3 w-3" /> Leave
-                      </button>
-                      <Link to="/events/waitlist/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
-                        Waiting Room
-                      </Link>
-                    </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </>
-      )}
-
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-bold text-[var(--mag-ink)]">Current Events</h3>
-        <span className="rounded-full bg-[var(--mag-green)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-green)]">Live now</span>
-      </div>
-      <div className="mb-6 space-y-3">
-        {currentEvents.map((event) => {
-          const count = (event as any)._count?.attendees ?? 0
-          const isJoined = activeEvent?.id === event.id
-          return (
-            <div key={event.id} className={`rounded-2xl border p-4 transition ${isJoined ? 'border-[var(--mag-green)] bg-[var(--mag-green)]/5' : 'border-[var(--mag-line)] bg-[var(--mag-card)]'}`}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 flex-1 gap-3">
-                  {event.photo && (
-                    <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                      {isJoined && <span className="shrink-0 rounded-full bg-[var(--mag-green)] px-2 py-0.5 text-[10px] font-bold text-white">Joined</span>}
-                      {(event as any).mysteryMode && (
-                        <span className="shrink-0 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                          Mystery
-                        </span>
-                      )}
-                      {(event as any).sponsorName && (
-                        <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                          <Star className="h-3 w-3" /> Sponsored
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                      <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                      <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-1.5">
-                  {!isJoined && (
+                  <div className="mt-3 flex gap-2">
                     <button
-                      onClick={() => { setEnteredCode(''); setJoinError(''); setJoinCodeModal({ open: true, eventName: event.name }) }}
-                      className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-green)] px-3 py-1.5 text-[10px] font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+                      onClick={() => handleLeaveWaitlist(event.id)}
+                      className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
                     >
-                      <LogIn className="h-3 w-3" /> Join
+                      <X className="h-3 w-3" /> Leave Waitlist
                     </button>
-                  )}
-                  {event.createdById === session?.user?.id && (
-                    <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
-                      Manage
+                    <Link to="/events/waitlist/$eventId" params={{ eventId: event.id }} className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
+                      Waiting Room
                     </Link>
-                  )}
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {myEvents.length > 0 && (
-        <>
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[var(--mag-ink)]">My Created Events</h3>
-          </div>
-          <div className="mb-6 space-y-3">
-            {myEvents.map((event) => {
-              const count = (event as any)._count?.attendees ?? 0
-              return (
-                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 flex-1 gap-3">
-                      {event.photo && (
-                        <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                          {(event as any).sponsorName && (
-                            <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                              <Star className="h-3 w-3" /> Sponsored
-                            </span>
-                          )}
-                        </div>
-                        <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
-                          <span className="rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono font-medium text-[var(--mag-ink)]">{event.code}</span>
-                          {!event.isPublic && (
-                            <span className="inline-flex items-center gap-1 rounded bg-[var(--mag-ink)]/10 px-1.5 py-0.5 font-medium text-[var(--mag-ink)]">
-                              <Lock className="h-3 w-3" /> Private
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] no-underline">
-                      Manage
-                    </Link>
-                    <button
-                      onClick={() => handleCopyShareLink(event.code)}
-                      className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)]"
-                    >
-                      Copy Link
-                    </button>
                   </div>
                 </div>
               )
             })}
           </div>
-        </>
+        </section>
       )}
 
-      {upcomingEvents.length > 0 && (
-        <>
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[var(--mag-ink)]">Upcoming Events</h3>
-            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><Clock className="h-3 w-3" />Starting soon</span>
+      {/* Current Events */}
+      {currentEvents.length > 0 && (
+        <section id="current-events" className="mb-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--mag-ink)]">Current Events</h3>
+            <span className="rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-ink)] border border-[var(--mag-line)]">Live now</span>
           </div>
-          <div className="mb-6 space-y-3">
-            {upcomingEvents.map((event) => {
+          <div className="space-y-3">
+            {currentEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
+              const isJoined = activeEvent?.id === event.id
               return (
-                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-90">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 flex-1 gap-3">
-                      {event.photo && (
-                        <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                          {(event as any).mysteryMode && (
-                            <span className="shrink-0 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                              Mystery
-                            </span>
-                          )}
-                          {(event as any).sponsorName && (
-                            <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                              <Star className="h-3 w-3" /> Sponsored
-                            </span>
-                          )}
-                        </div>
-                        <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
-                          {event.startsAt && (
-                            <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />Starts {new Date(event.startsAt).toLocaleString()}</span>
-                          )}
-                        </div>
+                <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+                  <div className="flex items-start gap-3">
+                    {event.photo && (
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-none object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                        {isJoined && <span className="shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-bg)]">Joined</span>}
+                        {(event as any).mysteryMode && (
+                          <span className="shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">Mystery</span>
+                        )}
+                        {(event as any).sponsorName && (
+                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">
+                            <Star className="h-3 w-3" /> Sponsored
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    {!isJoined && (
                       <button
-                        onClick={() => { setEnteredCode(''); setJoinError(''); setJoinSuccess(''); setJoinCodeModal({ open: true, eventName: event.name }) }}
-                        className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1.5 text-[10px] font-bold text-white transition hover:bg-amber-500"
+                        onClick={() => { setEnteredCode(''); setJoinError(''); setJoinCodeModal({ open: true, eventName: event.name }) }}
+                        className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80"
                       >
-                        <ListOrdered className="h-3 w-3" /> Join Waitlist
+                        <LogIn className="h-3 w-3" /> Join
                       </button>
-                      {event.createdById === session?.user?.id && (
-                        <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
-                          Manage
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </>
-      )}
-
-      {pastEvents.length > 0 && (
-        <>
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[var(--mag-ink)]">History</h3>
-            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><History className="h-3 w-3" />Past events</span>
-          </div>
-          <div className="mb-6 space-y-3">
-            {pastEvents.map((event) => {
-              const count = (event as any)._count?.attendees ?? 0
-              return (
-                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-70">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 flex-1 gap-3">
-                      {event.photo && (
-                        <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                          <span className="shrink-0 rounded-full bg-[var(--mag-ink-muted)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink-muted)]">Ended</span>
-                          {(event as any).sponsorName && (
-                            <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                              <Star className="h-3 w-3" /> Sponsored
-                            </span>
-                          )}
-                        </div>
-                        <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
-                          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
-                          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attended</span>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                     {event.createdById === session?.user?.id && (
-                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="text-[10px] font-medium text-[var(--mag-ink-muted)] no-underline transition hover:text-[var(--mag-ink)]">
+                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
                         Manage
                       </Link>
                     )}
@@ -425,17 +293,182 @@ function EventsExplorePage() {
               )
             })}
           </div>
-        </>
+        </section>
       )}
 
-      <Link to="/events/create" className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] py-4 text-sm font-medium text-[var(--mag-ink-muted)] transition hover:border-[var(--mag-green)] hover:text-[var(--mag-green)] no-underline">
-        <Plus className="h-4 w-4" />Create New Event
+      {/* My Created Events */}
+      {myEvents.length > 0 && (
+        <section className="mb-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--mag-ink)]">My Created Events</h3>
+          </div>
+          <div className="space-y-3">
+            {myEvents.map((event) => {
+              const count = (event as any)._count?.attendees ?? 0
+              return (
+                <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+                  <div className="flex items-start gap-3">
+                    {event.photo && (
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-none object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                        {(event as any).sponsorName && (
+                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">
+                            <Star className="h-3 w-3" /> Sponsored
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
+                      </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1 rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--mag-ink-soft)]">
+                          Code: {event.code}
+                        </span>
+                        {!event.isPublic && (
+                          <span className="inline-flex items-center gap-1 rounded bg-[var(--mag-surface)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--mag-ink)] border border-[var(--mag-line)]">
+                            <Lock className="h-3 w-3" /> Private
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
+                      Manage
+                    </Link>
+                    <button
+                      onClick={() => handleCopyShareLink(event.code)}
+                      className="inline-flex items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                    >
+                      Copy Link
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Upcoming Events */}
+      {upcomingEvents.length > 0 && (
+        <section className="mb-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--mag-ink)]">Upcoming Events</h3>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><Clock className="h-3 w-3" />Starting soon</span>
+          </div>
+          <div className="space-y-3">
+            {upcomingEvents.map((event) => {
+              const count = (event as any)._count?.attendees ?? 0
+              return (
+                <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-90">
+                  <div className="flex items-start gap-3">
+                    {event.photo && (
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-none object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                        {(event as any).mysteryMode && (
+                          <span className="shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">Mystery</span>
+                        )}
+                        {(event as any).sponsorName && (
+                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">
+                            <Star className="h-3 w-3" /> Sponsored
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attending</span>
+                        {event.startsAt && (
+                          <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />Starts {new Date(event.startsAt).toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => { setEnteredCode(''); setJoinError(''); setJoinSuccess(''); setJoinCodeModal({ open: true, eventName: event.name }) }}
+                      className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+                    >
+                      <ListOrdered className="h-3 w-3" /> Join Waitlist
+                    </button>
+                    {event.createdById === session?.user?.id && (
+                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
+                        Manage
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* History */}
+      {pastEvents.length > 0 && (
+        <section className="mb-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--mag-ink)]">History</h3>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><History className="h-3 w-3" />Past events</span>
+          </div>
+          <div className="space-y-3">
+            {pastEvents.map((event) => {
+              const count = (event as any)._count?.attendees ?? 0
+              return (
+                <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-70">
+                  <div className="flex items-start gap-3">
+                    {event.photo && (
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-none object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
+                        <span className="shrink-0 rounded-full bg-[var(--mag-ink-muted)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink-muted)]">Ended</span>
+                        {(event as any).sponsorName && (
+                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">
+                            <Star className="h-3 w-3" /> Sponsored
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
+                        <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{count} attended</span>
+                      </div>
+                    </div>
+                  </div>
+                  {event.createdById === session?.user?.id && (
+                    <div className="mt-3">
+                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] no-underline transition hover:bg-[var(--mag-surface)]">
+                        Manage
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Bottom Create CTA */}
+      <Link to="/events/create" className="mb-8 flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3.5 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 no-underline">
+        <Plus className="h-4 w-4" /> Create New Event
       </Link>
 
       {/* Enter event code modal */}
       {joinCodeModal?.open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
             <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Join {joinCodeModal.eventName}</h3>
             <p className="mb-3 text-xs text-[var(--mag-ink-soft)]">Enter the event code to join.</p>
             <input
@@ -446,13 +479,13 @@ function EventsExplorePage() {
               maxLength={10}
               autoFocus
               disabled={!!joinSuccess}
-              className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-center text-sm font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20 disabled:opacity-50"
+              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-center text-sm font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:border-[var(--mag-ink)] focus:outline-none disabled:opacity-50"
             />
             {joinError && (
-              <p className="mt-2 text-xs font-semibold text-red-500">{joinError}</p>
+              <p className="mt-2 text-xs font-semibold text-[var(--mag-sale)]">{joinError}</p>
             )}
             {joinSuccess && (
-              <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-600 dark:border-amber-900 dark:bg-amber-900/10">
+              <div className="mt-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 text-xs text-[var(--mag-ink-soft)]">
                 {joinSuccess}
               </div>
             )}
@@ -460,7 +493,7 @@ function EventsExplorePage() {
               {joinSuccess ? (
                 <button
                   onClick={() => { setJoinSuccess(''); setJoinCodeModal(null) }}
-                  className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+                  className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
                 >
                   Got it
                 </button>
@@ -479,7 +512,7 @@ function EventsExplorePage() {
                       handleJoin(code)
                     }}
                     disabled={!enteredCode.trim()}
-                    className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Join
                   </button>
@@ -493,7 +526,7 @@ function EventsExplorePage() {
       {/* Confirm leave + join modal */}
       {confirmModal?.open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
             <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Leave current event?</h3>
             <p className="mb-3 text-xs text-[var(--mag-ink-soft)]">
               You are already checked into <strong className="text-[var(--mag-ink)]">{confirmModal.currentEventName}</strong>. You can only be in one event at a time.
@@ -502,7 +535,7 @@ function EventsExplorePage() {
               Join <strong className="text-[var(--mag-ink)]">{confirmModal.eventName}</strong> anyway?
             </p>
             {joinError && (
-              <p className="mb-3 text-xs font-semibold text-red-500">{joinError}</p>
+              <p className="mb-3 text-xs font-semibold text-[var(--mag-sale)]">{joinError}</p>
             )}
             <div className="flex gap-2">
               <button
@@ -513,7 +546,7 @@ function EventsExplorePage() {
               </button>
               <button
                 onClick={confirmJoin}
-                className="flex-1 rounded-full bg-[var(--mag-green)] py-2.5 text-sm font-bold text-white transition hover:bg-[var(--mag-green-dark)]"
+                className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
               >
                 Switch Event
               </button>
@@ -521,6 +554,7 @@ function EventsExplorePage() {
           </div>
         </div>
       )}
+
       <div className="px-4 pb-4">
         <AdBanner />
       </div>

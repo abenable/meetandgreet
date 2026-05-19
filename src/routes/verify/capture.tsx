@@ -18,8 +18,8 @@ function VerifyCapturePage() {
 
       {step === 'pose' && (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <div className="mb-6 rounded-3xl border-4 border-dashed border-[var(--mag-green)]/30 bg-[var(--mag-surface)] p-12">
-            <div className="text-6xl font-bold text-[var(--mag-green)]/20">✌</div>
+          <div className="mb-6 rounded-3xl border-4 border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] p-12">
+            <div className="text-6xl font-bold text-[var(--mag-ink-muted)]">✌</div>
           </div>
           <h2 className="text-lg font-bold text-[var(--mag-ink)]">Strike a pose</h2>
           <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
@@ -27,7 +27,7 @@ function VerifyCapturePage() {
           </p>
           <button
             onClick={() => setStep('capture')}
-            className="mt-8 rounded-full bg-[var(--mag-green)] px-8 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[var(--mag-green-dark)]"
+            className="mt-8 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
           >
             I am Ready
           </button>
@@ -47,7 +47,7 @@ function VerifyCapturePage() {
           </div>
           <button
             onClick={() => setStep('review')}
-            className="mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--mag-green)] shadow-lg transition hover:scale-105"
+            className="mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--mag-ink)] transition hover:scale-105"
           >
             <Camera className="h-7 w-7 text-white" />
           </button>
@@ -61,11 +61,11 @@ function VerifyCapturePage() {
           </div>
           <p className="mt-4 text-sm text-[var(--mag-ink-soft)]">Analyzing your photo...</p>
           <div className="mt-2 h-1 w-32 overflow-hidden rounded-full bg-[var(--mag-line)]">
-            <div className="h-full w-2/3 rounded-full bg-[var(--mag-green)]" />
+            <div className="h-full w-2/3 rounded-full bg-[var(--mag-ink)]" />
           </div>
           <button
             onClick={() => setStep('success')}
-            className="mt-6 text-xs text-[var(--mag-green)] underline"
+            className="mt-6 text-xs text-[var(--mag-ink)] underline"
           >
             Simulate success
           </button>
@@ -74,8 +74,8 @@ function VerifyCapturePage() {
 
       {step === 'success' && (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--mag-green)]/15">
-            <CheckCircle className="h-10 w-10 text-[var(--mag-green)]" />
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--mag-surface)]">
+            <CheckCircle className="h-10 w-10 text-[var(--mag-ink)]" />
           </div>
           <h2 className="text-2xl font-bold text-[var(--mag-ink)]">You are Verified!</h2>
           <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
@@ -83,7 +83,7 @@ function VerifyCapturePage() {
           </p>
           <a
             href="/profile"
-            className="mt-8 rounded-full bg-[var(--mag-green)] px-8 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[var(--mag-green-dark)] no-underline"
+            className="mt-8 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 no-underline"
           >
             Back to Profile
           </a>

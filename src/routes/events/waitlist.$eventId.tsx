@@ -44,16 +44,16 @@ function WaitlistRoomPage() {
 
       {eventLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-[var(--mag-green)]" />
+          <Loader2 className="h-6 w-6 animate-spin text-[var(--mag-ink)]" />
         </div>
       ) : !event ? (
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-6 text-center">
+        <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-6 text-center">
           <p className="text-sm text-[var(--mag-ink-soft)]">Event not found.</p>
         </div>
       ) : (
         <div className="space-y-4">
           {/* Event info */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900 dark:bg-amber-900/10">
+          <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
             <div className="flex items-start gap-3">
               {event.photo && (
                 <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
@@ -61,7 +61,7 @@ function WaitlistRoomPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-bold text-[var(--mag-ink)]">{event.name}</h2>
-                  <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-white">Waitlisted</span>
+                  <span className="shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-bg)]">Waitlisted</span>
                 </div>
                 <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
@@ -73,7 +73,7 @@ function WaitlistRoomPage() {
               </div>
             </div>
             {isStarted ? (
-              <p className="mt-3 text-center text-xs font-semibold text-[var(--mag-green)]">
+              <p className="mt-3 text-center text-xs font-semibold text-[var(--mag-ink)]">
                 The event has started — you should be added automatically. Pull down to refresh.
               </p>
             ) : (
@@ -83,14 +83,14 @@ function WaitlistRoomPage() {
             )}
             <button
               onClick={handleLeave}
-              className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-full border border-amber-300 bg-white py-2.5 text-xs font-bold text-amber-600 transition hover:bg-amber-100 dark:bg-transparent dark:hover:bg-amber-900/20"
+              className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-xs font-bold text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
             >
               Leave Waitlist
             </button>
           </div>
 
           {/* Waitlist */}
-          <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+          <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-bold text-[var(--mag-ink)]">People Waiting</h3>
               <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]">
@@ -101,7 +101,7 @@ function WaitlistRoomPage() {
 
             {waitlistLoading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-[var(--mag-green)]" />
+                <Loader2 className="h-5 w-5 animate-spin text-[var(--mag-ink)]" />
               </div>
             ) : waitlist.length === 0 ? (
               <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">Nobody else is waiting yet.</p>

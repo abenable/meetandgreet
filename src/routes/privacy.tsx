@@ -11,7 +11,7 @@ function PrivacyPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-[var(--mag-green)]" />
+          <Shield className="h-5 w-5 text-[var(--mag-ink)]" />
           <h1 className="text-lg font-bold text-[var(--mag-ink)]">Privacy Policy</h1>
         </div>
       </div>
@@ -124,7 +124,7 @@ function PrivacyPage() {
           <p className="mt-2">
             You can exercise many of these rights directly within the app through your profile and settings. For other
             requests, contact us at{' '}
-            <a href="mailto:privacy@meetandgreet.app" className="text-[var(--mag-green)] no-underline">privacy@meetandgreet.app</a>.
+            <a href="mailto:privacy@meetandgreet.app" className="text-[var(--mag-ink)] underline">privacy@meetandgreet.app</a>.
           </p>
         </section>
 
@@ -167,7 +167,7 @@ function PrivacyPage() {
           <h2 className="mb-2 text-sm font-bold text-[var(--mag-ink)]">12. Contact Us</h2>
           <p>
             If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at{' '}
-            <a href="mailto:privacy@meetandgreet.app" className="text-[var(--mag-green)] no-underline">privacy@meetandgreet.app</a>.
+            <a href="mailto:privacy@meetandgreet.app" className="text-[var(--mag-ink)] underline">privacy@meetandgreet.app</a>.
           </p>
         </section>
       </div>

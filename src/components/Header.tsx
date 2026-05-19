@@ -52,32 +52,32 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <Link
               to="/profile"
-              className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)]"
+              className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)]"
             >
               <AvatarImage src={session.user.image} />
               {tier !== 'free' && (
-                <span className="absolute -bottom-1 -right-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-1.5 py-[1px] text-[9px] font-bold text-white uppercase leading-none">
+                <span className="absolute -bottom-0.5 -right-0.5 rounded-full bg-[var(--mag-ink)] px-1.5 py-[1px] text-[9px] font-bold text-[var(--mag-bg)] uppercase leading-none">
                   {tier}
                 </span>
               )}
             </Link>
           </div>
         ) : (
-          <div className="w-9" />
+          <div className="w-10" />
         )}
-        <Link to="/" className="flex items-center gap-1.5 text-[var(--mag-green)] no-underline">
+        <Link to="/" className="flex items-center gap-1.5 no-underline">
           <Logo className="h-6 w-auto" />
-          <span className="text-lg font-bold tracking-tight text-[var(--mag-ink)]">Meet & Greet</span>
+          <span className="text-base font-medium tracking-normal text-[var(--mag-ink)]">Meet & Greet</span>
         </Link>
         <div className="flex items-center gap-1">
           {session?.user && (
             <Link
               to="/notifications"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
             >
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                <span className="absolute top-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--mag-sale)] px-1 text-[10px] font-bold text-[var(--mag-bg)]">
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
@@ -86,14 +86,14 @@ export default function Header() {
           {session?.user?.role === 'admin' && (
             <Link
               to="/admin"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
             >
               <Shield className="h-5 w-5" />
             </Link>
           )}
           <button
             onClick={toggle}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
             aria-label="Toggle theme"
           >
             {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}

@@ -1,92 +1,121 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-mag-green: #10B981;
-  --color-mag-green-dark: #059669;
-  --color-mag-green-light: #34D399;
+  --color-ink: #111111;
+  --color-canvas: #ffffff;
+  --color-soft-cloud: #f5f5f5;
+  --color-charcoal: #39393b;
+  --color-ash: #4b4b4d;
+  --color-mute: #707072;
+  --color-stone: #9e9ea0;
+  --color-hairline: #cacacb;
+  --color-hairline-soft: #e5e5e5;
+  --color-sale: #d30005;
+  --color-sale-deep: #780700;
+  --color-success: #007d48;
+  --color-success-bright: #1eaa52;
+  --color-info: #1151ff;
+  --color-info-deep: #0034e3;
 }
 
-/* LIGHT THEME (default) */
+/* LIGHT THEME (default) — Nike retail chrome */
 :root {
-  --mag-green: #10B981;
-  --mag-green-dark: #059669;
-  --mag-green-light: #34D399;
   --mag-ink: #111111;
-  --mag-ink-soft: #666666;
-  --mag-ink-muted: #999999;
+  --mag-ink-soft: #707072;
+  --mag-ink-muted: #9e9ea0;
   --mag-bg: #ffffff;
-  --mag-surface: #fafafa;
-  --mag-line: rgba(0, 0, 0, 0.08);
+  --mag-surface: #f5f5f5;
+  --mag-line: #e5e5e5;
   --mag-card: #ffffff;
-  --mag-yellow: #facc15;
-  --mag-blue: #60a5fa;
-  --mag-purple: #c084fc;
-  --header-bg: rgba(255, 255, 255, 0.92);
+  --mag-input-bg: #f5f5f5;
+  --mag-overlay: rgba(0, 0, 0, 0.4);
+  --header-bg: rgba(255, 255, 255, 0.96);
   --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-  --input-bg: #f9fafb;
+  --input-bg: #f5f5f5;
   --overlay-bg: rgba(0, 0, 0, 0.4);
+  --accent-pink: #ed1aa0;
+  --accent-purple: #beaffd;
+  --accent-teal: #0a7281;
+  /* semantic colors */
+  --mag-sale: #d30005;
+  --mag-sale-deep: #780700;
+  --mag-sale-bg: #fff5f5;
+  --mag-sale-10: rgba(211, 0, 5, 0.1);
+  --mag-sale-20: rgba(211, 0, 5, 0.2);
+  --mag-success: #007d48;
+  --mag-success-bright: #1eaa52;
+  --mag-success-bg: rgba(0, 125, 72, 0.08);
+  --mag-success-10: rgba(0, 125, 72, 0.1);
 }
 
 /* DARK THEME */
 .dark {
-  --mag-green: #10B981;
-  --mag-green-dark: #34D399;
-  --mag-green-light: #059669;
   --mag-ink: #ffffff;
-  --mag-ink-soft: #a0a0a0;
-  --mag-ink-muted: #666666;
+  --mag-ink-soft: #9e9ea0;
+  --mag-ink-muted: #707072;
   --mag-bg: #000000;
-  --mag-surface: #0a0a0a;
-  --mag-line: rgba(255, 255, 255, 0.12);
-  --mag-card: #111111;
-  --mag-yellow: #facc15;
-  --mag-blue: #60a5fa;
-  --mag-purple: #c084fc;
-  --header-bg: rgba(0, 0, 0, 0.92);
+  --mag-surface: #1a1a1a;
+  --mag-line: rgba(255, 255, 255, 0.2);
+  --mag-card: #242424;
+  --mag-input-bg: #2a2a2a;
+  --mag-overlay: rgba(255, 255, 255, 0.1);
+  --header-bg: rgba(0, 0, 0, 0.96);
   --bottom-nav-bg: rgba(0, 0, 0, 0.96);
-  --input-bg: #1a1a1a;
+  --input-bg: #2a2a2a;
   --overlay-bg: rgba(255, 255, 255, 0.1);
+  /* semantic colors dark */
+  --mag-sale: #ff4444;
+  --mag-sale-deep: #ff6666;
+  --mag-sale-bg: rgba(255, 68, 68, 0.12);
+  --mag-sale-10: rgba(255, 68, 68, 0.15);
+  --mag-sale-20: rgba(255, 68, 68, 0.25);
+  --mag-success: #1eaa52;
+  --mag-success-bright: #34d399;
+  --mag-success-bg: rgba(30, 170, 82, 0.12);
+  --mag-success-10: rgba(30, 170, 82, 0.15);
 }
 
-* {
-  box-sizing: border-box;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-html,
-body {
-  min-height: 100%;
-}
+  html,
+  body {
+    min-height: 100%;
+  }
 
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100dvh;
-}
+  #app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
 
-body {
-  margin: 0;
-  color: var(--mag-ink);
-  font-family: var(--font-sans);
-  background-color: var(--mag-bg);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: background-color 200ms ease, color 200ms ease;
-}
+  body {
+    margin: 0;
+    color: var(--mag-ink);
+    font-family: var(--font-sans);
+    background-color: var(--mag-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
 
-a {
-  color: var(--mag-green);
-  text-decoration: none;
-}
+  a {
+    color: var(--mag-ink);
+    text-decoration: none;
+  }
 
-a:hover {
-  color: var(--mag-green-dark);
-}
+  a:hover {
+    color: var(--mag-ink-soft);
+  }
 
-button {
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  button {
+    transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  }
 }
 
 .page-wrap {
@@ -140,20 +169,29 @@ button {
   animation: shimmer 1.5s infinite;
 }
 
+/* Nike system: no drop shadows on cards. Depth comes from photography and 1px hairlines only. */
 .card-shadow {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: none;
 }
 
 .dark .card-shadow {
-  box-shadow: 0 2px 12px rgba(255, 255, 255, 0.04), 0 1px 4px rgba(255, 255, 255, 0.02);
+  box-shadow: none;
 }
 
 .card-shadow-lg {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: none;
 }
 
 .dark .card-shadow-lg {
-  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.06), 0 2px 8px rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+.hairline {
+  border-bottom: 1px solid var(--mag-line);
+}
+
+.hairline-top {
+  border-top: 1px solid var(--mag-line);
 }
 
 /* Hide browser-native password reveal icons so the custom toggle works reliably */
@@ -172,7 +210,7 @@ input::-webkit-credentials-auto-fill-button {
 }
 
 .accent-gradient {
-  background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+  background: var(--mag-ink);
 }
 
 .pill {

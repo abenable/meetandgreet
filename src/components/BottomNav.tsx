@@ -10,34 +10,30 @@ export default function BottomNav() {
 
   if (!isMainScreen) return null
 
-  const activeClass = 'text-[var(--mag-green)]'
-  const inactiveClass = 'text-[var(--mag-ink-muted)]'
-
-  const isChatActive = path === '/chats' || path.startsWith('/chats/')
+  const items = [
+    { to: '/discover', label: 'Home', icon: Home },
+    { to: '/events', label: 'Events', icon: Calendar },
+    { to: '/likes', label: 'Likes', icon: Heart },
+    { to: '/chats', label: 'Chat', icon: MessageCircle },
+    { to: '/profile', label: 'Profile', icon: User },
+  ]
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--mag-line)] bg-[var(--bottom-nav-bg)] backdrop-blur-lg">
-      <div className="page-wrap flex items-center justify-around py-2">
-        <Link to="/discover" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${path === '/discover' ? activeClass : inactiveClass}`}>
-          <Home className="h-6 w-6" strokeWidth={path === '/discover' ? 2.5 : 2} />
-          <span className="text-[10px] font-medium">Home</span>
-        </Link>
-        <Link to="/events" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${path === '/events' || path.startsWith('/events/') ? activeClass : inactiveClass}`}>
-          <Calendar className="h-6 w-6" strokeWidth={path === '/events' || path.startsWith('/events/') ? 2.5 : 2} />
-          <span className="text-[10px] font-medium">Events</span>
-        </Link>
-        <Link to="/likes" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${path === '/likes' ? activeClass : inactiveClass}`}>
-          <Heart className="h-6 w-6" strokeWidth={path === '/likes' ? 2.5 : 2} />
-          <span className="text-[10px] font-medium">Likes</span>
-        </Link>
-        <Link to="/chats" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${isChatActive ? activeClass : inactiveClass}`}>
-          <MessageCircle className="h-6 w-6" strokeWidth={isChatActive ? 2.5 : 2} />
-          <span className="text-[10px] font-medium">Chat</span>
-        </Link>
-        <Link to="/profile" className={`flex flex-col items-center gap-0.5 p-2 no-underline ${path.startsWith('/profile') ? activeClass : inactiveClass}`}>
-          <User className="h-6 w-6" strokeWidth={path.startsWith('/profile') ? 2.5 : 2} />
-          <span className="text-[10px] font-medium">Profile</span>
-        </Link>
+      <div className="page-wrap flex items-center justify-around py-1">
+        {items.map(({ to, label, icon: Icon }) => {
+          const active = path === to || path.startsWith(to + '/')
+          return (
+            <Link
+              key={to}
+              to={to}
+              className={`flex flex-col items-center gap-0.5 p-2 no-underline ${active ? 'text-[var(--mag-ink)]' : 'text-[var(--mag-ink-muted)]'}`}
+            >
+              <Icon className="h-6 w-6" strokeWidth={active ? 2.5 : 2} />
+              <span className="text-[10px] font-medium">{label}</span>
+            </Link>
+          )
+        })}
       </div>
     </nav>
   )

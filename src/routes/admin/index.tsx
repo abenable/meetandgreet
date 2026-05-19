@@ -67,7 +67,7 @@ function AdminPage() {
   return (
     <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       <div className="mb-4 flex items-center gap-2">
-        <Shield className="h-5 w-5 text-[var(--mag-green)]" />
+        <Shield className="h-5 w-5 text-[var(--mag-ink)]" />
         <h1 className="text-lg font-bold text-[var(--mag-ink)]">Admin Dashboard</h1>
       </div>
 
@@ -97,7 +97,7 @@ function TabButton({ active, onClick, icon, label }: { active: boolean; onClick:
       onClick={onClick}
       className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
         active
-          ? 'bg-[var(--mag-green)] text-white'
+          ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
           : 'bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-line)]'
       }`}
     >
@@ -115,21 +115,21 @@ function OverviewTab() {
   })
 
   if (isLoading) return <div className="text-sm text-[var(--mag-ink-muted)]">Loading stats...</div>
-  if (!stats) return <div className="text-sm text-red-500">Failed to load stats</div>
+  if (!stats) return <div className="text-sm text-[var(--mag-sale)]">Failed to load stats</div>
 
   const cards = [
-    { label: 'Total Users', value: stats.totalUsers, icon: <Users className="h-5 w-5" />, color: 'text-blue-500' },
-    { label: 'Active Events', value: stats.activeEvents, icon: <Calendar className="h-5 w-5" />, color: 'text-[var(--mag-green)]' },
-    { label: 'Total Matches', value: stats.totalMatches, icon: <MessageSquare className="h-5 w-5" />, color: 'text-purple-500' },
-    { label: 'Total Messages', value: stats.totalMessages, icon: <Activity className="h-5 w-5" />, color: 'text-amber-500' },
-    { label: 'Total Reports', value: stats.totalReports, icon: <Flag className="h-5 w-5" />, color: 'text-red-500' },
-    { label: 'New Users (7d)', value: stats.recentUsers, icon: <UserIcon className="h-5 w-5" />, color: 'text-cyan-500' },
+    { label: 'Total Users', value: stats.totalUsers, icon: <Users className="h-5 w-5" />, color: 'text-[var(--mag-ink-muted)]' },
+    { label: 'Active Events', value: stats.activeEvents, icon: <Calendar className="h-5 w-5" />, color: 'text-[var(--mag-ink-muted)]' },
+    { label: 'Total Matches', value: stats.totalMatches, icon: <MessageSquare className="h-5 w-5" />, color: 'text-[var(--mag-ink-muted)]' },
+    { label: 'Total Messages', value: stats.totalMessages, icon: <Activity className="h-5 w-5" />, color: 'text-[var(--mag-ink-muted)]' },
+    { label: 'Total Reports', value: stats.totalReports, icon: <Flag className="h-5 w-5" />, color: 'text-[var(--mag-ink-muted)]' },
+    { label: 'New Users (7d)', value: stats.recentUsers, icon: <UserIcon className="h-5 w-5" />, color: 'text-[var(--mag-ink-muted)]' },
   ]
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {cards.map((c) => (
-        <div key={c.label} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        <div key={c.label} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
           <div className={`mb-2 ${c.color}`}>{c.icon}</div>
           <div className="text-2xl font-bold text-[var(--mag-ink)]">{c.value.toLocaleString()}</div>
           <div className="text-xs text-[var(--mag-ink-muted)]">{c.label}</div>
@@ -203,7 +203,7 @@ function UsersTab() {
           value={search}
           onChange={(e) => { setSearch(e.target.value); setCursor(undefined); setFilter('all') }}
           placeholder="Search by name or email..."
-          className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-2.5 pl-9 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-green)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-green)]/20"
+          className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-2.5 pl-9 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-line)] focus:outline-none"
         />
       </div>
 
@@ -215,7 +215,7 @@ function UsersTab() {
             onClick={() => setFilter(f.key)}
             className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${
               filter === f.key
-                ? 'bg-[var(--mag-green)] text-white'
+                ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                 : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
             }`}
           >
@@ -232,7 +232,7 @@ function UsersTab() {
           {search ? 'No users match your search.' : 'No users found.'}
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+        <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
           {filteredItems.map((user: any) => (
             <div key={user.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
               {/* Avatar — always wrapped in fixed-size rounded container */}
@@ -244,12 +244,12 @@ function UsersTab() {
                 <div className="flex items-center gap-1.5">
                   <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{user.name || user.email}</span>
                   {user.role === 'admin' && (
-                    <span className="shrink-0 rounded bg-amber-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                    <span className="shrink-0 rounded bg-[var(--mag-surface)] border border-[var(--mag-line)] px-1 py-px text-[9px] font-bold uppercase tracking-wide text-[var(--mag-ink)]">
                       admin
                     </span>
                   )}
                   {user.disabledAt && (
-                    <span className="shrink-0 rounded bg-red-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                    <span className="shrink-0 rounded bg-[var(--mag-sale)]/10 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-[var(--mag-sale)]">
                       disabled
                     </span>
                   )}
@@ -279,8 +279,8 @@ function UsersTab() {
                   }}
                   className={`flex h-8 w-8 items-center justify-center rounded-full transition disabled:opacity-40 ${
                     user.disabledAt
-                      ? 'bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400'
-                      : 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400'
+                      ? 'bg-[var(--mag-success-10)] text-[var(--mag-success)] hover:bg-[var(--mag-success-10)]'
+                      : 'bg-[var(--mag-sale)]/10 text-[var(--mag-sale)] hover:bg-[var(--mag-sale)]/20'
                   }`}
                   title={user.disabledAt ? 'Enable account' : 'Disable account'}
                   disabled={disableMutation.isPending}
@@ -344,7 +344,7 @@ function EventsTab() {
         <>
           <div className="space-y-2">
             {data?.items.map((event: any) => (
-              <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+              <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
                 <div className="flex items-start gap-3">
                   {event.photo ? (
                     <img src={event.photo} alt={event.name} className="h-12 w-12 shrink-0 rounded-xl object-cover" />
@@ -356,7 +356,7 @@ function EventsTab() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</span>
-                      {!event.isActive && <span className="shrink-0 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600 dark:bg-red-900/20">Inactive</span>}
+                      {!event.isActive && <span className="shrink-0 rounded-full bg-[var(--mag-sale)]/10 px-1.5 py-0.5 text-[10px] font-bold text-[var(--mag-sale)]">Inactive</span>}
                       {event.endedAt && <span className="shrink-0 rounded-full bg-[var(--mag-ink-muted)]/10 px-1.5 py-0.5 text-[10px] font-bold text-[var(--mag-ink-muted)]">Ended</span>}
                     </div>
                     <div className="text-xs text-[var(--mag-ink-muted)]">{event.location || 'No location'}</div>
@@ -383,7 +383,7 @@ function EventsTab() {
                         deleteMutation.mutate({ data: event.id })
                       }
                     }}
-                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-red-50 py-1.5 text-[10px] font-medium text-red-600 transition hover:bg-red-100 dark:bg-red-900/20"
+                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-bg)] py-1.5 text-[10px] font-medium text-[var(--mag-sale)] transition hover:bg-[var(--mag-surface)]"
                     disabled={deleteMutation.isPending}
                   >
                     <Trash2 className="h-3 w-3" /> Delete
@@ -444,9 +444,9 @@ function ReportsTab() {
         <>
           <div className="space-y-2">
             {data?.items.map((report: any) => (
-              <div key={report.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+              <div key={report.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
                 <div className="mb-2 flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                  <AlertTriangle className="h-4 w-4 text-[var(--mag-sale)]" />
                   <span className="text-xs font-medium text-[var(--mag-ink-soft)]">{new Date(report.createdAt).toLocaleString()}</span>
                 </div>
                 <div className="mb-2 text-sm text-[var(--mag-ink)]">{report.reason}</div>
@@ -455,13 +455,13 @@ function ReportsTab() {
                     <AvatarImage src={report.reporter?.image} className="h-5 w-5" />
                     <span className="text-[var(--mag-ink-muted)]">Reporter:</span>
                     <span className="font-medium text-[var(--mag-ink)]">{report.reporter?.name || report.reporter?.email || 'Unknown'}</span>
-                    {report.reporter?.disabledAt && <Ban className="h-3 w-3 text-red-500" />}
+                    {report.reporter?.disabledAt && <Ban className="h-3 w-3 text-[var(--mag-sale)]" />}
                   </div>
                   <div className="flex items-center gap-1.5">
                     <AvatarImage src={report.reported?.image} className="h-5 w-5" />
                     <span className="text-[var(--mag-ink-muted)]">Reported:</span>
                     <span className="font-medium text-[var(--mag-ink)]">{report.reported?.name || report.reported?.email || 'Unknown'}</span>
-                    {report.reported?.disabledAt && <Ban className="h-3 w-3 text-red-500" />}
+                    {report.reported?.disabledAt && <Ban className="h-3 w-3 text-[var(--mag-sale)]" />}
                   </div>
                 </div>
                 <button
@@ -568,7 +568,7 @@ function ModerationTab() {
         ) : !flaggedUsers || flaggedUsers.length === 0 ? (
           <div className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No flagged users</div>
         ) : (
-          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
             {flaggedUsers.map((user: any) => (
               <div key={user.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
                 <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-[var(--mag-surface)]">
@@ -577,11 +577,11 @@ function ModerationTab() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{user.name || user.email}</span>
-                    <span className="shrink-0 rounded bg-red-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                    <span className="shrink-0 rounded bg-[var(--mag-sale)]/10 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-[var(--mag-sale)]">
                       {user.reportCount} reports
                     </span>
                     {user.disabledAt && (
-                      <span className="shrink-0 rounded bg-red-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                      <span className="shrink-0 rounded bg-[var(--mag-sale)]/10 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-[var(--mag-sale)]">
                         disabled
                       </span>
                     )}
@@ -598,7 +598,7 @@ function ModerationTab() {
                         disableMutation.mutate({ data: { userId: user.id, disabled: true } })
                       }
                     }}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-600 transition hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-sale)]/10 text-[var(--mag-sale)] transition hover:bg-[var(--mag-sale)]/20"
                     title="Ban user"
                     disabled={disableMutation.isPending || user.disabledAt}
                   >
@@ -633,13 +633,13 @@ function ModerationTab() {
         ) : !pendingReports?.items || pendingReports.items.length === 0 ? (
           <div className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No pending reports</div>
         ) : (
-          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
             {pendingReports.items.map((report: any) => (
               <div key={report.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{report.reason}</span>
-                    <span className="shrink-0 rounded bg-amber-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                    <span className="shrink-0 rounded bg-[var(--mag-surface)] border border-[var(--mag-line)] px-1 py-px text-[9px] font-bold uppercase tracking-wide text-[var(--mag-ink)]">
                       pending
                     </span>
                   </div>
@@ -654,7 +654,7 @@ function ModerationTab() {
                 <div className="flex shrink-0 items-center gap-1.5">
                   <button
                     onClick={() => reviewMutation.mutate({ data: { reportId: report.id } })}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600 transition hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-success-10)] text-[var(--mag-success)] transition hover:bg-[var(--mag-success-10)]"
                     title="Mark reviewed"
                     disabled={reviewMutation.isPending}
                   >
@@ -693,7 +693,7 @@ function SponsorsTab() {
         <>
           <div className="space-y-2">
             {events?.map((event: any) => (
-              <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+              <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
                 <div className="flex items-start gap-3">
                   {event.photo ? (
                     <img src={event.photo} alt={event.name} className="h-12 w-12 shrink-0 rounded-xl object-cover" />
@@ -705,7 +705,7 @@ function SponsorsTab() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{event.name}</span>
-                      <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                      <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-bg)]">
                         <Star className="h-3 w-3" /> Sponsored
                       </span>
                     </div>

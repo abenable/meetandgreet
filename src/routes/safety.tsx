@@ -21,7 +21,7 @@ function SafetyPage() {
         <h1 className="text-lg font-bold text-[var(--mag-ink)]">Safety Center</h1>
       </div>
 
-      <div className="mb-6 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 p-5 text-white shadow-md">
+      <div className="mb-6 rounded-none bg-[var(--mag-ink)] p-5 text-[var(--mag-bg)]">
         <div className="flex items-center gap-2">
           <Shield className="h-6 w-6" />
           <h2 className="text-lg font-bold">Your safety matters</h2>
@@ -59,8 +59,8 @@ function SafetyPage() {
             desc: 'Review our guidelines to understand what behavior is expected on Meet & Greet.',
           },
         ].map((item) => (
-          <div key={item.title} className="flex gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 card-shadow">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--mag-green)]/10 text-[var(--mag-green)]">
+          <div key={item.title} className="flex gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-none bg-[var(--mag-surface)] text-[var(--mag-ink)]">
               <item.icon className="h-5 w-5" />
             </div>
             <div>

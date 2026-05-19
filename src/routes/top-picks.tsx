@@ -23,7 +23,7 @@ function TopPicksPage() {
 
       <div className="grid grid-cols-2 gap-3">
         {picks.map((profile, i) => (
-          <div key={i} className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] card-shadow">
+          <div key={i} className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
             <div className="relative">
               <img src={profile.photo} alt={profile.name} className="aspect-[3/4] w-full object-cover" />
               <div className="gradient-overlay absolute inset-0" />
@@ -37,9 +37,9 @@ function TopPicksPage() {
               </div>
             </div>
             <div className="flex items-center justify-around p-2">
-              <button className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-surface)] transition hover:bg-[var(--mag-surface)]"><X className="h-4 w-4 text-red-400" /></button>
-              <button className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-surface)] transition hover:bg-[var(--mag-surface)]"><Star className="h-4 w-4 fill-[var(--mag-blue)] text-[var(--mag-blue)]" /></button>
-              <button className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-surface)] transition hover:bg-[var(--mag-surface)]"><Heart className="h-4 w-4 fill-[var(--mag-green)] text-[var(--mag-green)]" /></button>
+              <button className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-surface)] transition hover:bg-[var(--mag-line)]"><X className="h-4 w-4 text-[var(--mag-ink-soft)]" /></button>
+              <button className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-surface)] transition hover:bg-[var(--mag-line)]"><Star className="h-4 w-4 text-[var(--mag-ink-soft)]" /></button>
+              <button className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-ink)] transition hover:opacity-80 active:scale-95"><Heart className="h-4 w-4 text-[var(--mag-bg)]" /></button>
             </div>
           </div>
         ))}

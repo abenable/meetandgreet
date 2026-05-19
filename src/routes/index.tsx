@@ -33,7 +33,7 @@ function LandingPage() {
       <div className="rise-in flex w-full max-w-xs flex-col gap-3" style={{ animationDelay: '320ms' }}>
         <Link
           to="/login"
-          className="flex items-center justify-center rounded-full bg-[var(--mag-green)] px-6 py-3.5 text-base font-semibold !text-white shadow-md transition hover:bg-[var(--mag-green-dark)] hover:shadow-lg no-underline"
+          className="flex items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3.5 text-base font-semibold !text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 no-underline"
         >
           Get started
         </Link>

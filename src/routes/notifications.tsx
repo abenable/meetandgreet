@@ -81,7 +81,7 @@ function NotificationsPage() {
               <button
                 key={n.id}
                 onClick={() => handleClick(n)}
-                className={`flex w-full items-start gap-3 rounded-none border p-3 text-left transition ${
+                className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition ${
                   n.readAt
                     ? 'border-[var(--mag-line)] bg-[var(--mag-card)] opacity-70'
                     : 'border-[var(--mag-line)] bg-[var(--mag-card)]'

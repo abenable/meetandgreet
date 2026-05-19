@@ -72,9 +72,9 @@ function LoginPage() {
         <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">Log in to continue swiping</p>
       </div>
 
-      <div className="flex w-full max-w-xs flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
         {error && (
-          <div className="rounded-xl border border-[var(--mag-sale)] bg-[var(--mag-sale-bg)] px-4 py-3 text-xs text-[var(--mag-sale)]">
+          <div className="rounded-2xl border border-[var(--mag-sale)] bg-[var(--mag-sale-bg)] px-4 py-3 text-xs text-[var(--mag-sale)]">
             {error}
           </div>
         )}
@@ -115,7 +115,7 @@ function LoginPage() {
             </button>
           </div>
 
-          <div className="text-right">
+          <div className="text-center">
             <Link to="/forgot-password" className="text-xs text-[var(--mag-ink)] no-underline hover:underline">
               Forgot password?
             </Link>
@@ -127,7 +127,7 @@ function LoginPage() {
             className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-60"
           >
             {loading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-bg)] border-t-transparent" />
             ) : (
               <>
                 Log In
@@ -137,7 +137,7 @@ function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-2 flex flex-col gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
+        <div className="mt-2 flex flex-col gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
           <div>
             <p className="text-sm font-semibold text-[var(--mag-ink)]">Don't have an account?</p>
             <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">Join now and start meeting people.</p>

@@ -129,7 +129,7 @@ function CreateEventPage() {
       </div>
 
       {code ? (
-        <div className="mb-6 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
+        <div className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 text-center">
           <p className="text-xs font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Created</p>
           <p className="mt-2 text-3xl font-mono font-bold tracking-widest text-[var(--mag-ink)]">{code}</p>
           <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">Share this code or link so others can join</p>

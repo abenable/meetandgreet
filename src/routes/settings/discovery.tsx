@@ -19,8 +19,8 @@ function DiscoverySettingsPage() {
         <h1 className="text-lg font-bold text-[var(--mag-ink)]">Discovery Settings</h1>
       </div>
 
-      <div className="space-y-5">
-        <div className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+      <div className="mx-auto max-w-md space-y-5">
+        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
           <div className="mb-3 flex items-center gap-2">
             <MapPin className="h-4 w-4 text-[var(--mag-ink-soft)]" />
             <h2 className="text-sm font-semibold text-[var(--mag-ink)]">Maximum Distance</h2>
@@ -36,7 +36,7 @@ function DiscoverySettingsPage() {
           />
         </div>
 
-        <div className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
           <div className="mb-3 flex items-center gap-2">
             <Users className="h-4 w-4 text-[var(--mag-ink-soft)]" />
             <h2 className="text-sm font-semibold text-[var(--mag-ink)]">Age Range</h2>
@@ -62,7 +62,7 @@ function DiscoverySettingsPage() {
           </div>
         </div>
 
-        <div className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
           <div className="mb-3 flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-[var(--mag-ink-soft)]" />
             <h2 className="text-sm font-semibold text-[var(--mag-ink)]">Show Me</h2>

@@ -65,7 +65,7 @@ function AdminPage() {
   const [tab, setTab] = useState<Tab>('overview')
 
   return (
-    <div className="page-wrap flex flex-1 flex-col px-4 py-4">
+    <div className="page-wrap mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 py-3 md:px-4 md:py-4">
       <div className="mb-4 flex items-center gap-2">
         <Shield className="h-5 w-5 text-[var(--mag-ink)]" />
         <h1 className="text-lg font-bold text-[var(--mag-ink)]">Admin Dashboard</h1>
@@ -129,7 +129,7 @@ function OverviewTab() {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {cards.map((c) => (
-        <div key={c.label} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        <div key={c.label} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
           <div className={`mb-2 ${c.color}`}>{c.icon}</div>
           <div className="text-2xl font-bold text-[var(--mag-ink)]">{c.value.toLocaleString()}</div>
           <div className="text-xs text-[var(--mag-ink-muted)]">{c.label}</div>
@@ -232,7 +232,7 @@ function UsersTab() {
           {search ? 'No users match your search.' : 'No users found.'}
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+        <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
           {filteredItems.map((user: any) => (
             <div key={user.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
               {/* Avatar — always wrapped in fixed-size rounded container */}
@@ -344,7 +344,7 @@ function EventsTab() {
         <>
           <div className="space-y-2">
             {data?.items.map((event: any) => (
-              <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+              <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
                 <div className="flex items-start gap-3">
                   {event.photo ? (
                     <img src={event.photo} alt={event.name} className="h-12 w-12 shrink-0 rounded-xl object-cover" />
@@ -444,7 +444,7 @@ function ReportsTab() {
         <>
           <div className="space-y-2">
             {data?.items.map((report: any) => (
-              <div key={report.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+              <div key={report.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
                 <div className="mb-2 flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-[var(--mag-sale)]" />
                   <span className="text-xs font-medium text-[var(--mag-ink-soft)]">{new Date(report.createdAt).toLocaleString()}</span>
@@ -568,7 +568,7 @@ function ModerationTab() {
         ) : !flaggedUsers || flaggedUsers.length === 0 ? (
           <div className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No flagged users</div>
         ) : (
-          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
             {flaggedUsers.map((user: any) => (
               <div key={user.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
                 <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-[var(--mag-surface)]">
@@ -633,7 +633,7 @@ function ModerationTab() {
         ) : !pendingReports?.items || pendingReports.items.length === 0 ? (
           <div className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No pending reports</div>
         ) : (
-          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
             {pendingReports.items.map((report: any) => (
               <div key={report.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
                 <div className="min-w-0 flex-1">
@@ -693,7 +693,7 @@ function SponsorsTab() {
         <>
           <div className="space-y-2">
             {events?.map((event: any) => (
-              <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+              <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
                 <div className="flex items-start gap-3">
                   {event.photo ? (
                     <img src={event.photo} alt={event.name} className="h-12 w-12 shrink-0 rounded-xl object-cover" />

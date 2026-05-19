@@ -39,10 +39,10 @@ function AccountSettingsPage() {
         <h1 className="text-xl font-bold text-[var(--mag-ink)]">Account Settings</h1>
       </div>
 
-      <div className="mb-5 overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
+      <div className="mx-auto max-w-md mb-5 overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
         <button
           onClick={() => openEdit('email', email)}
-          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-4 py-3 transition hover:bg-[var(--mag-surface)] text-left"
+          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-3 py-3 transition hover:bg-[var(--mag-surface)] text-left"
         >
           <Mail className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <div className="flex-1">
@@ -53,7 +53,7 @@ function AccountSettingsPage() {
         </button>
         <button
           onClick={() => openEdit('phone', phone)}
-          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-4 py-3 transition hover:bg-[var(--mag-surface)] text-left"
+          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-3 py-3 transition hover:bg-[var(--mag-surface)] text-left"
         >
           <Phone className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <div className="flex-1">
@@ -64,7 +64,7 @@ function AccountSettingsPage() {
         </button>
         <button
           onClick={() => openEdit('language', language)}
-          className="flex w-full items-center gap-3 px-4 py-3 transition hover:bg-[var(--mag-surface)] text-left"
+          className="flex w-full items-center gap-3 px-3 py-3 transition hover:bg-[var(--mag-surface)] text-left"
         >
           <Globe className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <div className="flex-1">
@@ -80,7 +80,7 @@ function AccountSettingsPage() {
       </h2>
       <button
         onClick={() => setShowDeleteConfirm(true)}
-        className="flex w-full items-center gap-3 rounded-none border border-[var(--mag-sale)]/30 bg-[var(--mag-sale)]/10 px-4 py-3 transition hover:bg-[var(--mag-sale)]/20"
+        className="mx-auto max-w-md flex w-full items-center gap-3 rounded-2xl border border-[var(--mag-sale)]/30 bg-[var(--mag-sale)]/10 px-3 py-3 transition hover:bg-[var(--mag-sale)]/20"
       >
         <Trash2 className="h-5 w-5 text-[var(--mag-sale)]" />
         <span className="flex-1 text-left text-sm font-semibold text-[var(--mag-sale)]">Delete Account</span>

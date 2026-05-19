@@ -324,7 +324,7 @@ function ProfilePage() {
       {/* About Me */}
       <button
         onClick={() => openEdit('bio', profile.bio || '')}
-        className="mb-4 flex w-full items-start justify-between rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 text-left transition hover:border-[var(--mag-ink)]/20"
+        className="mb-4 flex w-full items-start justify-between rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 text-left transition hover:border-[var(--mag-ink)]/20"
       >
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">About Me</h3>
@@ -337,7 +337,7 @@ function ProfilePage() {
 
       {/* Badges */}
       {badges && badges.length > 0 && (
-        <div className="mb-4 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        <div className="mb-4 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
           <h3 className="mb-2 text-sm font-semibold text-[var(--mag-ink)]">Badges</h3>
           <div className="flex flex-wrap gap-2">
             {badges.map((badge) => {
@@ -361,7 +361,7 @@ function ProfilePage() {
       {/* My Photos */}
       <button
         onClick={() => navigate({ to: '/profile/media' })}
-        className="mb-4 flex w-full flex-col rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 text-left transition hover:border-[var(--mag-ink)]/20"
+        className="mb-4 flex w-full flex-col rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 text-left transition hover:border-[var(--mag-ink)]/20"
       >
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">My Photos</h3>
@@ -371,7 +371,7 @@ function ProfilePage() {
         {photoCount > 0 ? (
           <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
             {(profile.photos || []).slice(0, 5).map((photo: string, i: number) => (
-              <div key={i} className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-none">
+              <div key={i} className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl">
                 <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
               </div>
             ))}
@@ -386,7 +386,7 @@ function ProfilePage() {
         )}
 
         {photoCount < 3 && (
-          <div className="mt-3 flex items-center gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-3">
+          <div className="mt-3 flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-3">
             <Sparkles className="h-5 w-5 shrink-0 text-[var(--mag-ink)]" />
             <div className="min-w-0 flex-1">
               <p className="text-xs font-medium text-[var(--mag-ink)]">Profiles with 3+ photos get 10x more matches</p>
@@ -399,7 +399,7 @@ function ProfilePage() {
       {/* Location */}
       <button
         onClick={() => openEdit('location', profile.location || '')}
-        className="mb-4 flex w-full items-start justify-between rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 text-left transition hover:border-[var(--mag-ink)]/20"
+        className="mb-4 flex w-full items-start justify-between rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 text-left transition hover:border-[var(--mag-ink)]/20"
       >
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-[var(--mag-ink)]">Location</h3>

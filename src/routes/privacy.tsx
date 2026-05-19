@@ -5,7 +5,7 @@ export const Route = createFileRoute('/privacy')({ component: PrivacyPage })
 
 function PrivacyPage() {
   return (
-    <main className="page-wrap min-h-[80vh] px-4 py-8">
+    <main className="page-wrap mx-auto min-h-[80vh] max-w-3xl px-4 py-6 md:px-6 md:py-8">
       <div className="mb-6 flex items-center gap-3">
         <Link to="/" className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-line)] no-underline">
           <ArrowLeft className="h-4 w-4" />

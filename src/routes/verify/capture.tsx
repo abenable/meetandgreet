@@ -27,7 +27,7 @@ function VerifyCapturePage() {
           </p>
           <button
             onClick={() => setStep('capture')}
-            className="mt-8 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
+            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
           >
             I am Ready
           </button>
@@ -83,7 +83,7 @@ function VerifyCapturePage() {
           </p>
           <a
             href="/profile"
-            className="mt-8 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 no-underline"
+            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 no-underline"
           >
             Back to Profile
           </a>

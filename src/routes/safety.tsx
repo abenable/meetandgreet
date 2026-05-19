@@ -13,7 +13,7 @@ export const Route = createFileRoute('/safety')({ component: SafetyPage })
 
 function SafetyPage() {
   return (
-    <main className="page-wrap px-4 py-4">
+    <main className="page-wrap mx-auto max-w-2xl px-3 py-4 md:px-4 md:py-6">
       <div className="mb-4 flex items-center gap-2">
         <Link to="/settings/privacy" className="rounded-full p-2 text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)] no-underline">
           <ArrowLeft className="h-5 w-5" />
@@ -21,7 +21,7 @@ function SafetyPage() {
         <h1 className="text-lg font-bold text-[var(--mag-ink)]">Safety Center</h1>
       </div>
 
-      <div className="mb-6 rounded-none bg-[var(--mag-ink)] p-5 text-[var(--mag-bg)]">
+      <div className="mb-6 rounded-2xl bg-[var(--mag-ink)] p-4 md:p-5 text-[var(--mag-bg)]">
         <div className="flex items-center gap-2">
           <Shield className="h-6 w-6" />
           <h2 className="text-lg font-bold">Your safety matters</h2>
@@ -59,8 +59,8 @@ function SafetyPage() {
             desc: 'Review our guidelines to understand what behavior is expected on Meet & Greet.',
           },
         ].map((item) => (
-          <div key={item.title} className="flex gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-none bg-[var(--mag-surface)] text-[var(--mag-ink)]">
+          <div key={item.title} className="flex gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[var(--mag-surface)] text-[var(--mag-ink)]">
               <item.icon className="h-5 w-5" />
             </div>
             <div>

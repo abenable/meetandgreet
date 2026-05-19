@@ -23,7 +23,7 @@ function TopPicksPage() {
 
       <div className="grid grid-cols-2 gap-3">
         {picks.map((profile, i) => (
-          <div key={i} className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
+          <div key={i} className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
             <div className="relative">
               <img src={profile.photo} alt={profile.name} className="aspect-[3/4] w-full object-cover" />
               <div className="gradient-overlay absolute inset-0" />

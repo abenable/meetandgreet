@@ -74,9 +74,9 @@ function SignupPage() {
         <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">Create your account to start matching</p>
       </div>
 
-      <div className="flex w-full max-w-xs flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
         {error && (
-          <div className="rounded-xl border border-[var(--mag-sale)] bg-[var(--mag-sale-bg)] px-4 py-3 text-xs text-[var(--mag-sale)]">
+          <div className="rounded-2xl border border-[var(--mag-sale)] bg-[var(--mag-sale-bg)] px-4 py-3 text-xs text-[var(--mag-sale)]">
             {error}
           </div>
         )}
@@ -129,9 +129,9 @@ function SignupPage() {
           </div>
 
           {password.length > 0 && (
-            <ul className="space-y-1">
+            <ul className="space-y-1 text-center">
               {requirements.map((r) => (
-                <li key={r.label} className="flex items-center gap-1.5 text-[11px] text-[var(--mag-ink-muted)]">
+                <li key={r.label} className="flex items-center justify-center gap-1.5 text-[11px] text-[var(--mag-ink-muted)]">
                   {r.met ? <Check className="h-3 w-3 text-[var(--mag-ink)]" /> : <X className="h-3 w-3 text-[var(--mag-sale)]" />}
                   <span className={r.met ? 'text-[var(--mag-ink-soft)]' : ''}>{r.label}</span>
                 </li>
@@ -145,7 +145,7 @@ function SignupPage() {
             className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-60"
           >
             {loading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-bg)] border-t-transparent" />
             ) : (
               <>
                 Create Account

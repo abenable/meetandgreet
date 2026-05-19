@@ -70,7 +70,7 @@ function MediaPage() {
       </div>
 
       {photos.length < 3 && (
-        <div className="mb-4 flex items-center gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-surface)] px-4 py-3">
+        <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-3">
           <Sparkles className="h-5 w-5 flex-shrink-0 text-[var(--mag-ink-soft)]" />
           <div>
             <p className="text-sm font-semibold text-[var(--mag-ink)]">More photos = more matches</p>

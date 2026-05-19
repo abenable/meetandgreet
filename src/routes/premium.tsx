@@ -19,18 +19,20 @@ function PremiumPage() {
         <p className="text-xs text-[var(--mag-ink-soft)]">Enjoy all features without any subscription.</p>
       </div>
 
-      <div className="mb-6 space-y-2">
+      <div className="mx-auto max-w-md mb-6 space-y-2">
         {features.map((feature) => (
-          <div key={feature} className="flex items-center gap-3 rounded-none bg-[var(--mag-surface)] px-4 py-2.5">
+          <div key={feature} className="flex items-center gap-3 rounded-2xl bg-[var(--mag-surface)] px-3 py-2.5">
             <Check className="h-4 w-4 text-[var(--mag-ink)]" />
             <span className="text-sm text-[var(--mag-ink)]">{feature}</span>
           </div>
         ))}
       </div>
 
-      <Link to="/discover" className="inline-flex w-full items-center justify-center rounded-full bg-[var(--mag-ink)] py-3.5 text-sm font-bold !text-[var(--mag-bg)] transition hover:opacity-80 no-underline">
-        Start Discovering
-      </Link>
+      <div className="flex justify-center">
+        <Link to="/discover" className="inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[var(--mag-ink)] py-3.5 text-sm font-bold !text-[var(--mag-bg)] transition hover:opacity-80 no-underline">
+          Start Discovering
+        </Link>
+      </div>
     </main>
   )
 }

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
-import { db } from "../db/index"
+import { prisma } from "../db/index"
 import { requireSession } from "./auth"
 import { getEffectiveTier } from "../lib/tiers"
 import { z } from "zod"
@@ -7,9 +7,17 @@ import { z } from "zod"
 const MAX_ADS_PER_DAY = 3
 const REWARDED_SWIPES_COUNT = 5
 
+async function getUserTier(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { subscriptionTier: true, subscriptionExpiresAt: true },
+  })
+  return getEffectiveTier(user?.subscriptionTier, user?.subscriptionExpiresAt)
+}
+
 export const getAdConfig = createServerFn({ method: "GET" }).handler(async () => {
   const session = await requireSession()
-  const tier = await getEffectiveTier(session.user.id)
+  const tier = await getUserTier(session.user.id)
 
   return {
     showAds: tier === "free",
@@ -24,13 +32,13 @@ export const getAdStatus = createServerFn({ method: "GET" }).handler(async () =>
   today.setHours(0, 0, 0, 0)
 
   const [todayViews, tier] = await Promise.all([
-    db.adView.count({
+    prisma.adView.count({
       where: {
         userId: session.user.id,
         createdAt: { gte: today },
       },
     }),
-    getEffectiveTier(session.user.id),
+    getUserTier(session.user.id),
   ])
 
   return {
@@ -50,7 +58,7 @@ export const watchRewardedAd = createServerFn({ method: "POST" })
   .inputValidator(watchAdSchema)
   .handler(async ({ data }) => {
     const session = await requireSession()
-    const tier = await getEffectiveTier(session.user.id)
+    const tier = await getUserTier(session.user.id)
 
     if (tier !== "free") {
       throw new Error("Ads are removed for Pro and Host users")
@@ -59,7 +67,7 @@ export const watchRewardedAd = createServerFn({ method: "POST" })
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const todayViews = await db.adView.count({
+    const todayViews = await prisma.adView.count({
       where: {
         userId: session.user.id,
         createdAt: { gte: today },
@@ -75,7 +83,7 @@ export const watchRewardedAd = createServerFn({ method: "POST" })
         ? "1_hour_boost"
         : `${REWARDED_SWIPES_COUNT}_extra_swipes`
 
-    await db.adView.create({
+    await prisma.adView.create({
       data: {
         userId: session.user.id,
         type: data.type,
@@ -85,7 +93,7 @@ export const watchRewardedAd = createServerFn({ method: "POST" })
 
     if (data.type === "rewarded_boost") {
       const boostedUntil = new Date(Date.now() + 60 * 60 * 1000)
-      await db.profile.updateMany({
+      await prisma.profile.updateMany({
         where: { userId: session.user.id },
         data: { boostedUntil, lastBoostedAt: new Date() },
       })
@@ -95,7 +103,7 @@ export const watchRewardedAd = createServerFn({ method: "POST" })
     if (data.type === "rewarded_swipes" && data.eventId) {
       const date = new Date()
       date.setHours(0, 0, 0, 0)
-      await db.dailySwipeLimit.upsert({
+      await prisma.dailySwipeLimit.upsert({
         where: {
           userId_eventId_date: {
             userId: session.user.id,

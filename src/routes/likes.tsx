@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Skeleton } from '@heroui/react'
 import { Heart, MessageCircle, Users, Check, X, Mail } from 'lucide-react'
 import { getLikes, getMatches } from '#/server/swipes'
 import { recordSwipe } from '#/server/swipes'
@@ -112,8 +113,23 @@ function LikesPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex h-32 items-center justify-center">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-ink-muted)] border-t-transparent" />
+        <div className="space-y-4">
+          <div className="flex items-center gap-1 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-1">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-10 flex-1 rounded-xl" />
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="relative overflow-hidden rounded-2xl bg-[var(--mag-card)]">
+                <Skeleton className="aspect-[3/4] w-full" />
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <Skeleton className="h-4 w-20 rounded-lg" />
+                  <Skeleton className="mt-1 h-3 w-14 rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : activeTab === 'likes' ? (
         likes.length === 0 ? (

@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Skeleton } from '@heroui/react'
 import {
   Users,
   Calendar,
@@ -114,7 +115,19 @@ function OverviewTab() {
     queryFn: () => getAdminStats(),
   })
 
-  if (isLoading) return <div className="text-sm text-[var(--mag-ink-muted)]">Loading stats...</div>
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4 space-y-2">
+            <Skeleton className="h-5 w-5 rounded-md" />
+            <Skeleton className="h-8 w-16 rounded-lg" />
+            <Skeleton className="h-3 w-20 rounded-lg" />
+          </div>
+        ))}
+      </div>
+    )
+  }
   if (!stats) return <div className="text-sm text-[var(--mag-sale)]">Failed to load stats</div>
 
   const cards = [
@@ -226,7 +239,18 @@ function UsersTab() {
 
       {/* List */}
       {isLoading ? (
-        <div className="py-8 text-center text-sm text-[var(--mag-ink-muted)]">Loading users...</div>
+        <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center gap-3 px-3 py-2.5">
+              <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <Skeleton className="h-3 w-28 rounded-lg" />
+                <Skeleton className="h-2.5 w-40 rounded-lg" />
+              </div>
+              <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+            </div>
+          ))}
+        </div>
       ) : filteredItems.length === 0 ? (
         <div className="py-8 text-center text-sm text-[var(--mag-ink-muted)]">
           {search ? 'No users match your search.' : 'No users found.'}
@@ -339,7 +363,23 @@ function EventsTab() {
   return (
     <div className="flex flex-col gap-3">
       {isLoading ? (
-        <div className="text-sm text-[var(--mag-ink-muted)]">Loading events...</div>
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
+              <div className="flex items-start gap-3">
+                <Skeleton className="h-12 w-12 shrink-0 rounded-xl" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32 rounded-lg" />
+                  <Skeleton className="h-3 w-24 rounded-lg" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-3 w-16 rounded-lg" />
+                    <Skeleton className="h-3 w-16 rounded-lg" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
         <>
           <div className="space-y-2">
@@ -439,7 +479,21 @@ function ReportsTab() {
   return (
     <div className="flex flex-col gap-3">
       {isLoading ? (
-        <div className="text-sm text-[var(--mag-ink-muted)]">Loading reports...</div>
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded-md" />
+                <Skeleton className="h-3 w-24 rounded-lg" />
+              </div>
+              <Skeleton className="h-4 w-3/4 rounded-lg" />
+              <div className="flex gap-3">
+                <Skeleton className="h-3 w-20 rounded-lg" />
+                <Skeleton className="h-3 w-20 rounded-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
         <>
           <div className="space-y-2">
@@ -564,7 +618,18 @@ function ModerationTab() {
           Flagged Users ({flaggedUsers?.length ?? 0})
         </h2>
         {flaggedLoading ? (
-          <div className="text-sm text-[var(--mag-ink-muted)]">Loading flagged users...</div>
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-3 px-3 py-2.5">
+                <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <Skeleton className="h-3 w-28 rounded-lg" />
+                  <Skeleton className="h-2.5 w-40 rounded-lg" />
+                </div>
+                <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+              </div>
+            ))}
+          </div>
         ) : !flaggedUsers || flaggedUsers.length === 0 ? (
           <div className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No flagged users</div>
         ) : (
@@ -629,7 +694,17 @@ function ModerationTab() {
           Pending Reports
         </h2>
         {reportsLoading ? (
-          <div className="text-sm text-[var(--mag-ink-muted)]">Loading pending reports...</div>
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-3 px-3 py-2.5">
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <Skeleton className="h-3 w-32 rounded-lg" />
+                  <Skeleton className="h-2.5 w-48 rounded-lg" />
+                </div>
+                <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+              </div>
+            ))}
+          </div>
         ) : !pendingReports?.items || pendingReports.items.length === 0 ? (
           <div className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No pending reports</div>
         ) : (
@@ -688,7 +763,20 @@ function SponsorsTab() {
   return (
     <div className="flex flex-col gap-3">
       {isLoading ? (
-        <div className="text-sm text-[var(--mag-ink-muted)]">Loading sponsors...</div>
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
+              <div className="flex items-start gap-3">
+                <Skeleton className="h-12 w-12 shrink-0 rounded-xl" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32 rounded-lg" />
+                  <Skeleton className="h-3 w-24 rounded-lg" />
+                  <Skeleton className="h-3 w-40 rounded-lg" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
         <>
           <div className="space-y-2">

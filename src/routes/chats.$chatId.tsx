@@ -1,6 +1,7 @@
 import { createFileRoute, useParams, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Skeleton } from '@heroui/react'
 import { ArrowLeft, Send, Check, CheckCheck, Ban, Mic, Play, Pause, Square, X } from 'lucide-react'
 import { getChatMessages, sendChatMessage, markChatRead, getIcebreakers, uploadVoiceMessage } from '#/server/conversations'
 import { getProfileByUserId } from '#/server/profiles'
@@ -71,7 +72,7 @@ function UnifiedChatPage() {
   const [blockDialogOpen, setBlockDialogOpen] = useState(false)
   const [showRevealToast, setShowRevealToast] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const typingTimeoutRef = useRef<NodeJS.Timeout>()
+  const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const prevUnlockedRef = useRef<boolean | undefined>(undefined)
 
   // Voice recording state
@@ -366,7 +367,13 @@ function UnifiedChatPage() {
       {/* Messages */}
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         {isLoading ? (
-          <div className="flex h-full items-center justify-center"><div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-ink-muted)] border-t-transparent" /></div>
+          <div className="flex h-full flex-col justify-end space-y-3 pb-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                <Skeleton className={`h-10 rounded-2xl px-4 py-2.5 ${i % 2 === 0 ? 'w-32 rounded-br-md' : 'w-40 rounded-bl-md'}`} />
+              </div>
+            ))}
+          </div>
         ) : chatData?.messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-[var(--mag-ink-muted)]">Start the conversation!</div>
         ) : (

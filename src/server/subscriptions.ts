@@ -89,7 +89,7 @@ export const setUserTier = createServerFn({ method: 'POST' })
 
 export const canJoinEvent = createServerFn({ method: 'POST' })
   .inputValidator(z.string())
-  .handler(async ({ data: eventId }) => {
+  .handler(async ({ data: _eventId }) => {
     const session = await requireSession()
 
     if (session.user.role === 'admin') {

@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Skeleton } from '@heroui/react'
 import {
   ArrowLeft,
   Save,
@@ -102,7 +103,6 @@ function ManageEventPage() {
   const eventPosts = postsData?.items ?? []
 
   const [postContent, setPostContent] = useState('')
-  const [postsCursor, setPostsCursor] = useState<string | undefined>()
 
   const loadMorePosts = async () => {
     if (!postsData?.nextCursor) return
@@ -349,11 +349,81 @@ function ManageEventPage() {
     removeWaitlistMutation.mutate({ data: { eventId, userId } })
   }
 
-  if (eventLoading || !event) {
+  if (eventLoading) {
     return (
       <main className="page-wrap px-4 py-4">
-        <div className="flex items-center justify-center py-20">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--mag-line)] border-t-transparent" />
+        <div className="mb-5 flex items-center gap-2">
+          <button
+            onClick={() => navigate({ to: '/events' })}
+            className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-lg font-bold text-[var(--mag-ink)]">Manage Event</h1>
+        </div>
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 text-center space-y-2">
+            <Skeleton className="mx-auto h-3 w-24 rounded-lg" />
+            <Skeleton className="mx-auto h-10 w-40 rounded-lg" />
+            <Skeleton className="mx-auto h-8 w-28 rounded-full" />
+          </div>
+          <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 space-y-3">
+            <Skeleton className="mx-auto h-5 w-28 rounded-lg" />
+            <Skeleton className="h-32 w-32 mx-auto rounded-2xl" />
+            <Skeleton className="h-10 w-full rounded-2xl" />
+            <Skeleton className="h-20 w-full rounded-2xl" />
+            <Skeleton className="h-10 w-full rounded-2xl" />
+            <div className="flex gap-2">
+              <Skeleton className="h-10 flex-1 rounded-full" />
+              <Skeleton className="h-10 flex-1 rounded-full" />
+            </div>
+          </div>
+          <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-1 flex gap-1">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-9 flex-1 rounded-lg" />
+            ))}
+          </div>
+          <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-4 w-20 rounded-lg" />
+              <Skeleton className="h-4 w-16 rounded-full" />
+            </div>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3">
+                <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <Skeleton className="h-3 w-24 rounded-lg" />
+                  <Skeleton className="h-2.5 w-32 rounded-lg" />
+                </div>
+                <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (!event) {
+    return (
+      <main className="page-wrap px-4 py-4">
+        <div className="mb-5 flex items-center gap-2">
+          <button
+            onClick={() => navigate({ to: '/events' })}
+            className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-lg font-bold text-[var(--mag-ink)]">Manage Event</h1>
+        </div>
+        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
+          <p className="text-sm font-semibold text-[var(--mag-ink)]">You don't have permission to manage this event.</p>
+          <button
+            onClick={() => navigate({ to: '/events' })}
+            className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-2.5 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+          >
+            Go Back
+          </button>
         </div>
       </main>
     )
@@ -783,8 +853,17 @@ function ManageEventPage() {
             </div>
 
             {profilesLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-line)] border-t-transparent" />
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3">
+                    <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <Skeleton className="h-3 w-24 rounded-lg" />
+                      <Skeleton className="h-2.5 w-32 rounded-lg" />
+                    </div>
+                    <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+                  </div>
+                ))}
               </div>
             ) : attendeeProfiles.length === 0 ? (
               <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No attendees yet.</p>
@@ -878,8 +957,16 @@ function ManageEventPage() {
               </div>
               <div className="max-h-[500px] overflow-y-auto">
                 {postsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-line)] border-t-transparent" />
+                  <div className="space-y-3 px-4 py-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+                        <div className="min-w-0 flex-1 space-y-1.5">
+                          <Skeleton className="h-3 w-24 rounded-lg" />
+                          <Skeleton className="h-3 w-full rounded-lg" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : eventPosts.length === 0 ? (
                   <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No posts yet. Start the conversation!</p>
@@ -930,8 +1017,18 @@ function ManageEventPage() {
             </div>
 
             {waitlistLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-line)] border-t-transparent" />
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3">
+                    <Skeleton className="h-6 w-6 shrink-0 rounded-full" />
+                    <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <Skeleton className="h-3 w-24 rounded-lg" />
+                      <Skeleton className="h-2.5 w-32 rounded-lg" />
+                    </div>
+                    <Skeleton className="h-7 w-16 shrink-0 rounded-full" />
+                  </div>
+                ))}
               </div>
             ) : waitlist.length === 0 ? (
               <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">No one on the waitlist yet.</p>

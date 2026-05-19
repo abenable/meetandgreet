@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { MapPin, Camera, Link2, Pencil, Trash2, AlertTriangle, Sparkles, ShieldCheck, Heart, Users, Briefcase, Flame, Calendar, BadgeCheck, Zap, ChevronRight, Plus } from 'lucide-react'
+import { Skeleton } from '@heroui/react'
+import { MapPin, Camera, Link2, Pencil, AlertTriangle, Sparkles, ShieldCheck, Heart, Users, Briefcase, Flame, Calendar, BadgeCheck, Zap, ChevronRight, Plus } from 'lucide-react'
 import { getMyProfile, updateProfile, verifyPhoto } from '#/server/profiles'
 import { disableMyAccount } from '#/server/auth'
 import { getUserBadges, getUserStreak } from '#/server/badges'
@@ -202,8 +203,29 @@ function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="page-wrap flex flex-1 flex-col items-center justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--mag-ink)] border-t-transparent" />
+      <div className="page-wrap flex flex-1 flex-col px-4 py-4">
+        <div className="mb-4 flex flex-col items-center">
+          <Skeleton className="h-28 w-28 rounded-full" />
+          <Skeleton className="mt-3 h-6 w-32 rounded-lg" />
+          <Skeleton className="mt-1 h-4 w-24 rounded-lg" />
+          <div className="mt-2 flex gap-2">
+            <Skeleton className="h-7 w-20 rounded-full" />
+            <Skeleton className="h-7 w-20 rounded-full" />
+          </div>
+          <Skeleton className="mt-3 h-7 w-32 rounded-full" />
+        </div>
+        <div className="mb-5 flex flex-wrap justify-center gap-2">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-7 w-20 rounded-full" />
+          ))}
+        </div>
+        <Skeleton className="mb-4 h-24 w-full rounded-2xl" />
+        <Skeleton className="mb-4 h-20 w-full rounded-2xl" />
+        <Skeleton className="mb-4 h-28 w-full rounded-2xl" />
+        <div className="mb-4 grid grid-cols-2 gap-3">
+          <Skeleton className="h-12 w-full rounded-full" />
+          <Skeleton className="h-12 w-full rounded-full" />
+        </div>
       </div>
     )
   }

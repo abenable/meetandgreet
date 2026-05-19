@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Skeleton } from '@heroui/react'
 import { ArrowLeft, Heart, MessageCircle, Star, Bell, CheckCheck } from 'lucide-react'
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '#/server/notifications'
 
@@ -15,7 +16,7 @@ function NotificationsPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
 
-  const { data: notifications = [] } = useQuery({
+  const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => getNotifications(),
   })
@@ -67,7 +68,20 @@ function NotificationsPage() {
         )}
       </div>
 
-      {notifications.length === 0 ? (
+      {isLoading ? (
+        <div className="space-y-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex w-full items-start gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+              <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-3 w-3/4 rounded-lg" />
+                <Skeleton className="h-3 w-1/2 rounded-lg" />
+              </div>
+              <Skeleton className="h-2.5 w-8 rounded-lg" />
+            </div>
+          ))}
+        </div>
+      ) : notifications.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <Bell className="mb-3 h-12 w-12 text-[var(--mag-ink-muted)]" />
           <p className="text-sm text-[var(--mag-ink-soft)]">No notifications yet.</p>

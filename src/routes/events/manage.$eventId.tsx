@@ -371,7 +371,7 @@ function ManageEventPage() {
           </button>
           <h1 className="text-lg font-bold text-[var(--mag-ink)]">Manage Event</h1>
         </div>
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-6 text-center">
+        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
           <p className="text-sm font-semibold text-[var(--mag-ink)]">You don't have permission to manage this event.</p>
           <button
             onClick={() => navigate({ to: '/events' })}
@@ -398,7 +398,7 @@ function ManageEventPage() {
       </div>
 
       {/* Event Code */}
-      <div className="mb-6 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
+      <div className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 text-center">
         <p className="text-xs font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Code</p>
         <p className="mt-2 text-4xl font-mono font-bold tracking-widest text-[var(--mag-ink)]">{(event as any).code}</p>
         <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">Share this code so others can join</p>
@@ -412,7 +412,7 @@ function ManageEventPage() {
       </div>
 
       {/* Event Details */}
-      <section className="mb-6 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+      <section className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
         <h2 className="mb-3 text-center text-sm font-bold text-[var(--mag-ink)]">Event Details</h2>
         <div className="mx-auto max-w-md space-y-4">
           <div>
@@ -594,7 +594,7 @@ function ManageEventPage() {
       </section>
 
       {/* Event Controls */}
-      <section className="mb-6 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+      <section className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
         <h2 className="mb-3 text-sm font-bold text-[var(--mag-ink)]">Event Controls</h2>
         <div className="flex flex-wrap items-center gap-3">
           {event.isActive ? (
@@ -627,7 +627,7 @@ function ManageEventPage() {
 
       {/* Sponsor Branding */}
       {isCreator && isHostOrAdmin && (
-        <section className="mb-6 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+        <section className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
           <h2 className="mb-3 text-sm font-bold text-[var(--mag-ink)]">Sponsor Branding</h2>
 
           {!(event as any)?.sponsorName && !(event as any)?.sponsorLogo && !(event as any)?.sponsorFrameUrl ? (
@@ -746,7 +746,7 @@ function ManageEventPage() {
       )}
 
       {/* Tabs */}
-      <div className="mb-4 flex items-center gap-1 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-1">
+      <div className="mb-4 flex items-center gap-1 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-1">
         {([
           { key: 'attendees', label: 'Attendees', count: attendeeCount, icon: Users },
           { key: 'activity', label: 'Activity', count: eventPosts.length, icon: MessageCircle },
@@ -771,7 +771,7 @@ function ManageEventPage() {
       </div>
 
       {/* Tab Content */}
-      <section className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+      <section className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
         {activeTab === 'attendees' && (
           <>
             <div className="mb-3 flex items-center justify-between">
@@ -795,7 +795,7 @@ function ManageEventPage() {
                   return (
                     <div
                       key={profile.userId}
-                      className="flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3"
+                      className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3"
                     >
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
                         <AvatarImage src={photo} alt={profile.name ?? ''} />
@@ -940,7 +940,7 @@ function ManageEventPage() {
                 {waitlist.map((person: any, index: number) => (
                   <div
                     key={person.userId}
-                    className="flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3"
+                    className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3"
                   >
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--mag-line)] text-[10px] font-bold text-[var(--mag-ink-muted)]">
                       {index + 1}
@@ -985,7 +985,7 @@ function ManageEventPage() {
             ) : (
               <div className="space-y-3">
                 {(reports as any[]).map((report) => (
-                    <div key={report.id} className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3">
+                    <div key={report.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3">
                     <div className="mb-2 flex items-center gap-2">
                       <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
                         <AvatarImage src={(report.reported as any)?.photos?.[0]} alt="" />

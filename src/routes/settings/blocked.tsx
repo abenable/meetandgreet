@@ -43,11 +43,11 @@ function BlockedUsersPage() {
           <p className="text-sm text-[var(--mag-ink-soft)]">You haven't blocked anyone</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="mx-auto max-w-md space-y-3">
           {blockedUsers.map((user) => (
             <div
               key={user.userId}
-              className="flex items-center gap-3 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-3"
+              className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-3"
             >
               <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
                 <AvatarImage src={user.photo ?? ''} alt={user.name ?? ''} />

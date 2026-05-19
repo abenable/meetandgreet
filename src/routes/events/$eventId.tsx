@@ -40,7 +40,7 @@ function EventDetailPage() {
           </button>
           <h1 className="text-lg font-bold text-[var(--mag-ink)]">Event Details</h1>
         </div>
-        <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-6 text-center">
+        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
           <p className="text-sm font-semibold text-[var(--mag-ink)]">Event not found.</p>
         </div>
       </main>
@@ -78,7 +78,7 @@ function EventDetailPage() {
       )}
 
       <div
-        className="relative rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4"
+        className="relative rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3"
         style={
           frameUrl
             ? {

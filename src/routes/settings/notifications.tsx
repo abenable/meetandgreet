@@ -7,7 +7,7 @@ export const Route = createFileRoute('/settings/notifications')({ component: Not
 function Toggle({ label, icon: Icon, defaultOn = true }: { label: string; icon: React.ElementType; defaultOn?: boolean }) {
   const [on, setOn] = useState(defaultOn)
   return (
-    <div className="flex items-center gap-3 px-4 py-3">
+    <div className="flex items-center gap-3 px-3 py-3">
       <Icon className="h-5 w-5 text-[var(--mag-ink-soft)]" />
       <span className="flex-1 text-sm text-[var(--mag-ink)]">{label}</span>
       <button
@@ -30,7 +30,7 @@ function NotificationsSettingsPage() {
         <h1 className="text-lg font-bold text-[var(--mag-ink)]">Notifications</h1>
       </div>
 
-      <div className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
+      <div className="mx-auto max-w-md overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
         <Toggle label="New Matches" icon={Heart} />
         <Toggle label="New Messages" icon={MessageSquare} />
         <Toggle label="Likes You" icon={Zap} />

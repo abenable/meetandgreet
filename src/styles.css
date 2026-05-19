@@ -120,22 +120,15 @@
 
 .page-wrap {
   width: 100%;
-  max-width: 480px;
+  max-width: 100%;
   margin-inline: auto;
   padding-inline: 1rem;
 }
 
 @media (min-width: 640px) {
   .page-wrap {
-    max-width: 640px;
-    padding-inline: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .page-wrap {
-    max-width: 960px;
-    padding-inline: 2rem;
+    max-width: 480px;
+    padding-inline: 1.25rem;
   }
 }
 

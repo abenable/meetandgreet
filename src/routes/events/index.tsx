@@ -109,7 +109,7 @@ function EventsExplorePage() {
 
       {/* Active Event Hero */}
       {activeEvent ? (
-        <div className="mb-8 rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
+        <div className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
           <div className="relative">
             {activeEvent.photo ? (
               <div className="relative h-40 w-full overflow-hidden">
@@ -126,7 +126,7 @@ function EventsExplorePage() {
               <h2 className="text-xl font-bold text-white">{activeEvent.name}</h2>
             </div>
           </div>
-          <div className="p-4">
+          <div className="p-3">
             <p className="text-sm text-[var(--mag-ink-soft)]">{activeEvent.description}</p>
             <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[var(--mag-ink-muted)]">
               <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{activeEvent.location}</span>
@@ -149,7 +149,7 @@ function EventsExplorePage() {
           </div>
         </div>
       ) : (
-        <div className="mb-8 flex flex-col items-center rounded-none border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] py-10 text-center">
+        <div className="mb-6 flex flex-col items-center rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] py-10 text-center">
           <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--mag-surface)]">
             <Calendar className="h-7 w-7 text-[var(--mag-ink-muted)]" />
           </div>
@@ -195,14 +195,14 @@ function EventsExplorePage() {
             <h3 className="text-sm font-bold text-[var(--mag-ink)]">Waitlisted</h3>
             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><ListOrdered className="h-3 w-3" />Waiting to start</span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {waitlistedEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
               return (
-                <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
                   <div className="flex items-start gap-3">
                     {event.photo && (
-                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-none object-cover" />
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -244,15 +244,15 @@ function EventsExplorePage() {
             <h3 className="text-sm font-bold text-[var(--mag-ink)]">Current Events</h3>
             <span className="rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-ink)] border border-[var(--mag-line)]">Live now</span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {currentEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
               const isJoined = activeEvent?.id === event.id
               return (
-                <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
                   <div className="flex items-start gap-3">
                     {event.photo && (
-                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-none object-cover" />
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -302,14 +302,14 @@ function EventsExplorePage() {
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-bold text-[var(--mag-ink)]">My Created Events</h3>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {myEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
               return (
-                <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
                   <div className="flex items-start gap-3">
                     {event.photo && (
-                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-none object-cover" />
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -362,14 +362,14 @@ function EventsExplorePage() {
             <h3 className="text-sm font-bold text-[var(--mag-ink)]">Upcoming Events</h3>
             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><Clock className="h-3 w-3" />Starting soon</span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {upcomingEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
               return (
-                <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-90">
+                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 opacity-90">
                   <div className="flex items-start gap-3">
                     {event.photo && (
-                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-none object-cover" />
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -420,14 +420,14 @@ function EventsExplorePage() {
             <h3 className="text-sm font-bold text-[var(--mag-ink)]">History</h3>
             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]"><History className="h-3 w-3" />Past events</span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {pastEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
               return (
-                <div key={event.id} className="rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 opacity-70">
+                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 opacity-70">
                   <div className="flex items-start gap-3">
                     {event.photo && (
-                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-none object-cover" />
+                      <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -447,7 +447,7 @@ function EventsExplorePage() {
                     </div>
                   </div>
                   {event.createdById === session?.user?.id && (
-                    <div className="mt-3">
+                    <div className="mt-3 flex justify-center">
                       <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] no-underline transition hover:bg-[var(--mag-surface)]">
                         Manage
                       </Link>

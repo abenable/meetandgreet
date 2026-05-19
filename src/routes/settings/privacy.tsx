@@ -14,7 +14,7 @@ function PrivacySettingsPage() {
   const [reportReason, setReportReason] = useState('')
 
   return (
-    <main className="page-wrap px-4 py-4">
+    <main className="page-wrap px-3 py-3">
       <div className="mb-5 text-center">
         <Link to="/settings" className="absolute left-4 top-4 rounded-full p-2 text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)] no-underline">
           <ArrowLeft className="h-5 w-5" />
@@ -22,8 +22,8 @@ function PrivacySettingsPage() {
         <h1 className="text-xl font-bold text-[var(--mag-ink)]">Privacy &amp; Safety</h1>
       </div>
 
-      <div className="mb-5 overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
-        <div className="flex items-center gap-3 border-b border-[var(--mag-line)] px-4 py-3">
+      <div className="mx-auto max-w-md mb-5 overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+        <div className="flex items-center gap-3 border-b border-[var(--mag-line)] px-3 py-3">
           <Eye className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-sm text-[var(--mag-ink)]">Show Online Status</span>
           <button
@@ -33,7 +33,7 @@ function PrivacySettingsPage() {
             <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition ${showOnline ? 'left-[22px]' : 'left-0.5'}`} />
           </button>
         </div>
-        <div className="flex items-center gap-3 border-b border-[var(--mag-line)] px-4 py-3">
+        <div className="flex items-center gap-3 border-b border-[var(--mag-line)] px-3 py-3">
           <EyeOff className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-sm text-[var(--mag-ink)]">Hide Age</span>
           <button
@@ -43,7 +43,7 @@ function PrivacySettingsPage() {
             <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition ${hideAge ? 'left-[22px]' : 'left-0.5'}`} />
           </button>
         </div>
-        <div className="flex items-center gap-3 px-4 py-3">
+        <div className="flex items-center gap-3 px-3 py-3">
           <EyeOff className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-sm text-[var(--mag-ink)]">Hide Distance</span>
           <button
@@ -58,28 +58,28 @@ function PrivacySettingsPage() {
       <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
         Safety Tools
       </h2>
-      <div className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
-        <Link to="/safety" className="flex items-center gap-3 border-b border-[var(--mag-line)] px-4 py-4 no-underline transition hover:bg-[var(--mag-surface)]">
+      <div className="mx-auto max-w-md overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+        <Link to="/safety" className="flex items-center gap-3 border-b border-[var(--mag-line)] px-3 py-3 no-underline transition hover:bg-[var(--mag-surface)]">
           <Shield className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-sm text-[var(--mag-ink)]">Safety Center</span>
         </Link>
         <button
           onClick={() => setShowBlockContacts(true)}
-          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-4 py-4 transition hover:bg-[var(--mag-surface)]"
+          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-3 py-3 transition hover:bg-[var(--mag-surface)]"
         >
           <Lock className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-left text-sm text-[var(--mag-ink)]">Block Contacts</span>
         </button>
         <button
           onClick={() => setShowBlocked(true)}
-          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-4 py-4 transition hover:bg-[var(--mag-surface)]"
+          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-3 py-3 transition hover:bg-[var(--mag-surface)]"
         >
           <Ban className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-left text-sm text-[var(--mag-ink)]">Blocked Users</span>
         </button>
         <button
           onClick={() => setShowReport(true)}
-          className="flex w-full items-center gap-3 px-4 py-4 transition hover:bg-[var(--mag-surface)]"
+          className="flex w-full items-center gap-3 px-3 py-3 transition hover:bg-[var(--mag-surface)]"
         >
           <Flag className="h-5 w-5 text-[var(--mag-ink-soft)]" />
           <span className="flex-1 text-left text-sm text-[var(--mag-ink)]">Report a Problem</span>

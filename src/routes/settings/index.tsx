@@ -95,14 +95,14 @@ function SettingsPage() {
         <h1 className="text-xl font-bold text-[var(--mag-ink)]">Settings</h1>
       </div>
 
-      <div className="space-y-6">
+      <div className="mx-auto max-w-md space-y-6">
         {/* Subscription */}
         <div>
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
             Subscription
           </h2>
-          <div className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
-            <div className="flex items-center gap-3 px-4 py-3">
+          <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+            <div className="flex items-center gap-3 px-3 py-3">
               <Zap className="h-5 w-5 text-[var(--mag-ink-soft)]" />
               <div className="flex-1">
                 <p className="text-sm text-[var(--mag-ink)]">
@@ -123,7 +123,7 @@ function SettingsPage() {
               </div>
             </div>
             {session?.user?.role === 'admin' && (
-              <div className="border-t border-[var(--mag-line)] px-4 py-3">
+              <div className="border-t border-[var(--mag-line)] px-3 py-3">
                 <p className="mb-2 text-xs font-medium text-[var(--mag-ink-muted)]">
                   Admin: Set Tier
                 </p>
@@ -156,8 +156,8 @@ function SettingsPage() {
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
             Boosts
           </h2>
-          <div className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
-            <div className="flex items-center gap-3 px-4 py-3">
+          <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+            <div className="flex items-center gap-3 px-3 py-3">
               <Zap className={`h-5 w-5 ${boostStatus?.isBoosted ? 'text-[var(--mag-ink)]' : 'text-[var(--mag-ink-soft)]'}`} />
               <div className="flex-1">
                 <p className="text-sm text-[var(--mag-ink)]">
@@ -185,8 +185,8 @@ function SettingsPage() {
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
               Ads
             </h2>
-            <div className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
-              <div className="flex items-center gap-3 px-4 py-3">
+            <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+              <div className="flex items-center gap-3 px-3 py-3">
                 <Film className="h-5 w-5 text-[var(--mag-ink-soft)]" />
                 <div className="flex-1">
                   <p className="text-sm text-[var(--mag-ink)]">
@@ -197,7 +197,7 @@ function SettingsPage() {
                   </p>
                 </div>
               </div>
-              <div className="border-t border-[var(--mag-line)] px-4 py-3">
+              <div className="border-t border-[var(--mag-line)] px-3 py-3">
                 <p className="text-xs text-[var(--mag-ink-muted)]">
                   Upgrade to Pro to remove all ads and get unlimited swipes, events, and weekly boosts.
                 </p>
@@ -211,12 +211,12 @@ function SettingsPage() {
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
               {section.title}
             </h2>
-            <div className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
+            <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
               {section.items.map((item, i) => (
                 <Link
                   key={item.label}
                   to={item.to}
-                  className={`flex items-center gap-3 px-4 py-3 transition hover:bg-[var(--mag-surface)] no-underline ${
+                  className={`flex items-center gap-3 px-3 py-3 transition hover:bg-[var(--mag-surface)] no-underline ${
                     i < section.items.length - 1 ? 'border-b border-[var(--mag-line)]' : ''
                   }`}
                 >
@@ -234,10 +234,10 @@ function SettingsPage() {
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
             Appearance
           </h2>
-          <div className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
+          <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
             <button
               onClick={handleToggleDark}
-              className="flex w-full items-center gap-3 px-4 py-3 transition hover:bg-[var(--mag-surface)] text-left"
+              className="flex w-full items-center gap-3 px-3 py-3 transition hover:bg-[var(--mag-surface)] text-left"
             >
               {darkMode ? (
                 <Sun className="h-5 w-5 text-[var(--mag-ink-soft)]" />
@@ -257,10 +257,10 @@ function SettingsPage() {
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
             Support
           </h2>
-          <div className="overflow-hidden rounded-none border border-[var(--mag-line)] bg-[var(--mag-card)]">
+          <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
             <button
               onClick={() => setShowHelp(true)}
-              className="flex w-full items-center gap-3 px-4 py-3 transition hover:bg-[var(--mag-surface)] text-left"
+              className="flex w-full items-center gap-3 px-3 py-3 transition hover:bg-[var(--mag-surface)] text-left"
             >
               <HelpCircle className="h-5 w-5 text-[var(--mag-ink-soft)]" />
               <span className="flex-1 text-sm text-[var(--mag-ink)]">Help & Support</span>

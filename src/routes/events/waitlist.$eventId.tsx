@@ -47,13 +47,13 @@ function WaitlistRoomPage() {
           <Loader2 className="h-6 w-6 animate-spin text-[var(--mag-ink)]" />
         </div>
       ) : !event ? (
-        <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-6 text-center">
+        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
           <p className="text-sm text-[var(--mag-ink-soft)]">Event not found.</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Event info */}
-          <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+          <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
             <div className="flex items-start gap-3">
               {event.photo && (
                 <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
@@ -90,7 +90,7 @@ function WaitlistRoomPage() {
           </div>
 
           {/* Waitlist */}
-          <div className="rounded-xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4">
+          <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-bold text-[var(--mag-ink)]">People Waiting</h3>
               <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]">
@@ -110,7 +110,7 @@ function WaitlistRoomPage() {
                 {waitlist.map((person: any, index: number) => (
                   <div
                     key={person.userId}
-                    className="flex items-center gap-3 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3"
+                    className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] p-3"
                   >
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--mag-line)] text-[10px] font-bold text-[var(--mag-ink-muted)]">
                       {index + 1}

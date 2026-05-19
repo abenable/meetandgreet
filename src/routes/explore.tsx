@@ -67,11 +67,11 @@ function ExplorePage() {
       )}
 
       {filteredProfiles.length === 0 ? (
-        <div className="text-center py-12 text-[var(--mag-ink-muted)] text-sm">No results found.</div>
+        <div className="flex flex-col items-center justify-center min-h-[50vh] py-12 text-center text-[var(--mag-ink-muted)] text-sm">No results found.</div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
           {filteredProfiles.map((profile) => (
-            <div key={profile.id} className="relative overflow-hidden rounded-none bg-[var(--mag-card)]">
+            <div key={profile.id} className="relative overflow-hidden rounded-2xl bg-[var(--mag-card)]">
               <img src={profile.photos[0]} alt={profile.name} className="aspect-[3/4] w-full object-cover" />
               <div className="gradient-overlay absolute inset-0" />
               <div className="absolute bottom-0 left-0 right-0 p-3">

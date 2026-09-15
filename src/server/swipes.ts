@@ -371,9 +371,8 @@ export const getSwipeDeck = createServerFn({ method: 'GET' })
     })
   )
   .handler(async ({ data }) => {
-    // getEventProfiles/getGlobalProfiles handle boost sorting internally: boosted
-    // profiles appear first, each group is shuffled separately, then concatenated.
-    // Both return a page — { items, nextOffset } — rather than the whole pool.
+    // getEventProfiles/getGlobalProfiles return one page — { items, nextOffset }
+    // — rather than the whole pool; ordering/shuffling is handled internally.
     if (data.eventId) {
       return getEventProfiles({
         data: {

@@ -109,8 +109,6 @@ model Profile {
   verificationPhoto       String?
   verificationSubmittedAt DateTime?
   verificationStatus      String?   // null | 'pending' | 'approved' | 'rejected'
-  boostedUntil DateTime?
-  lastBoostedAt DateTime?
   discoveryMode String  @default("global") // 'global' | 'event'
   prefAgeMin  Int      @default(18)
   prefAgeMax  Int      @default(99)
@@ -118,8 +116,7 @@ model Profile {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Global discovery pages over this; boostedUntil orders the first page.
-  @@index([discoveryMode, boostedUntil])
+  @@index([discoveryMode])
   @@index([verificationStatus, verificationSubmittedAt])
 }
 
@@ -353,21 +350,5 @@ model UserBadge {
 
   @@unique([userId, type])
   @@index([userId])
-}
-
-model EventMessageRequest {
-  id         String   @id @default(uuid())
-  eventId    String?
-  senderId   String
-  receiverId String
-  status     String   // pending | accepted | declined
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // Global requests (eventId IS NULL) are deduped by a partial unique index
-  // added in the migration, for the same NULL-distinct reason as EventSwipe.
-  @@unique([eventId, senderId, receiverId])
-  @@index([receiverId, status, createdAt])
-  @@index([senderId, status, createdAt])
 }
 

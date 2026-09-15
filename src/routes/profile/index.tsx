@@ -1,12 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@heroui/react'
-import { MapPin, Camera, Link2, Pencil, AlertTriangle, Sparkles, Heart, Users, Briefcase, Flame, Calendar, BadgeCheck, Zap, Plus } from 'lucide-react'
+import { MapPin, Camera, Link2, Pencil, AlertTriangle, Sparkles, Heart, Users, Briefcase, Flame, Calendar, BadgeCheck, Plus } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import { disableMyAccount } from '#/server/auth'
 import { getUserBadges, getUserStreak } from '#/server/badges'
-import { activateBoost, getBoostStatus } from '#/server/boosts'
 import AvatarImage from '#/components/AvatarImage'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 
@@ -35,48 +34,6 @@ function ProfilePage() {
   const [editGender, setEditGender] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-
-  const { data: boostStatus } = useQuery({ queryKey: ['boost-status'], queryFn: () => getBoostStatus() })
-  const [boostCountdown, setBoostCountdown] = useState('')
-  const [cooldownCountdown, setCooldownCountdown] = useState('')
-
-  useEffect(() => {
-    const tick = () => {
-      if (boostStatus?.boostedUntil) {
-        const diff = new Date(boostStatus.boostedUntil).getTime() - Date.now()
-        if (diff > 0) {
-          const mins = Math.floor(diff / 60000)
-          const secs = Math.floor((diff % 60000) / 1000)
-          setBoostCountdown(`${mins}m ${secs}s`)
-        } else {
-          setBoostCountdown('')
-        }
-      }
-      if (boostStatus?.nextBoostAt) {
-        const diff = new Date(boostStatus.nextBoostAt).getTime() - Date.now()
-        if (diff > 0) {
-          const hours = Math.floor(diff / 3600000)
-          const mins = Math.floor((diff % 3600000) / 60000)
-          setCooldownCountdown(`${hours}h ${mins}m`)
-        } else {
-          setCooldownCountdown('')
-        }
-      }
-    }
-    tick()
-    const interval = setInterval(tick, 1000)
-    return () => clearInterval(interval)
-  }, [boostStatus])
-
-  const boostMutation = useMutation({
-    mutationFn: async () => {
-      await activateBoost()
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['boost-status'] })
-      qc.invalidateQueries({ queryKey: ['my-profile'] })
-    },
-  })
 
   const updateMutation = useMutation({
     mutationFn: async (updates: any) => {
@@ -186,7 +143,7 @@ function ProfilePage() {
     <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       {/* Profile Avatar */}
       <div className="mb-4 flex flex-col items-center">
-        <div className={`relative h-28 w-28 overflow-hidden rounded-full border-4 ${boostStatus?.isBoosted ? 'border-[var(--mag-ink)]' : 'border-[var(--mag-card)]'}`}>
+        <div className="relative h-28 w-28 overflow-hidden rounded-full border-4 border-[var(--mag-card)]">
           <AvatarImage src={avatarPhoto} alt="Profile" />
           <button
             onClick={() => fileRef.current?.click()}
@@ -238,32 +195,6 @@ function ProfilePage() {
             <Flame className="h-3 w-3" />
             <span>{streakData.streakCount} day streak</span>
           </div>
-        )}
-
-        {/* Boost — prominent when active */}
-        {boostStatus?.isBoosted ? (
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-4 py-1.5 text-xs font-bold text-[var(--mag-bg)]">
-            <Zap className="h-3.5 w-3.5 fill-current" />
-            <span>Profile Boosted</span>
-            {boostCountdown && <span className="font-mono opacity-80">{boostCountdown}</span>}
-          </div>
-        ) : (
-          <button
-            onClick={() => boostMutation.mutate()}
-            disabled={boostMutation.isPending || !!cooldownCountdown}
-            className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition ${
-              cooldownCountdown
-                ? 'bg-[var(--mag-surface)] text-[var(--mag-ink-muted)]'
-                : 'bg-[var(--mag-ink)] text-[var(--mag-bg)] hover:opacity-80'
-            } disabled:opacity-60`}
-          >
-            <Zap className="h-3.5 w-3.5" />
-            {boostMutation.isPending
-              ? 'Activating...'
-              : cooldownCountdown
-                ? `Boost in ${cooldownCountdown}`
-                : 'Boost Profile'}
-          </button>
         )}
 
       </div>

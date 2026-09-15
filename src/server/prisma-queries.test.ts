@@ -67,7 +67,6 @@ describe('swipe deck candidate query', () => {
           ],
         },
         orderBy: [
-          { boostedUntil: { sort: 'desc', nulls: 'last' } },
           { updatedAt: 'desc' },
           { id: 'asc' },
         ],

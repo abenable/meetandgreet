@@ -6,7 +6,9 @@ import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { randomUUID } from 'node:crypto'
 import { createNotification } from './notifications.server'
-import { broadcastChatMessage } from './websocket-broadcast'
+import { broadcastChatMessage, broadcastMatchCreated } from './websocket-broadcast'
+import { findOrCreateMatch } from './matches.server'
+import { awardBadgeIfNotExists } from './badges.server'
 import { sanitizeText } from '#/lib/sanitize'
 import { rateLimit } from '#/lib/rate-limit'
 import { getUserScopedIdentifier } from '#/lib/rate-limit.server'
@@ -22,6 +24,94 @@ const MAX_AUDIO_BASE64_LENGTH = Math.ceil(MAX_AUDIO_BYTES * 1.4)
 
 const messageRateLimit = rateLimit({ windowMs: 60 * 1000, maxRequests: 60 })
 const voiceUploadRateLimit = rateLimit({ windowMs: 60 * 1000, maxRequests: 10 })
+const startChatRateLimit = rateLimit({ windowMs: 60 * 60 * 1000, maxRequests: 30 })
+
+/**
+ * Open a chat with someone directly — no approval step. The match row is
+ * created immediately (this used to be a "message request" the recipient had
+ * to accept); whether they read or reply is up to them.
+ *
+ * Idempotent: if the pair already has a match, the existing one is returned so
+ * the caller can navigate to the same thread.
+ */
+export const startConversation = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({
+    eventId: z.string().optional(),
+    receiverId: z.string(),
+  }))
+  .handler(async ({ data }) => {
+    const session = await requireSession()
+    const senderId = session.user.id
+    const eventId = data.eventId ?? null
+
+    if (senderId === data.receiverId) {
+      throw new Error('Cannot chat with yourself')
+    }
+
+    const throttle = await startChatRateLimit(getUserScopedIdentifier(senderId))
+    if (!throttle.success) {
+      throw new Error('Too many chats started. Please slow down.')
+    }
+
+    // A block in either direction stops the chat.
+    const [receiver, block] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: data.receiverId },
+        select: { id: true, disabledAt: true },
+      }),
+      prisma.userBlock.findFirst({
+        where: {
+          OR: [
+            { blockerId: senderId, blockedId: data.receiverId },
+            { blockerId: data.receiverId, blockedId: senderId },
+          ],
+        },
+        select: { id: true },
+      }),
+    ])
+
+    if (!receiver || receiver.disabledAt || block) {
+      throw new Error('This profile is no longer available')
+    }
+
+    if (eventId) {
+      // Verify both are active attendees
+      const [senderAttendee, receiverAttendee] = await Promise.all([
+        prisma.eventAttendee.findFirst({
+          where: { eventId, userId: senderId, leftAt: null },
+          select: { id: true },
+        }),
+        prisma.eventAttendee.findFirst({
+          where: { eventId, userId: data.receiverId, leftAt: null },
+          select: { id: true },
+        }),
+      ])
+
+      if (!senderAttendee || !receiverAttendee) {
+        throw new Error('Both users must be active attendees')
+      }
+    }
+
+    const { match, created } = await findOrCreateMatch(eventId, senderId, data.receiverId)
+
+    if (created) {
+      broadcastMatchCreated(eventId, senderId, data.receiverId, match.id)
+
+      await Promise.all([
+        awardBadgeIfNotExists(senderId, 'first_match'),
+        awardBadgeIfNotExists(data.receiverId, 'first_match'),
+        createNotification({
+          userId: data.receiverId,
+          type: 'match',
+          title: "It's a Match!",
+          body: 'Someone started a chat with you. Say hi!',
+          link: `/chats/match_${match.id}`,
+        }),
+      ])
+    }
+
+    return { matchId: match.id, created }
+  })
 
 export const getConversations = createServerFn({ method: 'GET' })
   .handler(async () => {

@@ -20,7 +20,7 @@ export async function awardBadgeIfNotExists(userId: string, type: string): Promi
   if (info) {
     createNotification({
       userId,
-      type: 'request_accepted',
+      type: 'system',
       title: info.title,
       body: info.body,
       link: '/profile',

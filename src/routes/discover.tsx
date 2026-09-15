@@ -1,11 +1,11 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@heroui/react'
-import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, Briefcase, Zap, RotateCcw, Sparkles } from 'lucide-react'
+import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, Briefcase, RotateCcw, Sparkles } from 'lucide-react'
 import { getMyActiveEvent, reportUser } from '#/server/events'
 import { recordSwipe, getSwipeDeck, rewindLastSwipe } from '#/server/swipes'
-import { sendMessageRequest } from '#/server/requests'
+import { startConversation } from '#/server/conversations'
 import { getMyProfile } from '#/server/profiles'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
@@ -44,6 +44,7 @@ function formatLastActive(dateLike: string | Date | null | undefined): { label: 
 
 function DiscoverPage() {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const containerRef = useRef<HTMLDivElement>(null)
   const { data: activeEvent } = useQuery({ queryKey: ['active-event'], queryFn: () => getMyActiveEvent() })
   const { data: myProfile, isLoading: profileLoading } = useQuery({ queryKey: ['my-profile'], queryFn: () => getMyProfile() })
@@ -90,8 +91,8 @@ function DiscoverPage() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [photoIndices, setPhotoIndices] = useState<Record<string, number>>({})
   const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set())
-  const [requestedIds, setRequestedIds] = useState<Set<string>>(new Set())
-  const [requestPendingIds, setRequestPendingIds] = useState<Set<string>>(new Set())
+  const [chatStartedIds, setChatStartedIds] = useState<Set<string>>(new Set())
+  const [chatStartPendingIds, setChatStartPendingIds] = useState<Set<string>>(new Set())
   const [lastSwipe, setLastSwipe] = useState<{ userId: string; index: number } | null>(null)
   const [rewindError, setRewindError] = useState('')
 
@@ -124,14 +125,20 @@ function DiscoverPage() {
     },
   })
 
-  const requestMutation = useMutation({
-    mutationFn: sendMessageRequest,
-    onSuccess: (_, vars) => {
-      setRequestedIds((prev) => new Set(prev).add(vars.data.receiverId))
-      queryClient.invalidateQueries({ queryKey: ['outgoing-requests'] })
+  const startChatMutation = useMutation({
+    mutationFn: startConversation,
+    onSuccess: (result, vars) => {
+      setChatStartedIds((prev) => new Set(prev).add(vars.data.receiverId))
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      queryClient.invalidateQueries({ queryKey: ['matches'] })
+      navigate({ to: '/chats/$chatId', params: { chatId: `match_${result.matchId}` } })
+    },
+    onError: (error) => {
+      setSwipeError((error as Error)?.message || 'Could not start that chat. Try again.')
+      setTimeout(() => setSwipeError(''), 3000)
     },
     onSettled: (_, __, vars) => {
-      setRequestPendingIds((prev) => {
+      setChatStartPendingIds((prev) => {
         const next = new Set(prev)
         next.delete(vars.data.receiverId)
         return next
@@ -200,14 +207,14 @@ function DiscoverPage() {
     rewindMutation.mutate(lastSwipe)
   }, [lastSwipe, rewindMutation])
 
-  const handleRequest = useCallback(() => {
+  const handleStartChat = useCallback(() => {
     const profile = baseProfiles[currentIndex]
     if (!profile) return
-    if (requestedIds.has(profile.userId) || requestPendingIds.has(profile.userId)) return
+    if (chatStartedIds.has(profile.userId) || chatStartPendingIds.has(profile.userId)) return
 
-    setRequestPendingIds((prev) => new Set(prev).add(profile.userId))
-    requestMutation.mutate({ data: { eventId: effectiveEventId, receiverId: profile.userId } })
-  }, [currentIndex, effectiveEventId, baseProfiles, requestMutation, requestedIds, requestPendingIds])
+    setChatStartPendingIds((prev) => new Set(prev).add(profile.userId))
+    startChatMutation.mutate({ data: { eventId: effectiveEventId, receiverId: profile.userId } })
+  }, [currentIndex, effectiveEventId, baseProfiles, startChatMutation, chatStartedIds, chatStartPendingIds])
 
   const handleReport = () => {
     const profile = baseProfiles[currentIndex]
@@ -395,13 +402,6 @@ function DiscoverPage() {
                   </span>
                 </div>
               )}
-              {profile.isBoosted && (
-                <div className="absolute top-4 left-4 z-10">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-ink)]/90 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
-                    <Zap className="h-3 w-3" /> BOOSTED
-                  </span>
-                </div>
-              )}
               {hasPhotos && (
                 <>
                   <div className="absolute top-4 left-4 right-4 flex gap-1.5">
@@ -501,19 +501,19 @@ function DiscoverPage() {
                   />
                 </button>
                 <button
-                  onClick={handleRequest}
-                  disabled={requestedIds.has(profile.userId) || requestPendingIds.has(profile.userId)}
+                  onClick={handleStartChat}
+                  disabled={chatStartedIds.has(profile.userId) || chatStartPendingIds.has(profile.userId)}
                   className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${
-                    requestedIds.has(profile.userId) ? 'bg-[var(--mag-ink)]' : 'bg-black/30'
+                    chatStartedIds.has(profile.userId) ? 'bg-[var(--mag-ink)]' : 'bg-black/30'
                   }`}
-                  title={requestedIds.has(profile.userId) ? 'Request sent' : 'Send message request'}
+                  title={chatStartedIds.has(profile.userId) ? 'Chat started' : 'Start a chat'}
                 >
-                  {requestPendingIds.has(profile.userId) ? (
+                  {chatStartPendingIds.has(profile.userId) ? (
                     <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                   ) : (
                     <MessageCircle
                       className={`h-6 w-6 ${
-                        requestedIds.has(profile.userId)
+                        chatStartedIds.has(profile.userId)
                           ? 'fill-white text-white'
                           : 'fill-transparent text-white'
                       }`}

@@ -1,7 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Skeleton } from '@heroui/react'
 import {
   Compass,
   Bell,
@@ -14,20 +12,13 @@ import {
   X,
   Sun,
   Ban,
-  Zap,
 } from 'lucide-react'
-import { getBoostStatus } from '#/server/boosts'
 
 export const Route = createFileRoute('/settings/')({ component: SettingsPage })
 
 function SettingsPage() {
   const [darkMode, setDarkMode] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
-
-  const { data: boostStatus, isLoading: boostLoading } = useQuery({
-    queryKey: ['boost-status'],
-    queryFn: () => getBoostStatus(),
-  })
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains('dark')
@@ -77,41 +68,6 @@ function SettingsPage() {
       </div>
 
       <div className="mx-auto max-w-md space-y-6">
-        {/* Boosts */}
-        <div>
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
-            Boosts
-          </h2>
-          {boostLoading ? (
-            <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 space-y-2">
-              <Skeleton className="h-5 w-32 rounded-lg" />
-              <Skeleton className="h-3 w-48 rounded-lg" />
-            </div>
-          ) : (
-            <div className="overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
-              <div className="flex items-center gap-3 px-3 py-3">
-                <Zap className={`h-5 w-5 ${boostStatus?.isBoosted ? 'text-[var(--mag-ink)]' : 'text-[var(--mag-ink-soft)]'}`} />
-                <div className="flex-1">
-                  <p className="text-sm text-[var(--mag-ink)]">
-                    {boostStatus?.isBoosted
-                      ? 'Profile is boosted'
-                      : boostStatus?.nextBoostAt
-                        ? 'Boost on cooldown'
-                        : 'Boost available'}
-                  </p>
-                  <p className="text-xs text-[var(--mag-ink-muted)]">
-                    {boostStatus?.isBoosted
-                      ? 'Your profile is shown first in the swipe deck'
-                      : boostStatus?.nextBoostAt
-                        ? `Next boost available soon`
-                        : 'Use a boost to be shown first for 1 hour'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
         {sections.map((section) => (
           <div key={section.title}>
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">

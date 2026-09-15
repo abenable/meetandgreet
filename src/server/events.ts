@@ -712,7 +712,6 @@ const DECK_PROFILE_SELECT = {
   lookingFor: true,
   job: true,
   verifiedAt: true,
-  boostedUntil: true,
   createdAt: true,
   updatedAt: true,
   user: {
@@ -733,10 +732,8 @@ export interface DeckProfile {
   lookingFor: string[]
   job: string | null
   verifiedAt: Date | null
-  boostedUntil: Date | null
   createdAt: Date
   updatedAt: Date
-  isBoosted: boolean
   sharedInterests: string[]
   lastActiveDate: Date | null
 }
@@ -837,10 +834,9 @@ async function buildSwipeDeck({
   const rows = await prisma.profile.findMany({
     where,
     select: DECK_PROFILE_SELECT,
-    // Boosted profiles first, then most recently active. Stable ordering is
-    // what makes offset paging safe.
+    // Most recently active first. Stable ordering is what makes offset paging
+    // safe.
     orderBy: [
-      { boostedUntil: { sort: 'desc', nulls: 'last' } },
       { updatedAt: 'desc' },
       { id: 'asc' },
     ],
@@ -851,20 +847,11 @@ async function buildSwipeDeck({
   const hasMore = rows.length > fetchSize
   const candidates = hasMore ? rows.slice(0, -1) : rows
 
-  const now = new Date()
-
   // Age filter — the one predicate that cannot move into SQL.
   const eligible = candidates.filter((p) => {
     const age = calculateAge(p.birthDate)
     return age === null || (age >= prefAgeMin && age <= prefAgeMax)
   })
-
-  const boostedIds = new Set(
-    eligible.filter((p) => p.boostedUntil && p.boostedUntil > now).map((p) => p.userId),
-  )
-
-  const boosted = eligible.filter((p) => boostedIds.has(p.userId))
-  const nonBoosted = eligible.filter((p) => !boostedIds.has(p.userId))
 
   // Vary the order between users and between pages, but keep it deterministic
   // so a refetch of the same page returns the same order.
@@ -880,7 +867,7 @@ async function buildSwipeDeck({
   // No slice: every eligible candidate in this window is returned. A page can
   // come back shorter than `limit` when the age filter removes people, which
   // is correct — the client keeps paging until nextOffset is null.
-  const ordered = [...rank(boosted), ...rank(nonBoosted)]
+  const ordered = rank(eligible)
 
   const items: DeckProfile[] = ordered.map(({ user, ...profile }) => ({
     ...profile,
@@ -891,7 +878,6 @@ async function buildSwipeDeck({
         : user?.image
           ? [user.image]
           : [],
-    isBoosted: boostedIds.has(profile.userId),
     sharedInterests: (profile.interests ?? []).filter((i) => myInterests.has(i)),
     lastActiveDate: user?.lastActiveDate ?? null,
   }))
@@ -1028,8 +1014,6 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
         verificationPhoto: null,
         verificationSubmittedAt: null,
         verificationStatus: null,
-        boostedUntil: null,
-        lastBoostedAt: null,
         discoveryMode: 'global',
         prefAgeMin: 18,
         prefAgeMax: 99,

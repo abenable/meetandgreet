@@ -2,26 +2,21 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@heroui/react'
-import { Heart, MessageCircle, Users, Check, X, Mail } from 'lucide-react'
-import { getLikes, getMatches } from '#/server/swipes'
-import { recordSwipe } from '#/server/swipes'
-import { getIncomingMessageRequests, acceptMessageRequest, declineMessageRequest } from '#/server/requests'
+import { Heart, MessageCircle, Users } from 'lucide-react'
+import { getLikes, getMatches, recordSwipe } from '#/server/swipes'
 import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/likes')({ component: LikesPage })
 
-type Tab = 'likes' | 'requests' | 'matches'
+type Tab = 'likes' | 'matches'
 
 function LikesPage() {
   const [activeTab, setActiveTab] = useState<Tab>('likes')
   const queryClient = useQueryClient()
   const { data: likes = [], isLoading: likesLoading } = useQuery({ queryKey: ['likes'], queryFn: () => getLikes() })
   const { data: matches = [], isLoading: matchesLoading } = useQuery({ queryKey: ['matches'], queryFn: () => getMatches() })
-  const { data: requests = [], isLoading: requestsLoading } = useQuery({ queryKey: ['incoming-requests'], queryFn: () => getIncomingMessageRequests() })
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
   const [justMatchedIds, setJustMatchedIds] = useState<Set<string>>(new Set())
-  const [acceptPendingIds, setAcceptPendingIds] = useState<Set<string>>(new Set())
-  const [declinedIds, setDeclinedIds] = useState<Set<string>>(new Set())
 
   const likeBackMutation = useMutation({
     mutationFn: async ({ eventId, swipedId }: { eventId?: string; swipedId: string }) => {
@@ -44,47 +39,20 @@ function LikesPage() {
     },
   })
 
-  const acceptMutation = useMutation({
-    mutationFn: async (requestId: string) => {
-      return acceptMessageRequest({ data: requestId })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['incoming-requests'] })
-      queryClient.invalidateQueries({ queryKey: ['matches'] })
-    },
-    onSettled: (_, __, requestId) => {
-      setAcceptPendingIds((prev) => {
-        const next = new Set(prev)
-        next.delete(requestId)
-        return next
-      })
-    },
-  })
-
-  const declineMutation = useMutation({
-    mutationFn: async (requestId: string) => {
-      return declineMessageRequest({ data: requestId })
-    },
-    onSuccess: (_, requestId) => {
-      setDeclinedIds((prev) => new Set(prev).add(requestId))
-      queryClient.invalidateQueries({ queryKey: ['incoming-requests'] })
-    },
-  })
-
   const handleLikeBack = (like: any) => {
     if (pendingIds.has(like.userId) || justMatchedIds.has(like.userId)) return
     setPendingIds((prev) => new Set(prev).add(like.userId))
     likeBackMutation.mutate({ eventId: like.eventId || undefined, swipedId: like.userId })
   }
 
-  const isLoading = likesLoading || matchesLoading || requestsLoading
+  const isLoading = likesLoading || matchesLoading
 
   return (
     <div className="page-wrap flex flex-1 flex-col px-4 py-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-bold text-[var(--mag-ink)]">Connections</h1>
         <span className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1 text-xs font-semibold text-[var(--mag-ink-soft)]">
-          {likes.length + requests.length + matches.length} total
+          {likes.length + matches.length} total
         </span>
       </div>
 
@@ -92,7 +60,6 @@ function LikesPage() {
       <div className="mb-4 flex items-center gap-1 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-1">
         {([
           { key: 'likes' as Tab, label: 'Likes You', count: likes.length },
-          { key: 'requests' as Tab, label: 'Requests', count: requests.length },
           { key: 'matches' as Tab, label: 'Matches', count: matches.length },
         ]).map((t) => (
           <button
@@ -172,66 +139,6 @@ function LikesPage() {
                       </button>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        )
-      ) : activeTab === 'requests' ? (
-        requests.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--mag-line)] bg-[var(--mag-card)] p-8 text-center">
-            <Mail className="mx-auto mb-2 h-8 w-8 text-[var(--mag-ink-muted)]" />
-            <p className="text-sm text-[var(--mag-ink-soft)]">No message requests yet.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {requests.map((req: any) => {
-              const isAcceptPending = acceptPendingIds.has(req.id)
-              const isDeclined = declinedIds.has(req.id)
-              return (
-                <div
-                  key={req.id}
-                  className={`flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 ${isDeclined ? 'opacity-50' : ''}`}
-                >
-                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-                    <AvatarImage src={(req.senderPhotos || [])[0]} alt={req.senderName} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-semibold text-[var(--mag-ink)]">{req.senderName}</h3>
-                    <p className="truncate text-xs text-[var(--mag-ink-soft)]">{req.senderLocation || 'Wants to chat'}</p>
-                    {req.eventName && (
-                      <p className="text-[10px] text-[var(--mag-ink-muted)]">{req.eventName}</p>
-                    )}
-                  </div>
-                  {!isDeclined ? (
-                    <div className="flex shrink-0 items-center gap-2">
-                      <button
-                        onClick={() => {
-                          setAcceptPendingIds((prev) => new Set(prev).add(req.id))
-                          acceptMutation.mutate(req.id)
-                        }}
-                        disabled={isAcceptPending}
-                        className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-60 active:scale-95"
-                        title="Accept"
-                      >
-                        {isAcceptPending ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-bg)] border-t-transparent" />
-                        ) : (
-                          <Check className="h-4 w-4" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => declineMutation.mutate(req.id)}
-                        disabled={isAcceptPending}
-                        className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] disabled:opacity-60"
-                        title="Decline"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="shrink-0 text-xs text-[var(--mag-ink-muted)]">Declined</span>
-                  )}
                 </div>
               )
             })}

@@ -513,7 +513,7 @@ export const reviewVerification = createServerFn({ method: 'POST' })
 
     await createNotification({
       userId: data.userId,
-      type: 'request_accepted',
+      type: 'system',
       title: data.approve ? 'Profile verified' : 'Verification not approved',
       body: data.approve
         ? 'Your verified badge is now live on your profile.'

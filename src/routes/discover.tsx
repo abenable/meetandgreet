@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@heroui/react'
-import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, Briefcase, RotateCcw, Sparkles } from 'lucide-react'
+import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, RotateCcw, Sparkles } from 'lucide-react'
 import { getMyActiveEvent, reportUser } from '#/server/events'
 import { recordSwipe, getSwipeDeck, rewindLastSwipe } from '#/server/swipes'
 import { startConversation } from '#/server/conversations'
@@ -57,8 +57,6 @@ function DiscoverPage() {
   const isMystery = isEventMode && activeEvent?.mysteryMode === true
   const awaitingEventCheckIn = !profileLoading && myProfile?.discoveryMode === 'event' && !activeEvent
 
-  const [selectedIntent, setSelectedIntent] = useState<'dating' | 'friends' | 'networking' | ''>('')
-
   // The deck is paged now — the server used to return every candidate in the
   // pool in one response.
   const {
@@ -68,13 +66,12 @@ function DiscoverPage() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['swipe-deck', effectiveEventId ?? 'global', selectedIntent],
+    queryKey: ['swipe-deck', effectiveEventId ?? 'global'],
     initialPageParam: 0,
     queryFn: ({ pageParam }) =>
       getSwipeDeck({
         data: {
           eventId: effectiveEventId,
-          intent: selectedIntent || undefined,
           offset: pageParam,
           limit: 30,
         },
@@ -319,28 +316,6 @@ function DiscoverPage() {
 
   return (
     <div className="flex h-[calc(100dvh-112px)] flex-col bg-[var(--mag-bg)]">
-      <div className="shrink-0 px-4 py-2">
-        <div className="flex gap-2 overflow-x-auto hide-scrollbar">
-          {[
-            { value: 'dating' as const, label: 'Dating', icon: Heart },
-            { value: 'friends' as const, label: 'Friends', icon: Users },
-            { value: 'networking' as const, label: 'Networking', icon: Briefcase },
-          ].map(({ value, label, icon: Icon }) => (
-            <button
-              key={value}
-              onClick={() => setSelectedIntent((prev) => (prev === value ? '' : value))}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
-                selectedIntent === value
-                  ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)]'
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
       {(rewindError || swipeError) && (
         <div className="shrink-0 px-4 pb-2">
           <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-center">

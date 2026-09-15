@@ -1,4 +1,4 @@
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext, redirect } from '@tanstack/react-router'
+import { HeadContent, Outlet, Scripts, createRootRouteWithContext, isRedirect, redirect, useRouterState } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
@@ -8,6 +8,8 @@ import { WebSocketProvider } from '../integrations/websocket/WebSocketProvider'
 import { getVapidPublicKey, subscribePush } from '#/server/notifications'
 import { checkAndUpdateStreak } from '#/server/badges'
 import { pingPresence } from '#/server/presence'
+import { getMyProfile } from '#/server/profiles'
+import { isProfileComplete } from '#/lib/profile-complete'
 
 import appCss from '../styles.css?url'
 
@@ -67,7 +69,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async ({ context, location }) => {
     const isPublic = isPublicPath(location.pathname)
 
     let session: Awaited<ReturnType<typeof getSession>> = null
@@ -107,6 +109,34 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       })
     }
 
+    // Onboarding gate: a verified account without a usable profile (photo,
+    // birthday, location, interests) is walked through the wizard before it
+    // can reach anything else. The profile read is cached by react-query, so
+    // this costs at most one fetch per staleTime window — and the wizard
+    // invalidates the cache on every save. If the read itself fails, let the
+    // navigation through rather than trapping the user; server functions
+    // still enforce everything that matters.
+    try {
+      const profile = await context.queryClient.ensureQueryData({
+        queryKey: ['my-profile'],
+        queryFn: () => getMyProfile(),
+      })
+
+      if (location.pathname === '/onboarding') {
+        // Finished elsewhere (e.g. by completing the wizard in another tab) —
+        // don't make them walk the wizard again.
+        if (isProfileComplete(profile)) {
+          throw redirect({ to: '/discover' })
+        }
+      } else if (!isProfileComplete(profile)) {
+        throw redirect({ to: '/onboarding' })
+      }
+    } catch (err) {
+      // A redirect thrown above must keep propagating; only swallow read
+      // failures.
+      if (isRedirect(err)) throw err
+    }
+
     return { session }
   },
   component: RootLayout,
@@ -120,6 +150,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootLayout() {
   const { session } = Route.useRouteContext()
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  // The wizard is a focused flow — no header, footer or tab bar.
+  const isOnboarding = pathname.startsWith('/onboarding')
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
@@ -219,13 +252,17 @@ function RootLayout() {
 
   return (
     <WebSocketProvider>
-      <Header />
+      {!isOnboarding && <Header />}
       <main className="flex flex-1 flex-col bg-[var(--mag-bg)]">
         <Outlet />
       </main>
-      <Footer />
-      <BottomNav />
-      <PWAInstallPrompt />
+      {!isOnboarding && (
+        <>
+          <Footer />
+          <BottomNav />
+          <PWAInstallPrompt />
+        </>
+      )}
     </WebSocketProvider>
   )
 }

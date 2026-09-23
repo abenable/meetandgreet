@@ -5,7 +5,7 @@ export const Route = createFileRoute('/verify/')({ component: VerifyIntroPage })
 
 function VerifyIntroPage() {
   return (
-    <main className="page-wrap flex min-h-[80vh] flex-col items-center justify-center px-4 py-8 text-center">
+    <main className="page-wrap flex min-h-[80vh] flex-col items-center justify-center px-4 py-8 text-center pb-nav">
       <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--mag-surface)]">
         <Shield className="h-10 w-10 text-[var(--mag-ink)]" />
       </div>

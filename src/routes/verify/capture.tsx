@@ -86,7 +86,7 @@ function VerifyCapturePage() {
   const alreadyHandled = status?.verifiedAt || status?.status === 'pending'
 
   return (
-    <div className="page-wrap flex min-h-[90vh] flex-col px-4 py-4">
+    <div className="page-wrap flex min-h-[90vh] flex-col px-4 py-4 pb-nav">
       <div className="mb-4 flex items-center gap-2">
         <button
           onClick={() => {

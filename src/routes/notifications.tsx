@@ -49,7 +49,7 @@ function NotificationsPage() {
   }
 
   return (
-    <div className="page-wrap flex flex-1 flex-col px-4 py-4">
+    <div className="page-wrap flex flex-1 flex-col px-4 py-4 pb-nav">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button onClick={() => history.back()} className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">

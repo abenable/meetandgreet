@@ -86,7 +86,7 @@ function ShareJoinPage() {
   }
 
   return (
-    <main className="page-wrap px-4 py-4">
+    <main className="page-wrap px-4 py-4 pb-nav">
       <div className="mb-5 flex items-center gap-2">
         <button
           onClick={() => navigate({ to: '/events' })}

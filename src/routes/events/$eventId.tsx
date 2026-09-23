@@ -20,7 +20,7 @@ function EventDetailPage() {
 
   if (isLoading) {
     return (
-      <main className="page-wrap px-4 py-4">
+      <main className="page-wrap px-4 py-4 pb-nav">
         <div className="flex items-center justify-center py-20">
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--mag-line)] border-t-transparent" />
         </div>

@@ -68,7 +68,7 @@ function DesignKitPage() {
 
   if (!import.meta.env.DEV) {
     return (
-      <div className="page-wrap py-16">
+      <div className="page-wrap py-16 pb-nav">
         <EmptyState title="Not available" description="The design kit only renders in development." />
       </div>
     )

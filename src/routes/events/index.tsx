@@ -96,7 +96,7 @@ function EventsExplorePage() {
   const hasJoinableEvents = currentEvents.length > 0 || upcomingEvents.length > 0
 
   return (
-    <div className="page-wrap flex flex-1 flex-col px-4 py-4">
+    <div className="page-wrap flex flex-1 flex-col px-4 py-4 pb-nav">
       <h1 className="mb-6 text-base font-medium uppercase tracking-wide text-[var(--mag-ink-muted)]">Explore Events</h1>
 
       {isLoading ? (

@@ -6,7 +6,7 @@ export const Route = createFileRoute('/about')({ component: AboutPage })
 
 function AboutPage() {
   return (
-    <main className="page-wrap mx-auto max-w-2xl px-4 py-6 md:px-6 md:py-8">
+    <main className="page-wrap mx-auto max-w-2xl px-4 py-6 md:px-6 md:py-8 pb-nav">
       <div className="mb-8 text-center">
         <div className="mb-4 inline-flex items-center justify-center rounded-full bg-[var(--mag-ink)]">
           <Logo className="h-16 w-16" />

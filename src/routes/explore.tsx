@@ -40,7 +40,7 @@ function ExplorePage() {
   const isFiltering = Boolean(searchQuery.trim() || activeCategory)
 
   return (
-    <main className="page-wrap px-4 py-4">
+    <main className="page-wrap px-4 py-4 pb-nav">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Explore</h1>
         <button onClick={() => setShowSearch((s) => !s)} className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">

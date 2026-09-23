@@ -112,7 +112,7 @@ function CreateEventPage() {
   }
 
   return (
-    <main className="page-wrap px-4 py-4">
+    <main className="page-wrap px-4 py-4 pb-nav">
       <div className="mb-5 flex items-center gap-2">
         <button onClick={() => navigate({ to: '/events' })} className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">
           <ArrowLeft className="h-5 w-5" />

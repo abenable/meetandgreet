@@ -324,6 +324,10 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+.pb-nav {
+  padding-bottom: calc(var(--app-nav-h) + 1.25rem);
+}
+
 .mb-safe {
   margin-bottom: env(safe-area-inset-bottom, 0px);
 }

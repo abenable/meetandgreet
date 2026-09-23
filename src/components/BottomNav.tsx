@@ -18,6 +18,8 @@ export default function BottomNav() {
     refetchInterval: 60000,
   })
 
+  if (!session?.user) return null
+
   const items = [
     { to: '/discover', label: 'Home', icon: Home, badge: 0 },
     { to: '/events', label: 'Events', icon: Calendar, badge: 0 },

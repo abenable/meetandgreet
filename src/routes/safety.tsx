@@ -13,7 +13,7 @@ export const Route = createFileRoute('/safety')({ component: SafetyPage })
 
 function SafetyPage() {
   return (
-    <main className="page-wrap mx-auto max-w-2xl px-3 py-4 md:px-4 md:py-6">
+    <main className="page-wrap mx-auto max-w-2xl px-3 py-4 md:px-4 md:py-6 pb-nav">
       <div className="mb-4 flex items-center gap-2">
         <Link to="/settings/privacy" className="rounded-full p-2 text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)] no-underline">
           <ArrowLeft className="h-5 w-5" />

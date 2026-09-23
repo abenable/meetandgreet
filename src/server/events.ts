@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { Prisma } from '@prisma/client'
 import { prisma } from '#/db'
+import { gendersMatching } from '#/lib/gender'
 import { requireSession } from '#/server/auth'
 import { broadcastToEvent } from '#/server/websocket-broadcast'
 import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
@@ -819,7 +820,7 @@ async function buildSwipeDeck({
               OR: [
                 { gender: null },
                 { gender: '' },
-                { gender: prefShowMe === 'Women' ? 'Female' : 'Male' },
+                { gender: { in: gendersMatching(prefShowMe === 'Women' ? 'Women' : 'Men') } },
               ],
             },
           ]

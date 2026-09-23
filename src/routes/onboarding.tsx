@@ -6,6 +6,7 @@ import { Camera, ChevronRight, User, Sparkles, MapPin, X, AlignLeft } from 'luci
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
 import { nextOnboardingStep } from '#/lib/profile-complete'
+import { GENDER_OPTIONS } from '#/lib/gender'
 import AvatarImage from '#/components/AvatarImage'
 
 export const Route = createFileRoute('/onboarding')({ component: OnboardingPage })
@@ -251,7 +252,7 @@ function OnboardingPage() {
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">Gender</label>
                 <div className="flex flex-wrap gap-2">
-                  {['Male', 'Female'].map((g) => (
+                  {GENDER_OPTIONS.map((g) => (
                     <button
                       key={g}
                       onClick={() => setGender(gender === g ? '' : g)}

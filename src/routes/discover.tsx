@@ -10,6 +10,7 @@ import { sendFriendRequest } from '#/server/friends'
 import type { FriendState } from '#/server/friends'
 import { useToast } from '#/components/ui'
 import { getMyProfile } from '#/server/profiles'
+import { genderInitial } from '#/lib/gender'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
 
@@ -24,7 +25,7 @@ const REPORT_REASONS = [
 ]
 
 function formatNameWithGender(name: string | null, gender: string | null): string {
-  const initial = gender === 'Male' ? 'M' : gender === 'Female' ? 'F' : ''
+  const initial = genderInitial(gender)
   return initial ? `${name || ''}, ${initial}` : (name || '')
 }
 

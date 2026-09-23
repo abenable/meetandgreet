@@ -15,13 +15,12 @@ import {
   useToast,
 } from '#/components/ui'
 import { cn } from '#/lib/cn'
+import { GENDER_OPTIONS } from '#/lib/gender'
 
 export const Route = createFileRoute('/profile/edit')({ component: EditProfilePage })
 
 const MAX_BIO = 500
 const MAX_INTERESTS = 20
-
-const GENDERS = ['Woman', 'Man', 'Non-binary', 'Prefer not to say']
 
 const INTENTS = [
   { value: 'dating' as const, label: 'Dating', icon: Heart },
@@ -172,7 +171,7 @@ function EditProfilePage() {
         <div>
           <p className="mb-2 text-body-sm font-semibold text-ink-soft">Gender</p>
           <div className="flex flex-wrap gap-2">
-            {GENDERS.map((option) => (
+            {GENDER_OPTIONS.map((option) => (
               <Button
                 key={option}
                 size="sm"

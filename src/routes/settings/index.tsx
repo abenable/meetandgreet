@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  Ban,
   Bell,
   ChevronRight,
   Compass,
@@ -38,7 +37,6 @@ const SECTIONS = [
     title: 'Safety',
     items: [
       { icon: Shield, label: 'Privacy', to: '/settings/privacy' },
-      { icon: Ban, label: 'Blocked accounts', to: '/settings/blocked' },
       { icon: Info, label: 'About', to: '/about' },
     ],
   },

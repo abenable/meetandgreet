@@ -29,8 +29,8 @@ function BlockedUsersPage() {
   })
 
   return (
-    <main className="page-wrap py-5 pb-28">
-      <PageHeader title="Blocked accounts" back="/settings" />
+    <main className="page-wrap py-5 pb-nav">
+      <PageHeader title="Blocked accounts" back="/settings/privacy" />
 
       {isLoading ? (
         <ul>

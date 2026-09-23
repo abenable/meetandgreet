@@ -7,11 +7,6 @@ export interface Segment<T extends string> {
   count?: number
 }
 
-/**
- * The single tab pattern for the app — a soft stadium track holding pill
- * options, the active one lifted to canvas. Replaces the three different tab
- * treatments the screens had grown independently.
- */
 export function SegmentedControl<T extends string>({
   segments,
   value,
@@ -44,10 +39,7 @@ export function SegmentedControl<T extends string>({
             aria-selected={active}
             onClick={() => onChange(segment.value)}
             className={cn(
-              'flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-label transition',
-              // Lifted by a rung plus a hairline rather than by a shadow.
-              // A plain `bg-canvas` pill would sit *below* the track in dark
-              // mode, where canvas is darker than canvas-soft.
+              'flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-body-sm font-semibold transition',
               active
                 ? 'bg-canvas-raised text-ink ring-1 ring-hairline'
                 : 'text-ink-muted hover:text-ink',

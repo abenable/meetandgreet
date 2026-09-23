@@ -102,7 +102,7 @@ function AccountSettingsPage() {
               type="text"
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
-              className="mb-4 w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
+              className="mb-4 w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
             <div className="flex gap-2">
               <button

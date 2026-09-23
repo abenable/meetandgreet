@@ -156,7 +156,7 @@ function PrivacySettingsPage() {
               onChange={(e) => setReportReason(e.target.value)}
               placeholder="Describe the issue..."
               rows={4}
-              className="mb-4 w-full resize-none rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
+              className="mb-4 w-full resize-none rounded-card border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
             />
             <div className="flex gap-2">
               <button

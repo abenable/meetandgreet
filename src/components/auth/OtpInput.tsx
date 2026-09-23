@@ -3,15 +3,6 @@ import { cn } from '#/lib/cn'
 
 const LENGTH = 6
 
-/**
- * Six boxes rather than one text field with letter-spacing.
- *
- * The old single input set `tracking-[0.5em]`, which spaced the `000000`
- * placeholder too, so the placeholder digits sat offset from where typed
- * digits landed. It also carried no `one-time-code` hint, so iOS never offered
- * the emailed code from the keyboard bar, and nothing submitted when the sixth
- * digit arrived.
- */
 export function OtpInput({
   value,
   onChange,
@@ -23,7 +14,6 @@ export function OtpInput({
 }: {
   value: string
   onChange: (value: string) => void
-  /** Fired once the sixth digit lands, so the form can submit itself. */
   onComplete?: (value: string) => void
   invalid?: boolean
   disabled?: boolean
@@ -42,8 +32,6 @@ export function OtpInput({
       completedFor.current = null
       return
     }
-    // Guard against re-firing for a value we already reported — otherwise a
-    // re-render after a failed submit would submit again.
     if (completedFor.current === value) return
     completedFor.current = value
     onComplete?.(value)
@@ -63,9 +51,6 @@ export function OtpInput({
     const digits = raw.replace(/\D/g, '')
     if (!digits) return
 
-    // One input can receive several characters at once — a paste, or iOS
-    // filling the whole code from the keyboard bar into whichever box has
-    // focus. Spread them across the boxes from here rather than truncating.
     if (digits.length > 1) {
       const merged = (value.slice(0, index) + digits).slice(0, LENGTH)
       setDigits(merged, merged.length)
@@ -75,9 +60,6 @@ export function OtpInput({
     const chars = value.padEnd(LENGTH, ' ').split('')
     chars[index] = digits
     const next = chars.join('').replace(/\D/g, '')
-    // Focus follows the end of the value, not index+1: tapping an empty box
-    // further along still lands the digit in the first free slot, so focus has
-    // to go there too rather than skipping past it.
     setDigits(next, next.length)
   }
 
@@ -119,8 +101,6 @@ export function OtpInput({
           }}
           type="text"
           inputMode="numeric"
-          // Every box carries the hint: autofill targets whichever one has
-          // focus, and handleChange spreads the full code from there.
           autoComplete="one-time-code"
           aria-label={`Digit ${index + 1}`}
           aria-invalid={invalid || undefined}
@@ -130,7 +110,7 @@ export function OtpInput({
           onKeyDown={(e) => handleKeyDown(index, e)}
           onFocus={(e) => e.target.select()}
           className={cn(
-            'h-14 w-full min-w-0 rounded-media bg-field text-center text-h2 text-ink',
+            'h-14 w-full min-w-0 rounded-full bg-field text-center text-h2 text-ink',
             'border border-transparent outline-none transition',
             'focus:border-ink focus:ring-1 focus:ring-ink',
             'disabled:opacity-55',

@@ -216,7 +216,7 @@ function FriendsPage() {
                 }
               />
             ) : (
-              <ul className="-mt-1">
+              <ul className="space-y-2">
                 {friends.map((person) => (
                   <PersonRow
                     key={person.userId}
@@ -268,7 +268,7 @@ function FriendsPage() {
                       Wants to be friends
                       <CountBadge count={incoming.length} />
                     </SectionHeading>
-                    <ul>
+                    <ul className="space-y-2">
                       {incoming.map((person) => {
                         const busy =
                           respond.isPending && respond.variables?.data.userId === person.userId
@@ -315,7 +315,7 @@ function FriendsPage() {
                 {outgoing.length > 0 && (
                   <section>
                     <SectionHeading>Sent</SectionHeading>
-                    <ul>
+                    <ul className="space-y-2">
                       {outgoing.map((person) => (
                         <PersonRow
                           key={person.userId}
@@ -369,7 +369,7 @@ function FriendsPage() {
                 description={`Nobody called "${debouncedFindQuery.trim()}" turned up.`}
               />
             ) : (
-              <ul>
+              <ul className="space-y-2">
                 {found.map((person) => (
                   <PersonRow
                     key={person.userId}
@@ -465,7 +465,7 @@ function PersonRow({
   actions?: React.ReactNode
 }) {
   return (
-    <li className="flex items-center gap-3 border-b border-hairline-soft py-3">
+    <li className="flex items-center gap-3 rounded-card bg-canvas-raised p-3 shadow-sm transition hover:shadow-md">
       <Avatar
         src={person.photo}
         alt={person.name}
@@ -486,9 +486,9 @@ function PersonRow({
 
 function PersonRowSkeletons() {
   return (
-    <ul>
+    <ul className="space-y-2">
       {[1, 2, 3, 4].map((i) => (
-        <li key={i} className="flex items-center gap-3 border-b border-hairline-soft py-3">
+        <li key={i} className="flex items-center gap-3 rounded-card bg-canvas-raised p-3 shadow-sm">
           <Skeleton className="h-14 w-14 rounded-full" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-3.5 w-28 rounded-full" />

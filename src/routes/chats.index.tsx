@@ -1,48 +1,86 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Skeleton } from '@heroui/react'
-import { MessageCircle } from 'lucide-react'
+import { MailOpen, MessageCircle } from 'lucide-react'
 import { getConversations } from '#/server/conversations'
-import AvatarImage from '#/components/AvatarImage'
+import { Avatar, CountBadge, EmptyState, SegmentedControl, Skeleton } from '#/components/ui'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
+import { cn } from '#/lib/cn'
 
 export const Route = createFileRoute('/chats/')({ component: ChatsPage })
 
+type Filter = 'all' | 'unread' | 'read'
+
 function ChatsPage() {
+  const [filter, setFilter] = useState<Filter>('all')
+
   const { data: conversations = [], isLoading } = useQuery({
     queryKey: ['conversations'],
     queryFn: () => getConversations(),
   })
 
+  const unreadCount = useMemo(
+    () => (conversations as any[]).filter((c) => c.unreadCount > 0).length,
+    [conversations],
+  )
+
+  const visible = useMemo(() => {
+    const list = conversations as any[]
+    if (filter === 'unread') return list.filter((c) => c.unreadCount > 0)
+    if (filter === 'read') return list.filter((c) => !c.unreadCount)
+    return list
+  }, [conversations, filter])
+
   return (
-    <div className="page-wrap flex flex-1 flex-col px-4 py-4">
-      <h1 className="mb-4 text-2xl font-bold text-[var(--mag-ink)]">Chats</h1>
+    <div className="page-wrap flex flex-1 flex-col py-5 pb-28">
+      <h1 className="mb-5 text-center text-h1 text-ink">Chats</h1>
+
+      {!isLoading && conversations.length > 0 && (
+        <SegmentedControl
+          aria-label="Filter conversations"
+          className="mb-5"
+          value={filter}
+          onChange={setFilter}
+          segments={[
+            { value: 'all', label: 'All', count: conversations.length },
+            { value: 'unread', label: 'Unread', count: unreadCount },
+            { value: 'read', label: 'Read' },
+          ]}
+        />
+      )}
 
       {isLoading ? (
-        <div className="space-y-0">
+        <div className="space-y-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center gap-3 border-b border-[var(--mag-line)] p-3">
+            <div key={i} className="flex items-center gap-3 rounded-card bg-canvas-raised p-3 shadow-sm">
               <Skeleton className="h-14 w-14 shrink-0 rounded-full" />
               <div className="min-w-0 flex-1 space-y-2">
-                <Skeleton className="h-3 w-28 rounded-lg" />
-                <Skeleton className="h-3 w-3/4 rounded-lg" />
+                <Skeleton className="h-3.5 w-28 rounded-full" />
+                <Skeleton className="h-3 w-3/4 rounded-full" />
               </div>
-              <div className="flex shrink-0 flex-col items-end gap-2">
-                <Skeleton className="h-2.5 w-10 rounded-lg" />
-                <Skeleton className="h-5 w-5 rounded-full" />
-              </div>
+              <Skeleton className="h-3 w-12 shrink-0 rounded-full" />
             </div>
           ))}
         </div>
       ) : conversations.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <MessageCircle className="mb-3 h-12 w-12 text-[var(--mag-ink-muted)]" />
-          <p className="text-base text-[var(--mag-ink-soft)]">No conversations yet.</p>
-          <p className="mt-1 text-sm text-[var(--mag-ink-muted)]">Start matching or join an event to chat.</p>
-        </div>
+        <EmptyState
+          icon={MessageCircle}
+          title="No conversations yet"
+          description="Add a friend or join an event, then say hello."
+        />
+      ) : visible.length === 0 ? (
+        <EmptyState
+          icon={MailOpen}
+          title={filter === 'unread' ? 'Nothing unread' : 'Nothing read yet'}
+          description={
+            filter === 'unread'
+              ? 'You are all caught up.'
+              : 'Conversations you have opened will show up here.'
+          }
+        />
       ) : (
-        <div className="border-t border-[var(--mag-line)]">
-          {conversations.map((convo: any) => (
+        <div className="space-y-2">
+          {visible.map((convo: any) => (
             <ChatRow key={convo.id} convo={convo} />
           ))}
         </div>
@@ -52,33 +90,31 @@ function ChatsPage() {
 }
 
 function ChatRow({ convo }: { convo: any }) {
+  const unread = convo.unreadCount > 0
+
   return (
     <Link
       to="/chats/$chatId"
       params={{ chatId: convo.chatId }}
-      className="flex items-center gap-3 border-b border-[var(--mag-line)] p-3 transition no-underline hover:bg-[var(--mag-surface)]"
+      className="flex items-center gap-3 rounded-card bg-canvas-raised p-3 no-underline shadow-sm transition hover:bg-canvas-soft hover:shadow-md"
     >
-      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-        <AvatarImage src={convo.peerPhoto} alt={convo.peerName} />
-      </div>
+      <Avatar src={convo.peerPhoto} alt={convo.peerName} size="lg" />
+
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <h3 className="text-base font-semibold text-[var(--mag-ink)]">{convo.peerName}</h3>
+        <p className="flex items-center gap-1.5 truncate text-title text-ink">
+          {convo.peerName}
           {convo.peerVerifiedAt && <VerifiedBadge />}
-        </div>
-        <p className={`truncate text-sm ${convo.unreadCount > 0 ? 'font-medium text-[var(--mag-ink)]' : 'text-[var(--mag-ink-soft)]'}`}>
-          {convo.lastMessage}
+        </p>
+        <p className={cn('truncate text-body-sm', unread ? 'text-ink' : 'text-ink-muted')}>
+          {convo.lastMessage || 'Say hello'}
         </p>
       </div>
-      <div className="flex shrink-0 flex-col items-end gap-1">
-        <span className="text-xs text-[var(--mag-ink-muted)]" suppressHydrationWarning>
+
+      <div className="flex shrink-0 flex-col items-end gap-1.5">
+        <span className="text-caption text-ink-faint" suppressHydrationWarning>
           {new Date(convo.lastMessageAt).toLocaleDateString()}
         </span>
-        {convo.unreadCount > 0 && (
-          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--mag-ink)] px-1.5 text-xs font-bold text-[var(--mag-bg)]">
-            {convo.unreadCount}
-          </span>
-        )}
+        <CountBadge count={convo.unreadCount} />
       </div>
     </Link>
   )

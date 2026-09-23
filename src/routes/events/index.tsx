@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { Button, buttonClasses, Skeleton } from '#/components/ui'
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Skeleton } from '@heroui/react'
 import { Calendar, MapPin, Plus, ArrowRight, Users, Clock, History, LogIn, ListOrdered, X, Star } from 'lucide-react'
 import { listEvents, getMyActiveEvent, leaveEvent, joinEvent, getMyWaitlistedEvents, removeFromWaitlist } from '#/server/events'
 import { getSession } from '#/server/auth'
@@ -167,16 +167,24 @@ function EventsExplorePage() {
                 <span className="inline-flex items-center gap-1 rounded bg-[var(--mag-surface)] px-1.5 py-0.5 font-mono text-xs font-medium text-[var(--mag-ink-soft)]">Code: {activeEvent.code}</span>
               )}
             </div>
-            <div className="mt-4 flex gap-2">
-              <Link to="/discover" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--mag-ink)] py-3 text-base font-medium !text-[var(--on-ink)] no-underline transition hover:opacity-80">
-                Discover People <ArrowRight className="h-4 w-4" />
+            <div className="mt-4 space-y-2">
+              <Link to="/discover" className={buttonClasses({ block: true, className: 'gap-1.5' })}>
+                Discover people <ArrowRight className="h-4 w-4" />
               </Link>
-              {activeEvent.createdById === session?.user?.id && (
-                <Link to="/events/manage/$eventId" params={{ eventId: activeEvent.id }} className="inline-flex items-center justify-center rounded-full bg-[var(--mag-ink)] shadow-sm px-5 py-3 text-base font-medium text-[var(--on-ink)] transition hover:opacity-90 no-underline">
-                  Manage
-                </Link>
-              )}
-              <button onClick={handleLeave} className="rounded-full bg-[var(--mag-ink)] shadow-sm px-5 py-3 text-base font-medium text-[var(--on-ink)] transition hover:opacity-90">Leave</button>
+              <div className="flex gap-2">
+                {activeEvent.createdById === session?.user?.id && (
+                  <Link
+                    to="/events/manage/$eventId"
+                    params={{ eventId: activeEvent.id }}
+                    className={buttonClasses({ variant: 'ghost', size: 'sm', block: true })}
+                  >
+                    Manage
+                  </Link>
+                )}
+                <Button variant="ghost" size="sm" block onClick={handleLeave}>
+                  Leave
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -191,23 +199,26 @@ function EventsExplorePage() {
               ? 'Join a live event below to start meeting people nearby.'
               : 'There are no events right now. Create one to get started.'}
           </p>
-          <div className="mt-4 flex gap-2">
+          <div className="mt-5 w-full max-w-[16rem] space-y-2">
             {hasJoinableEvents && (
-              <button
+              <Button
+                block
                 onClick={() => {
                   const el = document.getElementById('current-events')
                   el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                 }}
-                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--mag-ink)] px-5 py-2.5 text-base font-medium text-[var(--on-ink)] transition hover:opacity-80"
               >
-                Browse Events <ArrowRight className="h-4 w-4" />
-              </button>
+                Browse events <ArrowRight className="h-4 w-4" />
+              </Button>
             )}
             <Link
               to="/events/create"
-              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--mag-ink)] shadow-sm px-5 py-2.5 text-base font-medium text-[var(--on-ink)] transition hover:opacity-90 no-underline"
+              className={buttonClasses({
+                variant: hasJoinableEvents ? 'ghost' : 'primary',
+                block: true,
+              })}
             >
-              <Plus className="h-4 w-4" /> Create Event
+              <Plus className="h-4 w-4" /> Create event
             </Link>
           </div>
         </div>
@@ -215,8 +226,8 @@ function EventsExplorePage() {
 
       {/* Prominent Create CTA at top */}
       {activeEvent && (
-        <Link to="/events/create" className="mb-8 flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3.5 text-base font-medium text-[var(--on-ink)] transition hover:opacity-80 no-underline">
-          <Plus className="h-4 w-4" /> Create New Event
+        <Link to="/events/create" className={buttonClasses({ block: true, className: 'mb-8 gap-2' })}>
+          <Plus className="h-4 w-4" /> Create event
         </Link>
       )}
 
@@ -252,15 +263,16 @@ function EventsExplorePage() {
                     </div>
                   </div>
                   <div className="mt-3 flex gap-2">
-                    <button
-                      onClick={() => handleLeaveWaitlist(event.id)}
-                      className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-ink)] shadow-sm px-4 py-2 text-sm font-medium text-[var(--on-ink)] transition hover:opacity-90"
+                    <Link
+                      to="/events/waitlist/$eventId"
+                      params={{ eventId: event.id }}
+                      className={buttonClasses({ size: 'sm', block: true })}
                     >
-                      <X className="h-3 w-3" /> Leave Waitlist
-                    </button>
-                    <Link to="/events/waitlist/$eventId" params={{ eventId: event.id }} className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-ink)] shadow-sm px-4 py-2 text-sm font-medium text-[var(--on-ink)] transition hover:opacity-90 no-underline">
-                      Waiting Room
+                      Waiting room
                     </Link>
+                    <Button variant="ghost" size="sm" block onClick={() => handleLeaveWaitlist(event.id)}>
+                      <X className="h-4 w-4" /> Leave
+                    </Button>
                   </div>
                 </div>
               )
@@ -305,15 +317,20 @@ function EventsExplorePage() {
                   </div>
                   <div className="mt-3 flex gap-2">
                     {!isJoined && (
-                      <button
-                        onClick={() => handleJoin({ eventId: event.id })}
-                        className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80"
-                      >
-                        <LogIn className="h-3 w-3" /> Join
-                      </button>
+                      <Button size="sm" block onClick={() => handleJoin({ eventId: event.id })}>
+                        <LogIn className="h-4 w-4" /> Join
+                      </Button>
                     )}
                     {(event as any).createdById === session?.user?.id && (
-                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-ink)] shadow-sm px-4 py-2 text-sm font-medium text-[var(--on-ink)] transition hover:opacity-90 no-underline">
+                      <Link
+                        to="/events/manage/$eventId"
+                        params={{ eventId: event.id }}
+                        className={buttonClasses({
+                          variant: isJoined ? 'primary' : 'ghost',
+                          size: 'sm',
+                          block: true,
+                        })}
+                      >
                         Manage
                       </Link>
                     )}
@@ -361,14 +378,15 @@ function EventsExplorePage() {
                     </div>
                   </div>
                   <div className="mt-3 flex gap-2">
-                    <button
-                      onClick={() => handleJoin({ eventId: event.id })}
-                      className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80"
-                    >
-                      <ListOrdered className="h-3 w-3" /> Join Waitlist
-                    </button>
+                    <Button size="sm" block onClick={() => handleJoin({ eventId: event.id })}>
+                      <ListOrdered className="h-4 w-4" /> Join waitlist
+                    </Button>
                     {(event as any).createdById === session?.user?.id && (
-                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-ink)] shadow-sm px-4 py-2 text-sm font-medium text-[var(--on-ink)] transition hover:opacity-90 no-underline">
+                      <Link
+                        to="/events/manage/$eventId"
+                        params={{ eventId: event.id }}
+                        className={buttonClasses({ variant: 'ghost', size: 'sm', block: true })}
+                      >
                         Manage
                       </Link>
                     )}
@@ -415,7 +433,11 @@ function EventsExplorePage() {
                   </div>
                   {(event as any).createdById === session?.user?.id && (
                     <div className="mt-3 flex justify-center">
-                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-ink)] shadow-sm px-4 py-2 text-sm font-medium text-[var(--on-ink)] no-underline transition hover:opacity-90">
+                      <Link
+                        to="/events/manage/$eventId"
+                        params={{ eventId: event.id }}
+                        className={buttonClasses({ variant: 'ghost', size: 'sm' })}
+                      >
                         Manage
                       </Link>
                     </div>

@@ -36,6 +36,10 @@
   --on-scrim: #ffffff;
 
   --chrome-bg: rgba(255, 255, 255, 0.88);
+
+  --app-header-h: 65px;
+  --app-nav-h: calc(64px + env(safe-area-inset-bottom, 0px));
+  --app-viewport-h: calc(100dvh - var(--app-header-h) - var(--app-nav-h));
 }
 
 .dark {

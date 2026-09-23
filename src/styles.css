@@ -1,82 +1,239 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+/* Inter is loaded on its variable axis: the type system uses 300 / 450 / 650,
+   which the old fixed 400;500;600;700 import could not render. See DESIGN.md —
+   Inter is the documented substitute for Saans. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap");
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-ink: #111111;
-  --color-canvas: #ffffff;
-  --color-soft-cloud: #f5f5f5;
-  --color-charcoal: #39393b;
-  --color-ash: #4b4b4d;
-  --color-mute: #707072;
-  --color-stone: #9e9ea0;
-  --color-hairline: #cacacb;
-  --color-hairline-soft: #e5e5e5;
-  --color-sale: #d30005;
-  --color-sale-deep: #780700;
-  --color-success: #007d48;
-  --color-success-bright: #1eaa52;
-  --color-info: #1151ff;
-  --color-info-deep: #0034e3;
-}
+/* Tailwind v4 wires `dark:` to prefers-color-scheme by default, but the app
+   toggles a `.dark` class on <html> (hooks/useTheme.ts). Without this the two
+   disagree: every `dark:` utility in the app followed the OS while the tokens
+   below followed the toggle. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* LIGHT THEME (default) — Nike retail chrome */
+/* ---------------------------------------------------------------------------
+   Palette — Mobbin ladder (DESIGN.md)
+   ---------------------------------------------------------------------------
+   Structure comes from a ladder of neutral tints and 1px hairlines, never from
+   shadows. One accent, spent sparingly on a single signal.
+
+   `ink` is both the primary text colour and the primary fill; `on-ink` is what
+   sits on top of it. Dark mode flips that polarity rather than re-colouring,
+   which is why the two are defined as a pair.
+--------------------------------------------------------------------------- */
+
 :root {
-  --mag-ink: #111111;
-  --mag-ink-soft: #707072;
-  --mag-ink-muted: #9e9ea0;
-  --mag-bg: #ffffff;
-  --mag-surface: #f5f5f5;
-  --mag-line: #e5e5e5;
-  --mag-card: #ffffff;
-  --mag-input-bg: #f5f5f5;
-  --mag-overlay: rgba(0, 0, 0, 0.4);
-  --header-bg: rgba(255, 255, 255, 0.96);
-  --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-  --input-bg: #f5f5f5;
-  --overlay-bg: rgba(0, 0, 0, 0.4);
-  --accent-pink: #ed1aa0;
-  --accent-purple: #beaffd;
-  --accent-teal: #0a7281;
-  /* semantic colors */
-  --mag-sale: #d30005;
-  --mag-sale-deep: #780700;
-  --mag-sale-bg: #fff5f5;
-  --mag-sale-10: rgba(211, 0, 5, 0.1);
-  --mag-sale-20: rgba(211, 0, 5, 0.2);
-  --mag-success: #007d48;
-  --mag-success-bright: #1eaa52;
-  --mag-success-bg: rgba(0, 125, 72, 0.08);
-  --mag-success-10: rgba(0, 125, 72, 0.1);
+  color-scheme: light;
+
+  /* Text */
+  --ink: #141414;
+  --ink-soft: #262626;
+  --ink-muted: #707070;
+  --ink-faint: #adadad;
+
+  /* Surfaces */
+  --canvas: #ffffff;
+  --canvas-soft: #f3f3f3;
+  /* In light, a card is white and a hairline carries its edge, so `raised`
+     sits level with the canvas. Dark cannot do that — see the dark block. */
+  --canvas-raised: #ffffff;
+  --field: #f0f0f0;
+  --hairline-soft: #f0f0f0;
+  --hairline: #e0e0e0;
+
+  /* Inverse — what reads on top of an `ink` fill */
+  --on-ink: #ffffff;
+
+  /* The one accent. Reserved for live / unread / pending signals. */
+  --accent: #0066ff;
+  --accent-contrast: #ffffff;
+
+  /* Semantic. Kept to the minimum the product actually needs. */
+  --danger: #d30005;
+  --danger-soft: rgba(211, 0, 5, 0.08);
+  --success: #007d48;
+  --success-soft: rgba(0, 125, 72, 0.08);
+  --warning: #8a5a00;
+  --warning-soft: rgba(138, 90, 0, 0.1);
+
+  /* Scrims over photography */
+  --scrim: rgba(0, 0, 0, 0.5);
+  --scrim-strong: rgba(0, 0, 0, 0.72);
+  --on-scrim: #ffffff;
+
+  /* Chrome */
+  --chrome-bg: rgba(255, 255, 255, 0.88);
 }
 
-/* DARK THEME */
 .dark {
-  --mag-ink: #ffffff;
-  --mag-ink-soft: #9e9ea0;
-  --mag-ink-muted: #707072;
-  --mag-bg: #000000;
-  --mag-surface: #1a1a1a;
-  --mag-line: rgba(255, 255, 255, 0.2);
-  --mag-card: #242424;
-  --mag-input-bg: #2a2a2a;
-  --mag-overlay: rgba(255, 255, 255, 0.1);
-  --header-bg: rgba(0, 0, 0, 0.96);
-  --bottom-nav-bg: rgba(0, 0, 0, 0.96);
-  --input-bg: #2a2a2a;
-  --overlay-bg: rgba(255, 255, 255, 0.1);
-  /* semantic colors dark */
-  --mag-sale: #ff4444;
-  --mag-sale-deep: #ff6666;
-  --mag-sale-bg: rgba(255, 68, 68, 0.12);
-  --mag-sale-10: rgba(255, 68, 68, 0.15);
-  --mag-sale-20: rgba(255, 68, 68, 0.25);
-  --mag-success: #1eaa52;
-  --mag-success-bright: #34d399;
-  --mag-success-bg: rgba(30, 170, 82, 0.12);
-  --mag-success-10: rgba(30, 170, 82, 0.15);
+  color-scheme: dark;
+
+  --ink: #fafafa;
+  --ink-soft: #e0e0e0;
+  --ink-muted: #8f8f8f;
+  --ink-faint: #616161;
+
+  --canvas: #0a0a0a;
+  --canvas-soft: #171717;
+  /* A 1px hairline on near-black is too faint to hold a card edge on an OLED
+     phone, so dark gets a real rung where light gets a border. */
+  --canvas-raised: #1c1c1c;
+  --field: #1f1f1f;
+  --hairline-soft: #1f1f1f;
+  --hairline: #2e2e2e;
+
+  --on-ink: #0a0a0a;
+
+  --accent: #4d94ff;
+  --accent-contrast: #06152b;
+
+  --danger: #ff5a5f;
+  --danger-soft: rgba(255, 90, 95, 0.14);
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.14);
+  --warning: #e0a33e;
+  --warning-soft: rgba(224, 163, 62, 0.14);
+
+  --scrim: rgba(0, 0, 0, 0.55);
+  --scrim-strong: rgba(0, 0, 0, 0.78);
+  --on-scrim: #ffffff;
+
+  --chrome-bg: rgba(10, 10, 10, 0.88);
 }
+
+/* ---------------------------------------------------------------------------
+   Legacy aliases
+   ---------------------------------------------------------------------------
+   ~1750 call sites still read `var(--mag-*)`. Rather than a single sweeping
+   rename, every old name now points at its position on the new ladder, so the
+   whole app moves onto the Mobbin palette in one step and screens migrate to
+   the `ink` / `canvas` utilities as they are redesigned.
+
+   Note the deliberate off-by-one: the old `--mag-ink-soft` was #707072, which
+   is `ink-muted` here, and the old `--mag-ink-muted` was #9e9ea0, which is
+   `ink-faint`. Mapping them by name instead of by role would have darkened
+   every piece of secondary copy in the app.
+--------------------------------------------------------------------------- */
+
+:root,
+.dark {
+  --mag-ink: var(--ink);
+  --mag-ink-soft: var(--ink-muted);
+  --mag-ink-muted: var(--ink-faint);
+  --mag-bg: var(--canvas);
+  --mag-surface: var(--canvas-soft);
+  --mag-card: var(--canvas-raised);
+  --mag-line: var(--hairline);
+  --mag-input-bg: var(--field);
+  --input-bg: var(--field);
+  --mag-overlay: var(--scrim);
+  --overlay-bg: var(--scrim);
+  --header-bg: var(--chrome-bg);
+  --bottom-nav-bg: var(--chrome-bg);
+
+  --mag-sale: var(--danger);
+  --mag-sale-deep: var(--danger);
+  --mag-sale-bg: var(--danger-soft);
+  --mag-sale-10: var(--danger-soft);
+  --mag-sale-20: var(--danger-soft);
+  --mag-success: var(--success);
+  --mag-success-bright: var(--success);
+  --mag-success-bg: var(--success-soft);
+  --mag-success-10: var(--success-soft);
+}
+
+/* ---------------------------------------------------------------------------
+   Theme registration
+   ---------------------------------------------------------------------------
+   `inline` so utilities compile to `var(--ink)` rather than an extra hop
+   through `--color-ink` — the palette above is what flips on `.dark`.
+--------------------------------------------------------------------------- */
+
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-canvas: var(--canvas);
+  --color-canvas-soft: var(--canvas-soft);
+  --color-canvas-raised: var(--canvas-raised);
+  --color-field: var(--field);
+  --color-hairline: var(--hairline);
+  --color-hairline-soft: var(--hairline-soft);
+  --color-on-ink: var(--on-ink);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-scrim: var(--scrim);
+  --color-on-scrim: var(--on-scrim);
+
+  /* Radius. Tailwind's own scale is left intact; these are the semantic steps
+     from DESIGN.md — `rounded-card` for containers, `rounded-media` for images
+     and inputs, `rounded-full` for anything interactive. */
+  --radius-media: 16px;
+  --radius-card: 24px;
+
+  /* Type. DESIGN.md's scale is sized for a marketing site (80px display); this
+     is the same system — same weights, same tight leading, same zero tracking —
+     restated for a 480px-wide app surface. */
+  --text-display: 2.125rem; /* 34px */
+  --text-display--line-height: 1.05;
+  --text-display--font-weight: 650;
+
+  --text-h1: 1.75rem; /* 28px */
+  --text-h1--line-height: 1.1;
+  --text-h1--font-weight: 650;
+
+  --text-h2: 1.375rem; /* 22px */
+  --text-h2--line-height: 1.15;
+  --text-h2--font-weight: 650;
+
+  --text-h3: 1.125rem; /* 18px */
+  --text-h3--line-height: 1.2;
+  --text-h3--font-weight: 650;
+
+  --text-title: 1rem; /* 16px */
+  --text-title--line-height: 1.3;
+  --text-title--font-weight: 600;
+
+  --text-lead: 1.0625rem; /* 17px — the light counterpoint to a 650 heading */
+  --text-lead--line-height: 1.4;
+  --text-lead--font-weight: 300;
+
+  --text-body: 0.9375rem; /* 15px */
+  --text-body--line-height: 1.45;
+  --text-body--font-weight: 450;
+
+  --text-body-sm: 0.8125rem; /* 13px */
+  --text-body-sm--line-height: 1.45;
+  --text-body-sm--font-weight: 450;
+
+  --text-link: 0.9375rem; /* 15px */
+  --text-link--line-height: 1.4;
+  --text-link--font-weight: 600;
+
+  --text-label: 0.6875rem; /* 11px */
+  --text-label--line-height: 1.3;
+  --text-label--font-weight: 600;
+
+  --text-caption: 0.6875rem; /* 11px */
+  --text-caption--line-height: 1.3;
+  --text-caption--font-weight: 450;
+
+  --font-weight-book: 450;
+  --font-weight-display: 650;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
 
 @layer base {
   * {
@@ -96,27 +253,65 @@
 
   body {
     margin: 0;
-    color: var(--mag-ink);
+    color: var(--ink);
+    background-color: var(--canvas);
     font-family: var(--font-sans);
-    background-color: var(--mag-bg);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    font-weight: 450;
+    /* Zero tracking everywhere — the grotesque is trusted at its natural fit. */
+    letter-spacing: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background-color 200ms ease, color 200ms ease;
   }
 
   a {
-    color: var(--mag-ink);
+    color: var(--ink);
     text-decoration: none;
   }
 
   a:hover {
-    color: var(--mag-ink-soft);
+    color: var(--ink-muted);
   }
 
   button {
-    transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+    transition: background-color 180ms ease, color 180ms ease,
+      border-color 180ms ease, transform 180ms ease, opacity 180ms ease;
+  }
+
+  /* Focus is signalled in ink, consistent with the monochrome system. */
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  /* Browser-native password reveal icons fight the custom toggle. */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
+
+  input::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Layout primitives
+--------------------------------------------------------------------------- */
 
 .page-wrap {
   width: 100%;
@@ -131,6 +326,67 @@
     padding-inline: 1.25rem;
   }
 }
+
+/* Sticky chrome sits on a translucent canvas wash rather than a solid bar, so
+   content visibly passes beneath it. */
+.chrome-blur {
+  background-color: var(--chrome-bg);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+}
+
+.hairline {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.hairline-top {
+  border-top: 1px solid var(--hairline);
+}
+
+/* Elevation is fill difference and hairlines only — DESIGN.md is explicit that
+   the system is shadow-free. These remain as no-ops so the ~30 call sites that
+   still ask for a shadow get the flat treatment instead of a stale one. */
+.card-shadow,
+.card-shadow-lg,
+.dark .card-shadow,
+.dark .card-shadow-lg {
+  box-shadow: none;
+}
+
+.gradient-overlay {
+  background: linear-gradient(
+    to top,
+    var(--scrim-strong) 0%,
+    var(--scrim) 34%,
+    transparent 72%
+  );
+}
+
+.pill {
+  border-radius: 9999px;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe-area helpers for the fixed bottom nav and chat composer on iOS. */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---------------------------------------------------------------------------
+   Motion
+--------------------------------------------------------------------------- */
 
 .rise-in {
   animation: rise-in 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -147,73 +403,52 @@
   }
 }
 
+.sheet-in {
+  animation: sheet-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fade-in 180ms ease both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Skeletons shimmer across the tint ladder rather than a hardcoded grey, so
+   they read correctly in both themes. */
+.shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--canvas-soft) 25%,
+    var(--field) 50%,
+    var(--canvas-soft) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
 @keyframes shimmer {
   0% {
-    background-position: -200% 0;
-  }
-  100% {
     background-position: 200% 0;
   }
-}
-
-.shimmer {
-  background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* Nike system: no drop shadows on cards. Depth comes from photography and 1px hairlines only. */
-.card-shadow {
-  box-shadow: none;
-}
-
-.dark .card-shadow {
-  box-shadow: none;
-}
-
-.card-shadow-lg {
-  box-shadow: none;
-}
-
-.dark .card-shadow-lg {
-  box-shadow: none;
-}
-
-.hairline {
-  border-bottom: 1px solid var(--mag-line);
-}
-
-.hairline-top {
-  border-top: 1px solid var(--mag-line);
-}
-
-/* Hide browser-native password reveal icons so the custom toggle works reliably */
-input::-ms-reveal,
-input::-ms-clear {
-  display: none;
-}
-
-input::-webkit-credentials-auto-fill-button {
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.gradient-overlay {
-  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 40%, transparent 100%);
-}
-
-.accent-gradient {
-  background: var(--mag-ink);
-}
-
-.pill {
-  border-radius: 9999px;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  100% {
+    background-position: -200% 0;
+  }
 }

@@ -4,6 +4,7 @@ import Footer from '../components/Footer'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import PWAInstallPrompt from '../components/PWAInstallPrompt'
+import { ToastProvider } from '#/components/ui'
 import { WebSocketProvider } from '../integrations/websocket/WebSocketProvider'
 import { getVapidPublicKey, subscribePush } from '#/server/notifications'
 import { checkAndUpdateStreak } from '#/server/badges'
@@ -252,17 +253,19 @@ function RootLayout() {
 
   return (
     <WebSocketProvider>
-      {!isOnboarding && <Header />}
-      <main className="flex flex-1 flex-col bg-[var(--mag-bg)]">
-        <Outlet />
-      </main>
-      {!isOnboarding && (
-        <>
-          <Footer />
-          <BottomNav />
-          <PWAInstallPrompt />
-        </>
-      )}
+      <ToastProvider>
+        {!isOnboarding && <Header />}
+        <main className="flex flex-1 flex-col bg-canvas">
+          <Outlet />
+        </main>
+        {!isOnboarding && (
+          <>
+            <Footer />
+            <BottomNav />
+            <PWAInstallPrompt />
+          </>
+        )}
+      </ToastProvider>
     </WebSocketProvider>
   )
 }

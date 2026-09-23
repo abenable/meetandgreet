@@ -138,7 +138,7 @@ function CreateEventPage() {
         <div>
           <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Event Name</label>
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Fremont Friday Night"
-            className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+            className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md" />
         </div>
 
         <div>
@@ -207,14 +207,14 @@ function CreateEventPage() {
         <div>
           <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Description</label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What is this event about?" rows={3}
-            className="w-full resize-none rounded-card bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+            className="w-full resize-none rounded-card bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md" />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Location</label>
           <div className="relative">
             <MapPin className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
             <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Capitol Hill, Seattle"
-              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md" />
           </div>
         </div>
         <div>
@@ -222,7 +222,7 @@ function CreateEventPage() {
           <div className="relative">
             <Users className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
             <input type="number" min={1} max={1000} value={maxAttendees} onChange={(e) => setMaxAttendees(e.target.value === '' ? '' : Number(e.target.value))} placeholder="No limit"
-              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md" />
           </div>
         </div>
         <div>
@@ -230,7 +230,7 @@ function CreateEventPage() {
           <div className="relative">
             <Calendar className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
             <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)}
-              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md" />
           </div>
         </div>
       </div>

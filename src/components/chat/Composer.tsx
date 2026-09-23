@@ -191,7 +191,7 @@ export function Composer({
                 submitText()
               }
             }}
-            className="max-h-[132px] min-h-11 flex-1 resize-none rounded-card bg-field px-4 py-3 text-body text-ink outline-none transition placeholder:text-ink-faint focus:ring-2 focus:ring-ink disabled:opacity-60"
+            className="max-h-[132px] min-h-11 flex-1 resize-none rounded-card bg-field px-4 py-3 text-body text-ink outline-none transition-[background-color,box-shadow] duration-200 placeholder:text-ink-faint focus:bg-canvas-raised focus:shadow-md disabled:opacity-60"
           />
 
           {hasText || !allowVoice ? (

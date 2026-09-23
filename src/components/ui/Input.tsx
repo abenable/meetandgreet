@@ -4,11 +4,11 @@ import { cn } from '#/lib/cn'
 
 const FIELD_BASE =
   'w-full bg-field text-body text-ink placeholder:text-ink-faint ' +
-  'outline-none transition hover:bg-canvas-soft ' +
-  'focus:bg-field focus:ring-2 focus:ring-ink ' +
+  'outline-none transition-[background-color,box-shadow] duration-200 ' +
+  'focus:bg-canvas-raised focus:shadow-md ' +
   'disabled:opacity-55 disabled:cursor-not-allowed'
 
-const INVALID = 'ring-2 ring-danger focus:ring-danger'
+const INVALID = 'bg-danger-soft'
 
 export interface FieldProps {
   label?: ReactNode
@@ -71,34 +71,30 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   { className, invalid, leading, trailing, ...rest },
   ref,
 ) {
-  const input = (
-    <input
-      ref={ref}
-      aria-invalid={invalid || undefined}
+  return (
+    <div
       className={cn(
-        FIELD_BASE,
-        'h-11 rounded-full px-4',
-        leading && 'pl-10',
-        trailing && 'pr-10',
-        invalid && INVALID,
+        'flex h-11 w-full items-center gap-2.5 rounded-full bg-field px-4',
+        'transition-[background-color,box-shadow] duration-200',
+        'focus-within:bg-canvas-raised focus-within:shadow-md',
+        'has-[input:disabled]:opacity-55',
+        invalid && 'bg-danger-soft',
         className,
       )}
-      {...rest}
-    />
-  )
-
-  if (!leading && !trailing) return input
-
-  return (
-    <div className="relative">
+    >
       {leading && (
-        <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-ink-faint [&>svg]:h-4 [&>svg]:w-4">
+        <span className="pointer-events-none flex shrink-0 items-center text-ink-faint [&>svg]:h-4 [&>svg]:w-4">
           {leading}
         </span>
       )}
-      {input}
+      <input
+        ref={ref}
+        aria-invalid={invalid || undefined}
+        className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint disabled:cursor-not-allowed"
+        {...rest}
+      />
       {trailing && (
-        <span className="absolute inset-y-0 right-3 flex items-center text-ink-faint [&>svg]:h-4 [&>svg]:w-4">
+        <span className="flex shrink-0 items-center text-ink-faint [&>svg]:h-4 [&>svg]:w-4">
           {trailing}
         </span>
       )}

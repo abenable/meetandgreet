@@ -51,7 +51,7 @@ function ExplorePage() {
       {showSearch && (
         <div className="mb-4">
           <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search people, interests, or locations..."
-            className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+            className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md" />
         </div>
       )}
 

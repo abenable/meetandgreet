@@ -514,7 +514,7 @@ function ManageEventPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+              className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
             />
           </div>
 
@@ -524,7 +524,7 @@ function ManageEventPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-card bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+              className="w-full resize-none rounded-card bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
             />
           </div>
 
@@ -536,7 +536,7 @@ function ManageEventPage() {
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
               />
             </div>
           </div>
@@ -549,7 +549,7 @@ function ManageEventPage() {
               value={maxAttendees}
               onChange={(e) => setMaxAttendees(e.target.value)}
               placeholder="Optional"
-              className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+              className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
             />
           </div>
 
@@ -594,7 +594,7 @@ function ManageEventPage() {
                 type="datetime-local"
                 value={startsAt}
                 onChange={(e) => setStartsAt(e.target.value)}
-                className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
               />
             </div>
           </div>
@@ -689,7 +689,7 @@ function ManageEventPage() {
                 value={sponsorName}
                 onChange={(e) => setSponsorName(e.target.value)}
                 placeholder="e.g. Acme Corp"
-                className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
               />
             </div>
 
@@ -700,7 +700,7 @@ function ManageEventPage() {
                 value={sponsorLogo}
                 onChange={(e) => setSponsorLogo(e.target.value)}
                 placeholder="https://example.com/logo.png"
-                className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
               />
               {sponsorLogo && (
                 <div className="mt-2 flex items-center gap-2">
@@ -717,7 +717,7 @@ function ManageEventPage() {
                 value={sponsorFrameUrl}
                 onChange={(e) => setSponsorFrameUrl(e.target.value)}
                 placeholder="https://example.com/frame.png"
-                className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
               />
               <p className="mt-1 text-xs text-[var(--mag-ink-muted)]">
                 A decorative border/frame image that wraps the event card
@@ -897,7 +897,7 @@ function ManageEventPage() {
                       }
                     }}
                     placeholder="Write something..."
-                    className="flex-1 rounded-full bg-[var(--input-bg)] px-4 py-2.5 text-base text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                    className="flex-1 rounded-full bg-[var(--input-bg)] px-4 py-2.5 text-base text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
                   />
                   <button
                     onClick={() => {

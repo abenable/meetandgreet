@@ -434,7 +434,7 @@ function EventsExplorePage() {
               maxLength={10}
               autoFocus
               disabled={!!joinSuccess}
-              className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-center text-base font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)] disabled:opacity-50"
+              className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-center text-base font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md disabled:opacity-50"
             />
             {joinError && (
               <p className="mt-2 text-sm font-semibold text-[var(--mag-sale)]">{joinError}</p>

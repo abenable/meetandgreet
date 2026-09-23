@@ -587,7 +587,7 @@ function DiscoverPage() {
                     onChange={(e) => setReportCustom(e.target.value)}
                     placeholder="Describe the issue..."
                     rows={3}
-                    className="mb-3 w-full resize-none rounded-card bg-[var(--input-bg)] px-3 py-2 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                    className="mb-3 w-full resize-none rounded-card bg-[var(--input-bg)] px-3 py-2 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
                   />
                 )}
 

@@ -111,10 +111,10 @@ export function OtpInput({
           onFocus={(e) => e.target.select()}
           className={cn(
             'h-14 w-full min-w-0 rounded-full bg-field text-center text-h2 text-ink',
-            'border border-transparent outline-none transition',
-            'focus:border-ink focus:ring-1 focus:ring-ink',
+            'outline-none transition-[background-color,box-shadow] duration-200',
+            'focus:bg-canvas-raised focus:shadow-md',
             'disabled:opacity-55',
-            invalid && 'border-danger focus:border-danger focus:ring-danger',
+            invalid && 'bg-danger-soft',
           )}
         />
       ))}

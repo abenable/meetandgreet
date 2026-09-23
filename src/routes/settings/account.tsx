@@ -131,7 +131,7 @@ function AccountSettingsPage() {
           value={confirmText}
           onChange={(e) => setConfirmText(e.target.value)}
           autoComplete="off"
-          className="h-11 w-full rounded-full border border-transparent bg-field px-4 text-body text-ink outline-none focus:border-danger focus:ring-1 focus:ring-danger"
+          className="h-11 w-full rounded-full bg-field px-4 text-body text-ink outline-none transition-[background-color,box-shadow] duration-200 focus:bg-canvas-raised focus:shadow-md"
         />
       </Sheet>
 

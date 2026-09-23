@@ -283,9 +283,6 @@ function EventsExplorePage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
                         {isJoined && <span className="shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-bg)]">Joined</span>}
-                        {(event as any).mysteryMode && (
-                          <span className="shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)]">Mystery</span>
-                        )}
                         {(event as any).sponsorName && (
                           <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)]">
                             <Star className="h-3 w-3" /> Sponsored
@@ -340,9 +337,6 @@ function EventsExplorePage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
-                        {(event as any).mysteryMode && (
-                          <span className="shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)]">Mystery</span>
-                        )}
                         {(event as any).sponsorName && (
                           <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)]">
                             <Star className="h-3 w-3" /> Sponsored

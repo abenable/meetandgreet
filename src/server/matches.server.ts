@@ -36,17 +36,12 @@ export async function findOrCreateMatch(
   })
   if (existing) return { match: existing, created: false }
 
-  const event = eventId
-    ? await prisma.event.findUnique({ where: { id: eventId }, select: { mysteryMode: true } })
-    : null
-
   try {
     const match = await prisma.eventMatch.create({
       data: {
         eventId,
         user1Id,
         user2Id,
-        messagesUnlockedAt: event?.mysteryMode ? null : new Date(),
       },
     })
     return { match, created: true }

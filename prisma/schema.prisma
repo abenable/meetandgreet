@@ -164,7 +164,6 @@ model Event {
   createdById       String
   isActive          Boolean                 @default(true)
   isPublic          Boolean                 @default(true)
-  mysteryMode       Boolean                 @default(false)
   sponsorName       String?
   sponsorLogo       String?
   sponsorFrameUrl   String?
@@ -293,16 +292,15 @@ model Friendship {
 }
 
 model EventMatch {
-  id                 String         @id @default(uuid())
-  eventId            String?
-  event              Event?         @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  user1Id            String
-  user1              User           @relation("MatchUser1", fields: [user1Id], references: [id], onDelete: Cascade)
-  user2Id            String
-  user2              User           @relation("MatchUser2", fields: [user2Id], references: [id], onDelete: Cascade)
-  createdAt          DateTime       @default(now())
-  messagesUnlockedAt DateTime?
-  messages           EventMessage[]
+  id        String         @id @default(uuid())
+  eventId   String?
+  event     Event?         @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  user1Id   String
+  user1     User           @relation("MatchUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2Id   String
+  user2     User           @relation("MatchUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+  messages  EventMessage[]
 
   // Every read filters `OR [user1Id, user2Id]` with no eventId, so eventId
   // cannot be the leading column. Uniqueness of the pair is enforced by two

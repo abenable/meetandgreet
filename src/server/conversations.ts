@@ -278,7 +278,6 @@ export const getConversations = createServerFn({ method: 'GET' })
           peerName: getPeerName(peerId),
           peerPhoto: getPeerPhoto(peerId),
           peerVerifiedAt: getPeerVerifiedAt(peerId),
-          messagesUnlockedAt: match.messagesUnlockedAt,
           lastMessage: match.messages[0]?.content ?? 'New match!',
           lastMessageAt: match.messages[0]?.createdAt ?? match.createdAt,
           unreadCount: unreadCountByMatchId.get(match.id) ?? 0,
@@ -385,7 +384,6 @@ export const getChatMessages = createServerFn({ method: 'GET' })
       return {
         type: 'match' as const,
         peerId: match.user1Id === myId ? match.user2Id : match.user1Id,
-        messagesUnlockedAt: match.messagesUnlockedAt,
         messages: msgs.map((m) => ({ ...m, isMine: m.senderId === myId })),
         nextCursor: hasMore ? msgs[0]?.id ?? null : null,
       }
@@ -492,17 +490,6 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
       const peerId = match.user1Id === myId ? match.user2Id : match.user1Id
       await assertNotBlocked(myId, peerId)
 
-      // Mystery mode: unlock photos after 10 messages
-      const existingCount = await prisma.eventMessage.count({ where: { matchId } })
-      let unlocked = false
-      if (!match.messagesUnlockedAt && existingCount >= 10) {
-        const result = await prisma.eventMatch.updateMany({
-          where: { id: matchId, messagesUnlockedAt: null },
-          data: { messagesUnlockedAt: new Date() },
-        })
-        unlocked = result.count > 0
-      }
-
       const message = await prisma.eventMessage.create({
         data: {
           matchId,
@@ -526,7 +513,7 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
         link: `/chats/${chatId}`,
       }).catch((err) => console.warn('[notify] message notification failed:', err))
 
-      return { ...message, isMine: true, unlocked }
+      return { ...message, isMine: true }
     }
 
     const { eventId, peerId } = parsed

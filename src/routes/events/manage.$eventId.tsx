@@ -23,7 +23,6 @@ import {
   Eye,
   Lock,
   ListOrdered,
-  Sparkles,
 } from 'lucide-react'
 import {
   getEventById,
@@ -132,7 +131,6 @@ function ManageEventPage() {
 
   const [eventPhoto, setEventPhoto] = useState<string | null>(null)
   const [eventIsPublic, setEventIsPublic] = useState(true)
-  const [eventMysteryMode, setEventMysteryMode] = useState(false)
   const [photoError, setPhotoError] = useState('')
   const [saveError, setSaveError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
@@ -172,7 +170,6 @@ function ManageEventPage() {
       setStartsAt(event.startsAt ? toDatetimeLocalValue(event.startsAt) : '')
       setEventPhoto(event.photo ?? null)
       setEventIsPublic((event as any).isPublic ?? true)
-      setEventMysteryMode((event as any).mysteryMode ?? false)
       setSponsorName((event as any).sponsorName ?? '')
       setSponsorLogo((event as any).sponsorLogo ?? '')
       setSponsorFrameUrl((event as any).sponsorFrameUrl ?? '')
@@ -288,7 +285,6 @@ function ManageEventPage() {
           startsAt: startsAtIso,
           photo: eventPhoto,
           isPublic: eventIsPublic,
-          mysteryMode: eventMysteryMode,
         },
       },
     })
@@ -587,37 +583,6 @@ function ManageEventPage() {
               {eventIsPublic
                 ? 'Anyone can find this event on the browse page.'
                 : 'Only people with the code or link can join.'}
-            </p>
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-center text-xs font-medium text-[var(--mag-ink)]">Mystery Mode</label>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setEventMysteryMode(true)}
-                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
-                  eventMysteryMode
-                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                    : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
-                }`}
-              >
-                <Sparkles className="h-3.5 w-3.5" /> On
-              </button>
-              <button
-                type="button"
-                onClick={() => setEventMysteryMode(false)}
-                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
-                  !eventMysteryMode
-                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                    : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
-                }`}
-              >
-                Off
-              </button>
-            </div>
-            <p className="mt-1 text-center text-[10px] text-[var(--mag-ink-muted)]">
-              Attendees' photos are blurred until they've exchanged 10 messages
             </p>
           </div>
 

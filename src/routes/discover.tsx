@@ -59,7 +59,6 @@ function DiscoverPage() {
   // into an event.
   const isEventMode = myProfile?.discoveryMode === 'event' && !!activeEvent
   const effectiveEventId = isEventMode ? activeEvent!.id : undefined
-  const isMystery = isEventMode && activeEvent?.mysteryMode === true
   const awaitingEventCheckIn = !profileLoading && myProfile?.discoveryMode === 'event' && !activeEvent
 
   // The deck is paged now — the server used to return every candidate in the
@@ -392,24 +391,9 @@ function DiscoverPage() {
                   src={pic}
                   alt={profile.name ?? ''}
                   priority={Math.abs(index - currentIndex) <= 2}
-                  imgClassName={isMystery ? 'blur-[20px] grayscale-[0.5] transition-all duration-1000' : ''}
                 />
               </div>
               <div className="gradient-overlay absolute inset-0" />
-              {isMystery && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="rounded-lg bg-black/50 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
-                    Locked - Reveal after 10 messages
-                  </span>
-                </div>
-              )}
-              {isMystery && (
-                <div className="absolute top-4 right-4 z-10">
-                  <span className="rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
-                    MYSTERY
-                  </span>
-                </div>
-              )}
               {hasPhotos && (
                 <>
                   <div className="absolute top-4 left-4 right-4 flex gap-1.5">

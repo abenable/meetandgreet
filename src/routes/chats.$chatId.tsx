@@ -75,10 +75,8 @@ function UnifiedChatPage() {
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
   const [blockDialogOpen, setBlockDialogOpen] = useState(false)
-  const [showRevealToast, setShowRevealToast] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
-  const prevUnlockedRef = useRef<boolean | undefined>(undefined)
 
   // Voice recording state
   const [isRecording, setIsRecording] = useState(false)
@@ -162,8 +160,6 @@ function UnifiedChatPage() {
   })
 
   const matchId = chatId.startsWith('match_') ? chatId.slice('match_'.length) : null
-  const isPhotosLocked = !!matchId && !chatData?.messagesUnlockedAt
-  const remainingMessages = isPhotosLocked ? Math.max(0, 10 - (chatData?.messages.length ?? 0)) : 0
   const { data: icebreakers } = useQuery({
     queryKey: ['icebreakers', matchId],
     queryFn: () => getIcebreakers({ data: matchId! }),
@@ -176,16 +172,6 @@ function UnifiedChatPage() {
       qc.invalidateQueries({ queryKey: ['conversations'] })
     })
   }, [chatId, qc])
-
-  // Detect photo unlock for mystery mode toast
-  useEffect(() => {
-    const isNowUnlocked = !!chatData?.messagesUnlockedAt
-    if (prevUnlockedRef.current === false && isNowUnlocked) {
-      setShowRevealToast(true)
-      setTimeout(() => setShowRevealToast(false), 3000)
-    }
-    prevUnlockedRef.current = isNowUnlocked
-  }, [chatData?.messagesUnlockedAt])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -366,7 +352,7 @@ function UnifiedChatPage() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="flex flex-1 items-center justify-center gap-2">
-          <div className={`h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)] ${isPhotosLocked ? 'blur-[20px] grayscale-[0.5]' : ''}`}>
+          <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
             <AvatarImage src={photo} alt={peerProfile?.name ?? ''} />
           </div>
           <div className="min-w-0 text-center">
@@ -394,23 +380,6 @@ function UnifiedChatPage() {
           <Ban className="h-5 w-5" />
         </button>
       </div>
-
-      {/* Unlock progress */}
-      {isPhotosLocked && remainingMessages > 0 && (
-        <div className="mb-2 rounded-xl bg-[var(--mag-surface)] px-3 py-2 text-center text-xs font-medium text-[var(--mag-ink)]">
-          Send {remainingMessages} more message{remainingMessages !== 1 ? 's' : ''} to reveal their photo 🔒
-        </div>
-      )}
-      {isPhotosLocked && remainingMessages === 0 && (
-        <div className="mb-2 rounded-xl bg-[var(--mag-surface)] px-3 py-2 text-center text-xs font-medium text-[var(--mag-ink)]">
-          Almost there! Send one more message to reveal 🔒
-        </div>
-      )}
-      {showRevealToast && (
-        <div className="mb-2 rounded-xl bg-[var(--mag-ink)] px-3 py-2 text-center text-xs font-bold text-[var(--mag-bg)] transition-all duration-500">
-          Photos revealed!
-        </div>
-      )}
 
       {/* Messages */}
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">

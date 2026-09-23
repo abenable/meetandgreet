@@ -41,7 +41,7 @@ export default function Header() {
   }
 
   return (
-    <header className="chrome-blur sticky top-0 z-50 shadow-[0_1px_12px_rgba(16,16,22,0.06)]">
+    <header className="chrome-blur sticky top-0 z-50 shadow-[0_1px_16px_rgba(14,14,22,0.12)]">
       <div className="page-wrap flex items-center justify-between py-3">
         <Link to="/" className="flex items-center gap-1.5 no-underline">
           <Logo className="h-6 w-auto" />

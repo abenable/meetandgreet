@@ -5,7 +5,7 @@ import { Calendar, Check, Globe } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import { getMyActiveEvent } from '#/server/events'
 import { PageHeader } from '#/components/PageHeader'
-import { Button, buttonClasses, Card, Skeleton, useToast } from '#/components/ui'
+import { buttonClasses, Card, SegmentedControl, Skeleton, useToast } from '#/components/ui'
 import { cn } from '#/lib/cn'
 
 export const Route = createFileRoute('/settings/discovery')({ component: DiscoverySettingsPage })
@@ -49,7 +49,7 @@ function DiscoverySettingsPage() {
     save.mutate({ data: { prefAgeMin: min, prefAgeMax: max } })
 
   return (
-    <main className="page-wrap py-5 pb-28">
+    <main className="page-wrap py-5 pb-nav">
       <PageHeader title="Discovery" back="/settings" />
 
       <section className="mb-7">
@@ -94,19 +94,12 @@ function DiscoverySettingsPage() {
 
       <section className="mb-7">
         <h2 className="mb-2 text-label text-ink-faint">Show me</h2>
-        <div className="flex flex-wrap gap-2">
-          {SHOW_ME_OPTIONS.map((option) => (
-            <Button
-              key={option}
-              size="sm"
-              variant={showMe === option ? 'primary' : 'outline'}
-              disabled={save.isPending}
-              onClick={() => save.mutate({ data: { prefShowMe: option } })}
-            >
-              {option}
-            </Button>
-          ))}
-        </div>
+        <SegmentedControl
+          aria-label="Who to show in discovery"
+          value={showMe as (typeof SHOW_ME_OPTIONS)[number]}
+          onChange={(option) => save.mutate({ data: { prefShowMe: option } })}
+          segments={SHOW_ME_OPTIONS.map((option) => ({ value: option, label: option }))}
+        />
       </section>
 
       <section>
@@ -166,16 +159,22 @@ function ModeOption({
       disabled={disabled}
       aria-pressed={selected}
       className={cn(
-        'flex w-full items-start gap-3 rounded-card border p-4 text-left transition disabled:opacity-60',
-        selected ? 'border-ink bg-canvas-soft' : 'border-hairline hover:bg-canvas-soft',
+        'flex w-full items-start gap-3 rounded-card p-4 text-left transition disabled:opacity-60',
+        selected
+          ? 'bg-ink text-on-ink shadow-md'
+          : 'bg-canvas-raised shadow-sm hover:bg-canvas-soft hover:shadow-md',
       )}
     >
-      <span className="mt-0.5 shrink-0 text-ink-muted [&>svg]:h-5 [&>svg]:w-5">{icon}</span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-title text-ink">{title}</span>
-        <span className="mt-0.5 block text-body-sm text-ink-muted">{description}</span>
+      <span className={cn('mt-0.5 shrink-0 [&>svg]:h-5 [&>svg]:w-5', selected ? 'text-on-ink' : 'text-ink-muted')}>
+        {icon}
       </span>
-      {selected && <Check className="mt-0.5 h-5 w-5 shrink-0 text-ink" />}
+      <span className="min-w-0 flex-1">
+        <span className="block text-title">{title}</span>
+        <span className={cn('mt-0.5 block text-body-sm', selected ? 'opacity-80' : 'text-ink-muted')}>
+          {description}
+        </span>
+      </span>
+      {selected && <Check className="mt-0.5 h-5 w-5 shrink-0" />}
     </button>
   )
 }

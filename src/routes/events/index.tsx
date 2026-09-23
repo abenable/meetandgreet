@@ -445,7 +445,7 @@ function EventsExplorePage() {
               maxLength={10}
               autoFocus
               disabled={!!joinSuccess}
-              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-center text-sm font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:border-[var(--mag-ink)] focus:outline-none disabled:opacity-50"
+              className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-center text-sm font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:border-[var(--mag-ink)] focus:outline-none disabled:opacity-50"
             />
             {joinError && (
               <p className="mt-2 text-xs font-semibold text-[var(--mag-sale)]">{joinError}</p>

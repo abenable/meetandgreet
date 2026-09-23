@@ -1,9 +1,5 @@
 import { cn } from '#/lib/cn'
 
-/**
- * Borrows the current text colour, so it reads correctly inside an ink button,
- * an outline button, or on a photo scrim without being told which.
- */
 export function Spinner({ className }: { className?: string }) {
   return (
     <span

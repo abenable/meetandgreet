@@ -12,11 +12,9 @@ export type BadgeTone =
 const TONES: Record<BadgeTone, string> = {
   neutral: 'bg-canvas-soft text-ink-muted',
   ink: 'bg-ink text-on-ink',
-  // The one accent — spend it on a single live signal per screen.
   accent: 'bg-accent text-accent-contrast',
   danger: 'bg-danger text-white',
   success: 'bg-success text-white',
-  // Laid over photography.
   overlay: 'bg-black/55 text-on-scrim backdrop-blur-sm',
 }
 
@@ -37,10 +35,6 @@ export function Badge({ tone = 'neutral', className, ...rest }: BadgeProps) {
   )
 }
 
-/**
- * The count bubble on a nav item or list row. Renders nothing at zero so
- * callers do not each need their own guard.
- */
 export function CountBadge({
   count,
   tone = 'accent',

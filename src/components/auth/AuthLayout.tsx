@@ -4,17 +4,6 @@ import { ArrowLeft } from 'lucide-react'
 import Logo from '#/components/Logo'
 import { cn } from '#/lib/cn'
 
-/**
- * The shell all six auth screens share.
- *
- * Two modes, because the screens are not peers: `destination` is somewhere you
- * arrive (log in, sign up) and carries the brand lockup; `step` is a stage in a
- * flow (verify a code, choose a password) and carries a back control and a
- * position instead. Previously every screen rendered the identical centred
- * lockup, so a step in the reset flow was indistinguishable from the login
- * page — and none of them offered a way back, which strands anyone running the
- * installed PWA, where there is no browser chrome.
- */
 export function AuthLayout({
   mode = 'destination',
   title,
@@ -27,7 +16,6 @@ export function AuthLayout({
   mode?: 'destination' | 'step'
   title: string
   subtitle?: ReactNode
-  /** Where the back control goes. Steps should always provide one. */
   back?: { to: string; search?: Record<string, unknown>; label?: string }
   step?: { current: number; total: number }
   children: ReactNode
@@ -36,9 +24,6 @@ export function AuthLayout({
   const isStep = mode === 'step'
 
   return (
-    /* 100dvh, top-aligned. The old `min-h-[90vh]` with vertical centring did
-       not shrink when the mobile keyboard opened, which pushed the submit
-       button off-screen on small phones. */
     <div className="page-wrap flex min-h-[100dvh] flex-col px-4 pt-6 pb-10">
       {(back || step) && (
         <div className="mb-6 flex h-10 items-center justify-between">
@@ -65,7 +50,6 @@ export function AuthLayout({
       <div
         className={cn(
           'mx-auto flex w-full max-w-sm flex-1 flex-col',
-          // Destinations breathe; steps start where the back control left off.
           !isStep && 'justify-center',
         )}
       >
@@ -85,8 +69,6 @@ export function AuthLayout({
   )
 }
 
-/** Form-level errors — the ones that belong to the submission rather than to a
- *  single field. Field-level problems go in `Field`'s error slot. */
 export function AuthAlert({ children }: { children: ReactNode }) {
   if (!children) return null
   return (

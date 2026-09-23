@@ -216,7 +216,7 @@ function UsersTab() {
           value={search}
           onChange={(e) => { setSearch(e.target.value); setCursor(undefined); setFilter('all') }}
           placeholder="Search by name or email..."
-          className="w-full rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-2.5 pl-9 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-line)] focus:outline-none"
+          className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] py-2.5 pl-9 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-line)] focus:outline-none"
         />
       </div>
 

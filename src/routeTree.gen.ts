@@ -18,6 +18,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LikesRouteImport } from './routes/likes'
+import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DesignRouteImport } from './routes/design'
@@ -98,6 +99,11 @@ const LoginRoute = LoginRouteImport.update({
 const LikesRoute = LikesRouteImport.update({
   id: '/likes',
   path: '/likes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FriendsRoute = FriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExploreRoute = ExploreRouteImport.update({
@@ -288,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/design': typeof DesignRoute
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
+  '/friends': typeof FriendsRoute
   '/likes': typeof LikesRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
@@ -334,6 +341,7 @@ export interface FileRoutesByTo {
   '/design': typeof DesignRoute
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
+  '/friends': typeof FriendsRoute
   '/likes': typeof LikesRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
@@ -381,6 +389,7 @@ export interface FileRoutesById {
   '/design': typeof DesignRoute
   '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
+  '/friends': typeof FriendsRoute
   '/likes': typeof LikesRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
@@ -430,6 +439,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/discover'
     | '/explore'
+    | '/friends'
     | '/likes'
     | '/login'
     | '/notifications'
@@ -476,6 +486,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/discover'
     | '/explore'
+    | '/friends'
     | '/likes'
     | '/login'
     | '/notifications'
@@ -522,6 +533,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/discover'
     | '/explore'
+    | '/friends'
     | '/likes'
     | '/login'
     | '/notifications'
@@ -570,6 +582,7 @@ export interface RootRouteChildren {
   DesignRoute: typeof DesignRoute
   DiscoverRoute: typeof DiscoverRoute
   ExploreRoute: typeof ExploreRoute
+  FriendsRoute: typeof FriendsRoute
   LikesRoute: typeof LikesRoute
   LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
@@ -669,6 +682,13 @@ declare module '@tanstack/react-router' {
       path: '/likes'
       fullPath: '/likes'
       preLoaderRoute: typeof LikesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/friends': {
+      id: '/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof FriendsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/explore': {
@@ -970,6 +990,7 @@ const rootRouteChildren: RootRouteChildren = {
   DesignRoute: DesignRoute,
   DiscoverRoute: DiscoverRoute,
   ExploreRoute: ExploreRoute,
+  FriendsRoute: FriendsRoute,
   LikesRoute: LikesRoute,
   LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,

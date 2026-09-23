@@ -63,15 +63,15 @@ function EditProfilePage() {
       <div className="mx-auto max-w-md space-y-4">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Bio</label>
-          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}           className="w-full resize-none rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}           className="w-full resize-none rounded-card border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Job</label>
-          <input type="text" value={job} onChange={(e) => setJob(e.target.value)}           className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+          <input type="text" value={job} onChange={(e) => setJob(e.target.value)}           className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Location</label>
-          <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}           className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+          <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}           className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Gender</label>
@@ -106,7 +106,7 @@ function EditProfilePage() {
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Interests (comma separated)</label>
-          <input type="text" value={interests} onChange={(e) => setInterests(e.target.value)}           className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+          <input type="text" value={interests} onChange={(e) => setInterests(e.target.value)}           className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
       </div>
 

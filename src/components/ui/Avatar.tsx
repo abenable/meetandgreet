@@ -23,13 +23,9 @@ export interface AvatarProps {
   src?: string | null
   alt?: string
   size?: AvatarSize
-  /** Square with `rounded-media` corners instead of a circle. */
   square?: boolean
-  /** Adds the presence ring. `undefined` renders no dot at all. */
   online?: boolean
-  /** Blur treatment for mystery-mode threads. */
   obscured?: boolean
-  /** Eager-load the one avatar that is on screen at first paint. */
   priority?: boolean
   className?: string
 }

@@ -54,10 +54,8 @@ function SignupPage() {
         return
       }
 
-      // Try to send OTP, but redirect to verify either way so the user can resend
       const otpRes = await sendEmailVerificationOtpFn({ data: normalizedEmail })
       if (!otpRes.success && otpRes.message) {
-        // Non-fatal: still redirect to verify page
         console.warn('OTP send warning:', otpRes.message)
       }
       navigate({ to: '/signup/verify', search: { email: normalizedEmail, redirect } })

@@ -1,11 +1,6 @@
 import type { ComponentType, ReactNode } from 'react'
 import { cn } from '#/lib/cn'
 
-/**
- * Every empty state in the app said something different in a different shape.
- * One frame: a soft icon tile, a headline that names the state, one line
- * explaining it, and — where there is one — the action that resolves it.
- */
 export function EmptyState({
   icon: Icon,
   title,

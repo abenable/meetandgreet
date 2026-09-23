@@ -8,20 +8,13 @@ export interface ListRowProps {
   subtitle?: ReactNode
   trailing?: ReactNode
   chevron?: boolean
-  /** Emphasises the row the way an unread thread should read. */
   emphasis?: boolean
   danger?: boolean
   onClick?: () => void
   className?: string
-  /** Render the row's own markup inside a caller-supplied element — a router
-   *  `<Link>`, typically, which cannot be nested in a `<button>`. */
   as?: 'div' | 'button'
 }
 
-/**
- * The single row shape behind settings, friends, chats and blocked lists.
- * Separated by hairlines, never boxed — the list itself is the container.
- */
 export function ListRow({
   leading,
   title,

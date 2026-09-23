@@ -33,9 +33,6 @@ function ForgotPasswordPage() {
     try {
       await sendPasswordResetOtpFn({ data: normalizedEmail })
       markOtpSent(normalizedEmail)
-      // Straight to the code step. This used to render a "check your email"
-      // screen whose only content was a button to continue — a stop with
-      // nothing on it.
       navigate({
         to: '/forgot-password/verify',
         search: { email: normalizedEmail, redirect },

@@ -12,24 +12,16 @@ export type ButtonVariant =
   | 'scrim'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
-/**
- * Every interactive element in this system is a stadium pill — DESIGN.md is
- * explicit that a rectangular button does not exist here. Emphasis comes from
- * fill, never from shadow.
- */
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-ink text-on-ink hover:opacity-85',
   outline: 'bg-canvas text-ink border border-hairline hover:bg-canvas-soft',
   soft: 'bg-canvas-soft text-ink hover:bg-field',
   ghost: 'bg-transparent text-ink-muted hover:bg-canvas-soft hover:text-ink',
   danger: 'bg-danger text-white hover:opacity-85',
-  // For controls laid over photography: a translucent scrim pill.
   scrim:
     'bg-black/35 text-on-scrim border border-white/20 backdrop-blur-sm hover:bg-black/50',
 }
 
-/** Heights keep every control at or above the 44px touch target, bar `sm`,
- *  which is for dense inline affordances only. */
 const SIZES: Record<ButtonSize, string> = {
   sm: 'h-9 px-4 text-label gap-1.5',
   md: 'h-11 px-5 text-link gap-2',
@@ -45,16 +37,11 @@ const ICON_SIZES: Record<ButtonSize, string> = {
 export interface ButtonStyleOptions {
   variant?: ButtonVariant
   size?: ButtonSize
-  /** Square control sized for a single icon; pass an accessible label with it. */
   icon?: boolean
   block?: boolean
   className?: string
 }
 
-/**
- * Exported separately so a router `<Link>` — which cannot be a `<button>` —
- * still renders as the same control.
- */
 export function buttonClasses({
   variant = 'primary',
   size = 'md',

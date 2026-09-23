@@ -3,14 +3,6 @@ import type { ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '#/lib/cn'
 
-/**
- * Replaces the hand-rolled `fixed inset-0` dialogs scattered across the
- * screens, none of which closed on Escape, locked the background scroll, or
- * told a screen reader they were modal.
- *
- * Presents as a bottom sheet on phones (thumb-reachable) and as a centred
- * dialog from 640px up.
- */
 export function Sheet({
   open,
   onClose,
@@ -18,7 +10,6 @@ export function Sheet({
   description,
   children,
   footer,
-  /** Hides the close affordance for a sheet that demands an explicit choice. */
   dismissible = true,
   className,
 }: {
@@ -51,8 +42,6 @@ export function Sheet({
 
       if (event.key !== 'Tab') return
 
-      // Keep Tab inside the panel. Without this, focus walks off into the page
-      // behind the scrim and the sheet becomes unusable by keyboard.
       const focusables = panelRef.current?.querySelectorAll<HTMLElement>(
         'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
       )
@@ -70,8 +59,6 @@ export function Sheet({
 
     document.addEventListener('keydown', onKeyDown, true)
 
-    // Focus the panel itself rather than its first control, so the sheet is
-    // announced before anything is typed into.
     const raf = requestAnimationFrame(() => panelRef.current?.focus())
 
     return () => {
@@ -104,8 +91,6 @@ export function Sheet({
           className,
         )}
       >
-        {/* Drag handle — affordance only; the sheet closes via scrim, Escape or
-            the close control. */}
         <div
           aria-hidden="true"
           className="mx-auto mb-4 h-1 w-9 rounded-full bg-hairline sm:hidden"

@@ -60,12 +60,6 @@ const BUTTON_VARIANTS: ReadonlyArray<ButtonVariant> = [
   'danger',
 ]
 
-/**
- * The kit, rendered from the real components. Dev-only — a design system you
- * cannot look at all at once is a design system that drifts.
- *
- * Toggle the theme with the header control to check both polarities.
- */
 function DesignKitPage() {
   const [tab, setTab] = useState<'one' | 'two' | 'three'>('one')
   const [sheetOpen, setSheetOpen] = useState(false)

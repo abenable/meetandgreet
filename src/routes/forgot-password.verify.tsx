@@ -40,9 +40,6 @@ function VerifyOtpPage() {
           setLoading(false)
           return
         }
-        // The code travels in history state, not in the query string. As a
-        // search param it sat in the address bar, in browser history, and in
-        // the Referer header of anything the reset page linked out to.
         navigate({
           to: '/forgot-password/reset',
           search: { email, redirect },

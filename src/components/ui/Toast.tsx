@@ -30,12 +30,6 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null)
 
-/**
- * Transient feedback lives here rather than as a line of red text wedged above
- * whichever control failed — which is what the chat composer, the swipe deck
- * and the join flow each grew separately, and which scrolls out of view on the
- * screens that need it most.
- */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
   const nextId = useRef(0)
@@ -55,7 +49,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       const id = nextId.current++
       const duration = options?.duration ?? 4000
       setToasts((prev) => [
-        // Cap the stack: a failing retry loop should not bury the screen.
         ...prev.slice(-2),
         { id, message, tone: options?.tone ?? 'neutral', action: options?.action },
       ])
@@ -106,8 +99,6 @@ function ToastRow({ toast, onDismiss }: { toast: Toast; onDismiss: () => void })
       role={toast.tone === 'error' ? 'alert' : 'status'}
       className={cn(
         'rise-in pointer-events-auto flex w-full max-w-sm items-center gap-2.5 rounded-full py-2.5 pr-2 pl-4',
-        // Polarity inversion, so a toast reads as chrome rather than as a card
-        // that belongs to the page beneath it.
         'bg-ink text-on-ink',
       )}
     >

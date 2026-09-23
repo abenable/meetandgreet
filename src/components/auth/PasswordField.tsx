@@ -4,16 +4,6 @@ import { validatePassword } from '#/lib/auth-errors'
 import { Field, Input } from '#/components/ui'
 import { cn } from '#/lib/cn'
 
-/**
- * The password input and its rules in one place, used by signup, reset and
- * login.
- *
- * The rules render as a meter plus a single line naming what is still missing.
- * The old screens listed all five requirements as centred rows that appeared
- * only after the first keystroke — so the rules were invisible until you had
- * already guessed, and once visible they pushed the submit button below the
- * fold on a small phone with the keyboard up.
- */
 export function PasswordField({
   value,
   onChange,
@@ -31,7 +21,6 @@ export function PasswordField({
   placeholder?: string
   autoComplete: 'current-password' | 'new-password'
   error?: string
-  /** Signup and reset show the meter; login does not. */
   showStrength?: boolean
   autoFocus?: boolean
   required?: boolean
@@ -100,7 +89,6 @@ export function PasswordField({
   )
 }
 
-/** "At least 8 characters" reads fine as a row, badly in a comma list. */
 function shortLabel(requirement: { label: string }): string {
   return requirement.label
     .replace(/^At least /, '')

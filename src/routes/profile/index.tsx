@@ -372,13 +372,13 @@ function ProfilePage() {
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   placeholder="Your name"
-                  className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
+                  className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
                 />
               </div>
             )}
             {editingField !== 'name' && (
               <textarea value={editValue} onChange={(e) => setEditValue(e.target.value)} rows={editingField === 'bio' ? 4 : 1}
-                className="mb-4 w-full resize-none rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+                className="mb-4 w-full resize-none rounded-card border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
             )}
             {editingField === 'name' && (
               <div className="mb-4">
@@ -386,7 +386,7 @@ function ProfilePage() {
                 <select
                   value={editGender}
                   onChange={(e) => setEditGender(e.target.value)}
-                  className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
+                  className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
                 >
                   <option value="">Select gender</option>
                   <option value="Male">Male</option>

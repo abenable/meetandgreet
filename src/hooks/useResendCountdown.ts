@@ -18,28 +18,14 @@ function writeSentAt(email: string, at: number) {
   try {
     window.sessionStorage.setItem(KEY_PREFIX + email, String(at))
   } catch {
-    // Private mode or blocked storage: the countdown just restarts.
   }
 }
 
-/**
- * Record that a code was just issued for this address, from outside the screen
- * that shows the countdown — the request step sends the code, the next screen
- * counts down against it.
- */
 export function markOtpSent(email: string) {
   if (typeof window === 'undefined' || !email) return
   writeSentAt(email, Date.now())
 }
 
-/**
- * Seconds left before a new code may be requested.
- *
- * Anchored to the moment the code was actually sent rather than to component
- * mount. The old screens reset a 60-second block on every mount without
- * sending anything, so navigating away and back locked the resend button for
- * another minute for no reason.
- */
 export function useResendCountdown(email: string) {
   const [remaining, setRemaining] = useState(0)
 
@@ -53,7 +39,6 @@ export function useResendCountdown(email: string) {
 
   useEffect(() => {
     if (!email) return
-    // First arrival on the screen means a code was just issued for us.
     if (readSentAt(email) === null) writeSentAt(email, Date.now())
     setRemaining(recompute())
     const timer = setInterval(() => setRemaining(recompute()), 1000)

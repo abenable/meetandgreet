@@ -221,7 +221,10 @@ export const getEventById = createServerFn({ method: 'GET' })
     if (!event) return null
 
     const isCreator = event.createdById === session.user.id
-    if (isCreator) return event
+    // One shape for both audiences: the join code is the only thing withheld,
+    // so it comes back null rather than absent. A union of two object shapes is
+    // what pushed every consumer into `as any`.
+    if (isCreator) return { ...event, canManage: true }
 
     // A private event is only visible to people who are actually connected to
     // it. Previously any signed-in user who knew (or guessed) an id got the
@@ -243,8 +246,8 @@ export const getEventById = createServerFn({ method: 'GET' })
       if (!attendee && !waitlisted) return null
     }
 
-    const { code, ...rest } = event
-    return rest
+    const { code: _code, ...rest } = event
+    return { ...rest, code: null as string | null, canManage: false }
   })
 
 async function leaveAllActiveEvents(userId: string, tx?: any) {

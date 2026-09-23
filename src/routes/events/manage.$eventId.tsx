@@ -29,7 +29,6 @@ import {
   getEventWaitlist,
   removeFromWaitlist,
 } from '#/server/events'
-import { getSession } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
 import { uploadImageToR2, maybeDeleteR2Image } from '#/lib/upload'
@@ -41,11 +40,6 @@ function ManageEventPage() {
   const { eventId } = useParams({ from: '/events/manage/$eventId' })
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-
-  const { data: session } = useQuery({
-    queryKey: ['session'],
-    queryFn: () => getSession(),
-  })
 
   const {
     data: event,
@@ -68,22 +62,26 @@ function ManageEventPage() {
     enabled: !!eventId,
   })
 
-  const attendeeCount = (event as any)?._count?.attendees ?? 0
+  const attendeeCount = event?._count?.attendees ?? 0
 
-  // Editable form state
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [location, setLocation] = useState('')
-  const [maxAttendees, setMaxAttendees] = useState<string>('')
-  const [startsAt, setStartsAt] = useState<string>('')
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    location: '',
+    maxAttendees: '',
+    startsAt: '',
+    photo: null as string | null,
+    isPublic: true,
+  })
+  const setField = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
+    setForm((prev) => ({ ...prev, [key]: value }))
   const [savedMsg, setSavedMsg] = useState(false)
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState<'attendees' | 'waitlist'>('attendees')
 
-  const [eventPhoto, setEventPhoto] = useState<string | null>(null)
-  const [eventIsPublic, setEventIsPublic] = useState(true)
   const [photoError, setPhotoError] = useState('')
   const [saveError, setSaveError] = useState('')
+  const [deleteText, setDeleteText] = useState('')
   const [confirmAction, setConfirmAction] = useState<
     | { kind: 'delete' }
     | { kind: 'remove'; userId: string; name: string }
@@ -100,11 +98,11 @@ function ManageEventPage() {
       const key = `events/${eventId}/photo-${crypto.randomUUID()}.jpg`
       const url = await uploadImageToR2(file, key)
 
-      if (eventPhoto?.startsWith('http')) {
-        await maybeDeleteR2Image(eventPhoto).catch(() => {})
+      if (form.photo?.startsWith('http')) {
+        await maybeDeleteR2Image(form.photo).catch(() => {})
       }
 
-      setEventPhoto(url)
+      setField('photo', url)
     } catch {
       setPhotoError('Failed to process image.')
     }
@@ -113,17 +111,19 @@ function ManageEventPage() {
 
   useEffect(() => {
     if (event) {
-      setName(event.name ?? '')
-      setDescription(event.description ?? '')
-      setLocation(event.location ?? '')
-      setMaxAttendees(event.maxAttendees != null ? String(event.maxAttendees) : '')
-      setStartsAt(event.startsAt ? toDatetimeLocalValue(event.startsAt) : '')
-      setEventPhoto(event.photo ?? null)
-      setEventIsPublic((event as any).isPublic ?? true)
+      setForm({
+        name: event.name ?? '',
+        description: event.description ?? '',
+        location: event.location ?? '',
+        maxAttendees: event.maxAttendees != null ? String(event.maxAttendees) : '',
+        startsAt: event.startsAt ? toDatetimeLocalValue(event.startsAt) : '',
+        photo: event.photo ?? null,
+        isPublic: event.isPublic ?? true,
+      })
     }
   }, [event])
 
-  const isCreator = !!session?.user?.id && (event as any)?.createdById === session.user.id
+  const canManage = event?.canManage === true
 
   const updateMutation = useMutation({
     mutationFn: updateEvent,
@@ -205,18 +205,17 @@ function ManageEventPage() {
   }
 
   const handleSave = () => {
-    const startsAtIso = startsAt ? localDatetimeToUTCISO(startsAt) : undefined
     updateMutation.mutate({
       data: {
         eventId,
         data: {
-          name: name.trim() || undefined,
-          description: description.trim() || undefined,
-          location: location.trim() || undefined,
-          maxAttendees: maxAttendees ? Number(maxAttendees) : undefined,
-          startsAt: startsAtIso,
-          photo: eventPhoto,
-          isPublic: eventIsPublic,
+          name: form.name.trim() || undefined,
+          description: form.description.trim() || undefined,
+          location: form.location.trim() || undefined,
+          maxAttendees: form.maxAttendees ? Number(form.maxAttendees) : undefined,
+          startsAt: form.startsAt ? localDatetimeToUTCISO(form.startsAt) : undefined,
+          photo: form.photo,
+          isPublic: form.isPublic,
         },
       },
     })
@@ -235,10 +234,15 @@ function ManageEventPage() {
     })
   }
 
-  const handleDelete = () => setConfirmAction({ kind: 'delete' })
+  const handleDelete = () => {
+    setDeleteText('')
+    setConfirmAction({ kind: 'delete' })
+  }
 
   const handleCopyLink = () => {
-    const link = `${window.location.origin}/events/join/${(event as any).code}`
+    const code = event?.code
+    if (!code) return
+    const link = `${window.location.origin}/events/join/${code}`
     navigator.clipboard.writeText(link).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
@@ -310,7 +314,7 @@ function ManageEventPage() {
 
   if (!event) {
     return (
-      <main className="page-wrap px-4 py-4">
+      <main className="page-wrap px-4 py-4 pb-nav">
         <div className="mb-5 flex items-center gap-2">
           <button
             onClick={() => navigate({ to: '/events' })}
@@ -334,9 +338,9 @@ function ManageEventPage() {
     )
   }
 
-  if (eventError || !isCreator) {
+  if (eventError || !canManage) {
     return (
-      <main className="page-wrap px-4 py-4">
+      <main className="page-wrap px-4 py-4 pb-nav">
         <div className="mb-5 flex items-center gap-2">
           <button
             onClick={() => navigate({ to: '/events' })}
@@ -361,7 +365,7 @@ function ManageEventPage() {
   }
 
   return (
-    <main className="page-wrap px-4 py-4">
+    <main className="page-wrap px-4 py-4 pb-nav">
       {/* Header */}
       <div className="mb-5 flex items-center gap-2">
         <button
@@ -377,7 +381,7 @@ function ManageEventPage() {
       {/* Event Code */}
       <div className="mb-6 rounded-2xl bg-[var(--mag-card)] shadow-sm p-4 text-center">
         <p className="text-sm font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Code</p>
-        <p className="mt-2 text-4xl font-mono font-bold tracking-widest text-[var(--mag-ink)]">{(event as any).code}</p>
+        <p className="mt-2 text-4xl font-mono font-bold tracking-widest text-[var(--mag-ink)]">{event.code}</p>
         <p className="mt-1 text-xs text-[var(--mag-ink-muted)]">Share this code so others can join</p>
         <button
           onClick={handleCopyLink}
@@ -395,16 +399,16 @@ function ManageEventPage() {
           <div>
             <label className="mb-1.5 block text-center text-sm font-medium text-[var(--mag-ink)]">Event Photo</label>
             <div className="flex justify-center">
-              {eventPhoto ? (
+              {form.photo ? (
                 <div className="relative inline-block">
-                <img src={eventPhoto} alt="Event" className="h-32 w-32 rounded-2xl object-cover" />
+                <img src={form.photo} alt="Event" className="h-32 w-32 rounded-2xl object-cover" />
                 <button
                   type="button"
                   onClick={() => {
-                    if (eventPhoto?.startsWith('http')) {
-                      maybeDeleteR2Image(eventPhoto).catch(() => {})
+                    if (form.photo?.startsWith('http')) {
+                      maybeDeleteR2Image(form.photo).catch(() => {})
                     }
-                    setEventPhoto(null)
+                    setField('photo', null)
                   }}
                   className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--mag-sale)] text-[var(--on-ink)]"
                 >
@@ -431,8 +435,8 @@ function ManageEventPage() {
             <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Event Name</label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={form.name}
+              onChange={(e) => setField('name', e.target.value)}
               className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
             />
           </div>
@@ -440,8 +444,8 @@ function ManageEventPage() {
           <div>
             <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Description</label>
             <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={form.description}
+              onChange={(e) => setField('description', e.target.value)}
               rows={3}
               className="w-full resize-none rounded-card bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
             />
@@ -453,8 +457,8 @@ function ManageEventPage() {
               <MapPin className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
               <input
                 type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                value={form.location}
+                onChange={(e) => setField('location', e.target.value)}
                 className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
               />
             </div>
@@ -465,8 +469,8 @@ function ManageEventPage() {
             <input
               type="number"
               min={1}
-              value={maxAttendees}
-              onChange={(e) => setMaxAttendees(e.target.value)}
+              value={form.maxAttendees}
+              onChange={(e) => setField('maxAttendees', e.target.value)}
               placeholder="Optional"
               className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
             />
@@ -476,15 +480,15 @@ function ManageEventPage() {
             <label className="mb-2 block text-center text-sm font-medium text-[var(--mag-ink)]">Visibility</label>
             <SegmentedControl
               aria-label="Event visibility"
-              value={eventIsPublic ? 'public' : 'private'}
-              onChange={(v) => setEventIsPublic(v === 'public')}
+              value={form.isPublic ? 'public' : 'private'}
+              onChange={(v) => setField('isPublic', v === 'public')}
               segments={[
                 { value: 'public', label: 'Public' },
                 { value: 'private', label: 'Private' },
               ]}
             />
             <p className="mt-1 text-center text-xs text-[var(--mag-ink-muted)]">
-              {eventIsPublic
+              {form.isPublic
                 ? 'Anyone can find this event on the browse page.'
                 : 'Only people with the code or link can join.'}
             </p>
@@ -496,8 +500,8 @@ function ManageEventPage() {
               <Calendar className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
               <input
                 type="datetime-local"
-                value={startsAt}
-                onChange={(e) => setStartsAt(e.target.value)}
+                value={form.startsAt}
+                onChange={(e) => setField('startsAt', e.target.value)}
                 className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
               />
             </div>
@@ -724,12 +728,37 @@ function ManageEventPage() {
             <Button variant="ghost" block onClick={() => setConfirmAction(null)}>
               Cancel
             </Button>
-            <Button variant="danger" block onClick={runConfirmedAction}>
+            <Button
+              variant="danger"
+              block
+              disabled={
+                confirmAction?.kind === 'delete' && deleteText.trim().toUpperCase() !== 'DELETE'
+              }
+              onClick={runConfirmedAction}
+            >
               {confirmAction ? CONFIRM_COPY[confirmAction.kind].action : ''}
             </Button>
           </>
         }
-      />
+      >
+        {confirmAction?.kind === 'delete' && (
+          <>
+            <label
+              htmlFor="confirm-delete-event"
+              className="mb-2 block text-body-sm font-semibold text-ink-soft"
+            >
+              Type DELETE to confirm
+            </label>
+            <input
+              id="confirm-delete-event"
+              value={deleteText}
+              onChange={(e) => setDeleteText(e.target.value)}
+              autoComplete="off"
+              className="h-11 w-full rounded-full bg-field px-4 text-body text-ink outline-none transition-[background-color,box-shadow] duration-200 focus:bg-canvas-raised focus:shadow-md"
+            />
+          </>
+        )}
+      </Sheet>
     </main>
   )
 }

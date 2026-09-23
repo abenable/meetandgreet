@@ -5,7 +5,7 @@ import { Calendar, Check, Globe } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import { getMyActiveEvent } from '#/server/events'
 import { PageHeader } from '#/components/PageHeader'
-import { buttonClasses, Card, SegmentedControl, Skeleton, useToast } from '#/components/ui'
+import { buttonClasses, Card, Select, Skeleton, useToast } from '#/components/ui'
 import { cn } from '#/lib/cn'
 
 export const Route = createFileRoute('/settings/discovery')({ component: DiscoverySettingsPage })
@@ -94,12 +94,22 @@ function DiscoverySettingsPage() {
 
       <section className="mb-7">
         <h2 className="mb-2 text-label text-ink-faint">Show me</h2>
-        <SegmentedControl
+        <Select
           aria-label="Who to show in discovery"
-          value={showMe as (typeof SHOW_ME_OPTIONS)[number]}
-          onChange={(option) => save.mutate({ data: { prefShowMe: option } })}
-          segments={SHOW_ME_OPTIONS.map((option) => ({ value: option, label: option }))}
-        />
+          value={showMe}
+          disabled={save.isPending}
+          onChange={(e) =>
+            save.mutate({
+              data: { prefShowMe: e.target.value as (typeof SHOW_ME_OPTIONS)[number] },
+            })
+          }
+        >
+          {SHOW_ME_OPTIONS.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </Select>
       </section>
 
       <section>

@@ -193,7 +193,7 @@ function OnboardingPage() {
                     <div key={i} className="group relative aspect-[3/4] overflow-hidden rounded-xl bg-[var(--mag-surface)]">
                       <AvatarImage src={url} alt={`Photo ${i + 1}`} />
                       {i === 0 && (
-                        <span className="absolute left-1 top-1 rounded-full bg-[var(--mag-ink)]/90 px-1.5 py-0.5 text-xs font-bold text-[var(--mag-bg)]">
+                        <span className="absolute left-1 top-1 rounded-full bg-[var(--mag-ink)]/90 px-1.5 py-0.5 text-xs font-bold text-[var(--on-ink)]">
                           AVATAR
                         </span>
                       )}
@@ -258,7 +258,7 @@ function OnboardingPage() {
                       onClick={() => setGender(gender === g ? '' : g)}
                       className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                         gender === g
-                          ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
+                          ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
                           : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink)] hover:bg-[var(--mag-surface)]'
                       }`}
                     >
@@ -322,7 +322,7 @@ function OnboardingPage() {
           {step > 1 && (
             <button
               onClick={() => goTo((step - 1) as 1 | 2 | 3 | 4)}
-              className="rounded-full bg-[var(--mag-card)] shadow-sm px-8 py-3 text-base font-semibold text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+              className="rounded-full bg-[var(--mag-ink)] shadow-sm px-8 py-3 text-base font-semibold text-[var(--on-ink)] transition hover:opacity-90"
             >
               Back
             </button>
@@ -330,7 +330,7 @@ function OnboardingPage() {
           <button
             onClick={handleContinue}
             disabled={!stepDone || save.isPending}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-8 py-3 text-base font-semibold text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-40 disabled:active:scale-100"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-8 py-3 text-base font-semibold text-[var(--on-ink)] transition hover:opacity-80 active:scale-95 disabled:opacity-40 disabled:active:scale-100"
           >
             {step < totalSteps ? (
               <>

@@ -174,7 +174,7 @@ function ShareJoinPage() {
                   search: { redirect: `/events/join/${code}` },
                 })
               }
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3 text-base font-bold !text-[var(--mag-bg)] transition hover:opacity-80"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3 text-base font-bold !text-[var(--on-ink)] transition hover:opacity-80"
             >
               <LogIn className="h-4 w-4" />
               Log in to Join
@@ -183,7 +183,7 @@ function ShareJoinPage() {
 
           <button
             onClick={() => navigate({ to: '/events' })}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-card)] shadow-sm py-3 text-base font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] shadow-sm py-3 text-base font-medium text-[var(--on-ink)] transition hover:opacity-90"
           >
             Browse Events
           </button>
@@ -236,13 +236,13 @@ function ShareJoinPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => { setConfirmInfo(null); navigate({ to: '/events' }) }}
-                  className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-base font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                  className="flex-1 rounded-full bg-[var(--mag-ink)] shadow-sm py-2.5 text-base font-medium text-[var(--on-ink)] transition hover:opacity-90"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => doJoin(true)}
-                  className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-base font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+                  className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-base font-bold text-[var(--on-ink)] transition hover:opacity-80"
                 >
                   Switch Event
                 </button>
@@ -251,7 +251,7 @@ function ShareJoinPage() {
           ) : (
             <button
               onClick={() => doJoin()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3 text-base font-bold !text-[var(--mag-bg)] transition hover:opacity-80"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3 text-base font-bold !text-[var(--on-ink)] transition hover:opacity-80"
             >
               {event && event.startsAt && new Date(event.startsAt) > new Date() ? (
                 <>

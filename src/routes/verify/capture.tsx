@@ -120,7 +120,7 @@ function VerifyCapturePage() {
           </p>
           <button
             onClick={() => navigate({ to: '/profile' })}
-            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
+            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--on-ink)] transition hover:opacity-80 active:scale-95"
           >
             Back to Profile
           </button>
@@ -148,7 +148,7 @@ function VerifyCapturePage() {
           )}
           <button
             onClick={() => void startCamera()}
-            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
+            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--on-ink)] transition hover:opacity-80 active:scale-95"
           >
             I am Ready
           </button>
@@ -199,14 +199,14 @@ function VerifyCapturePage() {
             <button
               onClick={retake}
               disabled={submitMutation.isPending}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--mag-card)] shadow-sm py-3 text-base font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--mag-ink)] shadow-sm py-3 text-base font-medium text-[var(--on-ink)] transition hover:opacity-90 disabled:opacity-50"
             >
               <RefreshCw className="h-4 w-4" /> Retake
             </button>
             <button
               onClick={() => submitMutation.mutate({ data: { imageBase64: capture } })}
               disabled={submitMutation.isPending}
-              className="flex flex-1 items-center justify-center rounded-full bg-[var(--mag-ink)] py-3 text-base font-bold text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-50"
+              className="flex flex-1 items-center justify-center rounded-full bg-[var(--mag-ink)] py-3 text-base font-bold text-[var(--on-ink)] transition hover:opacity-80 active:scale-95 disabled:opacity-50"
             >
               {submitMutation.isPending ? 'Submitting…' : 'Submit for review'}
             </button>
@@ -226,7 +226,7 @@ function VerifyCapturePage() {
           </p>
           <button
             onClick={() => navigate({ to: '/profile' })}
-            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
+            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--on-ink)] transition hover:opacity-80 active:scale-95"
           >
             Back to Profile
           </button>

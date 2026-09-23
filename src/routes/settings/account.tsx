@@ -108,7 +108,7 @@ function AccountSettingsPage() {
         description="Your profile is removed from discovery, events and every chat. Your email is permanently blocked from registering again. This cannot be undone."
         footer={
           <>
-            <Button variant="outline" block onClick={() => setConfirmDelete(false)}>
+            <Button variant="ghost" block onClick={() => setConfirmDelete(false)}>
               Cancel
             </Button>
             <Button

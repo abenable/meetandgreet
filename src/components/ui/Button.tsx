@@ -14,9 +14,9 @@ export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-ink text-on-ink shadow-sm hover:shadow-md hover:opacity-90',
-  outline: 'bg-canvas-raised text-ink shadow-sm hover:bg-canvas-soft hover:shadow-md',
-  soft: 'bg-canvas-soft text-ink hover:bg-hairline',
-  ghost: 'bg-transparent text-ink-muted hover:bg-canvas-soft hover:text-ink',
+  outline: 'bg-ink text-on-ink shadow-sm hover:shadow-md hover:opacity-90',
+  soft: 'bg-ink text-on-ink shadow-sm hover:shadow-md hover:opacity-90',
+  ghost: 'bg-transparent text-ink hover:bg-canvas-soft',
   danger: 'bg-danger text-white shadow-sm hover:shadow-md hover:opacity-90',
   scrim: 'bg-black/40 text-on-scrim backdrop-blur-md hover:bg-black/60',
 }

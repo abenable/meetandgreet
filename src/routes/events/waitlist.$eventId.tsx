@@ -61,7 +61,7 @@ function WaitlistRoomPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg font-bold text-[var(--mag-ink)]">{event.name}</h2>
-                  <span className="shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-xs font-bold text-[var(--mag-bg)]">Waitlisted</span>
+                  <span className="shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-xs font-bold text-[var(--on-ink)]">Waitlisted</span>
                 </div>
                 <p className="mt-0.5 text-sm text-[var(--mag-ink-soft)]">{event.description}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--mag-ink-muted)]">
@@ -83,7 +83,7 @@ function WaitlistRoomPage() {
             )}
             <button
               onClick={handleLeave}
-              className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-sm font-bold text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+              className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-full bg-[var(--mag-ink)] shadow-sm py-2.5 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-90"
             >
               Leave Waitlist
             </button>

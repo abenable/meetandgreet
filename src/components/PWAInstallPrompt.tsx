@@ -29,7 +29,7 @@ export default function PWAInstallPrompt() {
         </button>
         <button
           onClick={() => prompt()}
-          className="shrink-0 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-base font-medium text-[var(--mag-bg)] transition active:scale-95"
+          className="shrink-0 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-base font-medium text-[var(--on-ink)] transition active:scale-95"
         >
           Install
         </button>

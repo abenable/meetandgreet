@@ -39,7 +39,7 @@ function TopPicksPage() {
             <div className="flex items-center justify-around p-2">
               <button className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-surface)] transition hover:bg-[var(--mag-line)]"><X className="h-4 w-4 text-[var(--mag-ink-soft)]" /></button>
               <button className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-surface)] transition hover:bg-[var(--mag-line)]"><Star className="h-4 w-4 text-[var(--mag-ink-soft)]" /></button>
-              <button className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-ink)] transition hover:opacity-80 active:scale-95"><Heart className="h-4 w-4 text-[var(--mag-bg)]" /></button>
+              <button className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mag-ink)] transition hover:opacity-80 active:scale-95"><Heart className="h-4 w-4 text-[var(--on-ink)]" /></button>
             </div>
           </div>
         ))}

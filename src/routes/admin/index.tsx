@@ -98,7 +98,7 @@ function TabButton({ active, onClick, icon, label }: { active: boolean; onClick:
       onClick={onClick}
       className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition ${
         active
-          ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
+          ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
           : 'bg-[var(--mag-surface)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-line)]'
       }`}
     >
@@ -228,7 +228,7 @@ function UsersTab() {
             onClick={() => setFilter(f.key)}
             className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
               filter === f.key
-                ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
+                ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
                 : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
             }`}
           >
@@ -423,7 +423,7 @@ function EventsTab() {
                         deleteMutation.mutate({ data: event.id })
                       }
                     }}
-                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm py-1.5 text-xs font-medium text-[var(--mag-sale)] transition hover:bg-[var(--mag-surface)]"
+                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-ink)] shadow-sm py-1.5 text-xs font-medium text-[var(--mag-sale)] transition hover:opacity-90"
                     disabled={deleteMutation.isPending}
                   >
                     <Trash2 className="h-3 w-3" /> Delete
@@ -793,7 +793,7 @@ function SponsorsTab() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="truncate text-base font-semibold text-[var(--mag-ink)]">{event.name}</span>
-                      <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-xs font-bold text-[var(--mag-bg)]">
+                      <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-xs font-bold text-[var(--on-ink)]">
                         <Star className="h-3 w-3" /> Sponsored
                       </span>
                     </div>

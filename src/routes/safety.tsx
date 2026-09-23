@@ -21,7 +21,7 @@ function SafetyPage() {
         <h1 className="text-xl font-bold text-[var(--mag-ink)]">Safety Center</h1>
       </div>
 
-      <div className="mb-6 rounded-2xl bg-[var(--mag-ink)] p-4 md:p-5 text-[var(--mag-bg)]">
+      <div className="mb-6 rounded-2xl bg-[var(--mag-ink)] p-4 md:p-5 text-[var(--on-ink)]">
         <div className="flex items-center gap-2">
           <Shield className="h-6 w-6" />
           <h2 className="text-xl font-bold">Your safety matters</h2>

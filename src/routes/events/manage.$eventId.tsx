@@ -408,7 +408,7 @@ function ManageEventPage() {
           <p className="text-base font-semibold text-[var(--mag-ink)]">You don't have permission to manage this event.</p>
           <button
             onClick={() => navigate({ to: '/events' })}
-            className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+            className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-2.5 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80"
           >
             Go Back
           </button>
@@ -433,7 +433,7 @@ function ManageEventPage() {
           <p className="text-base font-semibold text-[var(--mag-ink)]">You don't have permission to manage this event.</p>
           <button
             onClick={() => navigate({ to: '/events' })}
-            className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+            className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-2.5 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80"
           >
             Go Back
           </button>
@@ -487,7 +487,7 @@ function ManageEventPage() {
                     }
                     setEventPhoto(null)
                   }}
-                  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--mag-sale)] text-[var(--mag-bg)]"
+                  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--mag-sale)] text-[var(--on-ink)]"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -561,7 +561,7 @@ function ManageEventPage() {
                 onClick={() => setEventIsPublic(true)}
                 className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   eventIsPublic
-                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
+                    ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
                     : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
                 }`}
               >
@@ -572,7 +572,7 @@ function ManageEventPage() {
                 onClick={() => setEventIsPublic(false)}
                 className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   !eventIsPublic
-                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
+                    ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
                     : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
                 }`}
               >
@@ -607,7 +607,7 @@ function ManageEventPage() {
           <button
             onClick={handleSave}
             disabled={updateMutation.isPending}
-            className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-3.5 w-3.5" />
             {updateMutation.isPending ? 'Saving…' : 'Save Changes'}
@@ -628,7 +628,7 @@ function ManageEventPage() {
             <button
               onClick={handleToggleActive}
               disabled={toggleActiveMutation.isPending}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--mag-sale)] px-5 py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--mag-sale)] px-5 py-2.5 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Square className="h-3.5 w-3.5" /> Stop Event
             </button>
@@ -636,7 +636,7 @@ function ManageEventPage() {
             <button
               onClick={handleToggleActive}
               disabled={toggleActiveMutation.isPending}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-5 py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-5 py-2.5 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Play className="h-3.5 w-3.5" /> Start Event
             </button>
@@ -742,7 +742,7 @@ function ManageEventPage() {
                 })
               }}
               disabled={updateSponsorMutation.isPending}
-              className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-3.5 w-3.5" />
               {updateSponsorMutation.isPending ? 'Saving…' : 'Save Sponsor'}
@@ -786,7 +786,7 @@ function ManageEventPage() {
             onClick={() => setActiveTab(t.key)}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-semibold transition ${
               activeTab === t.key
-                ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
+                ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
                 : 'text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
             }`}
           >
@@ -906,7 +906,7 @@ function ManageEventPage() {
                       }
                     }}
                     disabled={!postContent.trim() || createPostMutation.isPending}
-                    className="shrink-0 rounded-full bg-[var(--mag-ink)] px-4 py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="shrink-0 rounded-full bg-[var(--mag-ink)] px-4 py-2.5 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {createPostMutation.isPending ? 'Posting…' : 'Post'}
                   </button>
@@ -1013,7 +1013,7 @@ function ManageEventPage() {
                     <button
                       onClick={() => handleRemoveWaitlist(person.userId, person.name)}
                       disabled={removeWaitlistMutation.isPending}
-                      className="shrink-0 rounded-full bg-[var(--mag-card)] shadow-sm px-3 py-1.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-sale)]/30 hover:text-[var(--mag-sale)] disabled:opacity-50"
+                      className="shrink-0 rounded-full bg-[var(--mag-ink)] shadow-sm px-3 py-1.5 text-xs font-medium text-[var(--on-ink)] transition hover:border-[var(--mag-sale)]/30 hover:text-[var(--mag-sale)] disabled:opacity-50"
                     >
                       Remove
                     </button>
@@ -1059,13 +1059,13 @@ function ManageEventPage() {
                     <div className="mt-2 flex gap-2">
                       <button
                         onClick={() => handleBlock(report.reportedId, (report.reported as any)?.name)}
-                        className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-sale)] px-3 py-1.5 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+                        className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-sale)] px-3 py-1.5 text-xs font-bold text-[var(--on-ink)] transition hover:opacity-80"
                       >
                         <Ban className="h-3 w-3" /> Block user
                       </button>
                       <button
                         onClick={() => navigate({ to: '/chats/$chatId', params: { chatId: `org_${eventId}_${report.reportedId}` } })}
-                        className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm px-3 py-1.5 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                        className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-ink)] shadow-sm px-3 py-1.5 text-xs font-medium text-[var(--on-ink)] transition hover:opacity-90"
                       >
                         <MessageCircle className="h-3 w-3" /> Message
                       </button>
@@ -1109,7 +1109,7 @@ function ManageEventPage() {
                       <button
                         onClick={() => handleUnblock(b.userId)}
                         disabled={unblockMutation.isPending}
-                        className="shrink-0 rounded-full bg-[var(--mag-card)] shadow-sm px-3 py-1.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:border-[var(--mag-ink)] hover:text-[var(--mag-ink)] disabled:opacity-50"
+                        className="shrink-0 rounded-full bg-[var(--mag-ink)] shadow-sm px-3 py-1.5 text-xs font-medium text-[var(--on-ink)] transition hover:border-[var(--mag-ink)] hover:text-[var(--on-ink)] disabled:opacity-50"
                       >
                         Unblock
                       </button>

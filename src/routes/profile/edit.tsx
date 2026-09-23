@@ -275,7 +275,7 @@ function EditProfilePage() {
       </div>
 
       <div className={cn('mt-8 flex gap-2')}>
-        <Link to="/profile" className={buttonClasses({ variant: 'outline', block: true })}>
+        <Link to="/profile" className={buttonClasses({ variant: 'ghost', block: true })}>
           Cancel
         </Link>
         <Button

@@ -61,7 +61,7 @@ function NotificationsPage() {
           <button
             onClick={() => markAllMutation.mutate({ data: undefined })}
             disabled={markAllMutation.isPending}
-            className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm px-3 py-1.5 text-xs font-semibold text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-ink)] shadow-sm px-3 py-1.5 text-xs font-semibold text-[var(--on-ink)] transition hover:opacity-90 disabled:opacity-50"
           >
             <CheckCheck className="h-3 w-3" /> Mark all read
           </button>

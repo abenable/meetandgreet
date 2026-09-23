@@ -409,7 +409,7 @@ function ChatPage() {
         description="You disappear from each other everywhere in the app, and this chat closes."
         footer={
           <>
-            <Button variant="outline" block onClick={() => setBlockOpen(false)}>
+            <Button variant="ghost" block onClick={() => setBlockOpen(false)}>
               Cancel
             </Button>
             <Button

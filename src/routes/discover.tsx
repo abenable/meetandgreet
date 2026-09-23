@@ -320,7 +320,7 @@ function DiscoverPage() {
         <p className="mt-2 max-w-xs text-base text-[var(--mag-ink-soft)]">
           Your discovery is set to event-only in Settings. Check into an event to start swiping, or switch back to the global pool.
         </p>
-        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-bold !text-[var(--mag-bg)] no-underline transition hover:opacity-80 active:scale-95">
+        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-bold !text-[var(--on-ink)] no-underline transition hover:opacity-80 active:scale-95">
           Browse Events <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -345,7 +345,7 @@ function DiscoverPage() {
             ? "Other attendees haven't joined, or you've already swiped through everyone in this event."
             : "Nobody new to show right now, or you've already swiped through everyone."}
         </p>
-        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-bold !text-[var(--mag-bg)] no-underline transition hover:opacity-80 active:scale-95">
+        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-bold !text-[var(--on-ink)] no-underline transition hover:opacity-80 active:scale-95">
           Browse Events <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -594,7 +594,7 @@ function DiscoverPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setReportModalOpen(false)}
-                    className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-base font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                    className="flex-1 rounded-full bg-[var(--mag-ink)] shadow-sm py-2.5 text-base font-medium text-[var(--on-ink)] transition hover:opacity-90"
                   >
                     Cancel
                   </button>
@@ -603,7 +603,7 @@ function DiscoverPage() {
                     disabled={
                       !reportReason || (reportReason === 'Other' && !reportCustom.trim()) || reportMutation.isPending
                     }
-                    className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-base font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 active:scale-95"
+                    className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-base font-bold text-[var(--on-ink)] transition hover:opacity-80 disabled:opacity-50 active:scale-95"
                   >
                     {reportMutation.isPending ? 'Submitting…' : 'Submit Report'}
                   </button>

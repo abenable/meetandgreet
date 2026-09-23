@@ -127,7 +127,7 @@ function CreateEventPage() {
           <p className="mt-1 text-xs text-[var(--mag-ink-muted)]">Share this code or link so others can join</p>
           <button
             onClick={handleCopyLink}
-            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80"
           >
             {copied ? 'Copied!' : 'Copy Share Link'}
           </button>
@@ -150,7 +150,7 @@ function CreateEventPage() {
               <button
                 type="button"
                 onClick={() => setPhoto(null)}
-                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--mag-sale)] text-[var(--mag-bg)]"
+                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--mag-sale)] text-[var(--on-ink)]"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -179,7 +179,7 @@ function CreateEventPage() {
               onClick={() => setIsPublic(true)}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                 isPublic
-                  ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
+                  ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
                   : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
               }`}
             >
@@ -190,7 +190,7 @@ function CreateEventPage() {
               onClick={() => setIsPublic(false)}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                 !isPublic
-                  ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
+                  ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
                   : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
               }`}
             >
@@ -240,7 +240,7 @@ function CreateEventPage() {
       )}
       <div className="mt-6 flex justify-center">
         <button onClick={() => handleCreate()} disabled={!name.trim() || !!code}
-          className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3.5 text-base font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed">
+          className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3.5 text-base font-bold text-[var(--on-ink)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed">
           <Plus className="h-4 w-4" />Create Event
         </button>
       </div>
@@ -259,13 +259,13 @@ function CreateEventPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmModal(null)}
-                className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-base font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                className="flex-1 rounded-full bg-[var(--mag-ink)] shadow-sm py-2.5 text-base font-medium text-[var(--on-ink)] transition hover:opacity-90"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmCreate}
-                className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-base font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+                className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-base font-bold text-[var(--on-ink)] transition hover:opacity-80"
               >
                 Leave & Create
               </button>

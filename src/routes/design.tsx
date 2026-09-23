@@ -284,7 +284,7 @@ function DesignKitPage() {
           description="You'll stop appearing to other attendees, and lose access to the event chat."
           footer={
             <>
-              <Button variant="outline" block onClick={() => setSheetOpen(false)}>
+              <Button variant="ghost" block onClick={() => setSheetOpen(false)}>
                 Cancel
               </Button>
               <Button variant="danger" block onClick={() => setSheetOpen(false)}>

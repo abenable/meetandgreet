@@ -108,7 +108,6 @@ function SettingsPage() {
           block
           size="lg"
           onClick={() => setConfirmLogout(true)}
-          className="text-ink-muted"
         >
           <LogOut className="h-4 w-4" /> Log out
         </Button>
@@ -121,7 +120,7 @@ function SettingsPage() {
         description="You'll need your email and password to get back in."
         footer={
           <>
-            <Button variant="outline" block onClick={() => setConfirmLogout(false)}>
+            <Button variant="ghost" block onClick={() => setConfirmLogout(false)}>
               Cancel
             </Button>
             <Button block loading={logout.isPending} onClick={() => logout.mutate()}>

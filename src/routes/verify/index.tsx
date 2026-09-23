@@ -29,7 +29,7 @@ function VerifyIntroPage() {
 
       <Link
         to="/verify/capture"
-        className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 no-underline"
+        className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--on-ink)] transition hover:opacity-80 active:scale-95 no-underline"
       >
         Start Verification
         <ChevronRight className="h-4 w-4" />

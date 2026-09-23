@@ -55,7 +55,7 @@ export default function Header() {
             >
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <span className="absolute top-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--mag-sale)] px-1 text-xs font-bold text-[var(--mag-bg)]">
+                <span className="absolute top-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--mag-sale)] px-1 text-xs font-bold text-[var(--on-ink)]">
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}

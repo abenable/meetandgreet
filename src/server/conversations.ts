@@ -340,6 +340,15 @@ function parseChatId(
   throw new Error('Unknown chat type')
 }
 
+async function getPeerPresence(peerId: string) {
+  const peer = await prisma.user.findUnique({
+    where: { id: peerId },
+    select: { lastActiveDate: true, profile: { select: { showOnlineStatus: true } } },
+  })
+  if (!peer || peer.profile?.showOnlineStatus === false) return null
+  return peer.lastActiveDate
+}
+
 export const getChatMessages = createServerFn({ method: 'GET' })
   .inputValidator(
     z.union([
@@ -381,9 +390,12 @@ export const getChatMessages = createServerFn({ method: 'GET' })
       const hasMore = page.length > limit
       const msgs = (hasMore ? page.slice(0, limit) : page).reverse()
 
+      const peerId = match.user1Id === myId ? match.user2Id : match.user1Id
+
       return {
         type: 'match' as const,
-        peerId: match.user1Id === myId ? match.user2Id : match.user1Id,
+        peerId,
+        peerLastActiveDate: await getPeerPresence(peerId),
         messages: msgs.map((m) => ({ ...m, isMine: m.senderId === myId })),
         nextCursor: hasMore ? msgs[0]?.id ?? null : null,
       }
@@ -428,6 +440,7 @@ export const getChatMessages = createServerFn({ method: 'GET' })
       type: 'organizer' as const,
       peerId,
       eventId,
+      peerLastActiveDate: await getPeerPresence(peerId),
       messages: msgs.map((m) => ({ ...m, isMine: m.senderId === myId })),
       nextCursor: hasMore ? msgs[0]?.id ?? null : null,
     }

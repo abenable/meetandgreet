@@ -51,14 +51,15 @@ export function Switch({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
-          'relative mt-0.5 h-7 w-12 shrink-0 rounded-full transition disabled:opacity-50',
+          'relative mt-0.5 h-7 w-12 shrink-0 rounded-full transition-colors duration-300 ease-out disabled:opacity-50',
           checked ? 'bg-ink shadow-sm' : 'bg-hairline',
         )}
       >
         <span
           className={cn(
-            'absolute top-1 h-5 w-5 rounded-full bg-canvas-raised shadow-sm transition-all',
-            checked ? 'left-6' : 'left-1',
+            'absolute top-1 left-1 h-5 w-5 rounded-full bg-canvas-raised shadow-sm',
+            'transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none',
+            checked ? 'translate-x-5' : 'translate-x-0',
           )}
         />
       </button>

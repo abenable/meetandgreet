@@ -1,147 +1,153 @@
-import { createFileRoute, useParams, useNavigate } from '@tanstack/react-router'
-import { useEffect, useMemo, useState, useRef } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Skeleton } from '@heroui/react'
-import { ArrowLeft, Send, Check, CheckCheck, Ban, Mic, Play, Pause, Square, X } from 'lucide-react'
-import { getChatMessages, sendChatMessage, markChatRead, getIcebreakers, uploadVoiceMessage } from '#/server/conversations'
+import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft, Ban, MessageCircle } from 'lucide-react'
+import {
+  getChatMessages,
+  getIcebreakers,
+  markChatRead,
+  sendChatMessage,
+  uploadVoiceMessage,
+} from '#/server/conversations'
 import { getProfileByUserId } from '#/server/profiles'
 import { blockUser } from '#/server/blocks'
-import AvatarImage from '#/components/AvatarImage'
-import { VerifiedBadge } from '#/components/VerifiedBadge'
 import { useChatWebSocket } from '#/hooks/useWebSocket'
+import { Avatar, Button, EmptyState, Sheet, Skeleton, useToast } from '#/components/ui'
+import { VerifiedBadge } from '#/components/VerifiedBadge'
+import {
+  DaySeparator,
+  MessageBubble,
+  TypingBubble,
+  type ChatMessageView,
+  type MessageStatus,
+} from '#/components/chat/MessageBubble'
+import { Composer } from '#/components/chat/Composer'
+import { dayKey, formatDayLabel, formatPresence, isOnline } from '#/components/chat/time'
 
-export const Route = createFileRoute('/chats/$chatId')({ component: UnifiedChatPage })
+export const Route = createFileRoute('/chats/$chatId')({ component: ChatPage })
 
-function formatDuration(seconds: number) {
-  const m = Math.floor(seconds / 60)
-  const s = Math.floor(seconds % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
+const GROUP_WINDOW_MS = 5 * 60 * 1000
+
+interface PendingMessage {
+  tempId: string
+  content: string
+  type: 'text' | 'voice'
+  audioUrl?: string
+  blob?: Blob
+  createdAt: Date
+  status: MessageStatus
 }
 
-function VoiceMessagePlayer({ url, isMine }: { url: string; isMine: boolean }) {
-  const [playing, setPlaying] = useState(false)
-  const [duration, setDuration] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-
-  useEffect(() => {
-    const audio = new Audio()
-    audio.preload = 'metadata'
-    audio.src = url
-    audioRef.current = audio
-    audio.onloadedmetadata = () => setDuration(audio.duration)
-    audio.onended = () => setPlaying(false)
-    audio.ontimeupdate = () => setCurrentTime(audio.currentTime)
-    return () => {
-      audio.pause()
-      audio.src = ''
-      audioRef.current = null
-    }
-  }, [url])
-
-  const toggle = () => {
-    if (!audioRef.current) return
-    if (playing) {
-      audioRef.current.pause()
-      setPlaying(false)
-    } else {
-      audioRef.current.play()
-      setPlaying(true)
-    }
-  }
-
-  return (
-    <div className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 ${isMine ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]' : 'bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
-      <button
-        onClick={toggle}
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isMine ? 'bg-white/20 text-white' : 'bg-[var(--mag-line)] text-[var(--mag-ink)]'}`}
-        aria-label={playing ? 'Pause voice message' : 'Play voice message'}
-      >
-        {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-      </button>
-      <span className="min-w-[3rem] text-xs font-medium">{playing ? formatDuration(currentTime) : formatDuration(duration)}</span>
-      {/* No second <audio> element here: it duplicated the download of every
-          voice clip, since playback runs entirely through the Audio object
-          created above. */}
-    </div>
-  )
-}
-
-function UnifiedChatPage() {
+function ChatPage() {
   const { chatId } = useParams({ from: '/chats/$chatId' })
   const navigate = useNavigate()
   const qc = useQueryClient()
-  const [input, setInput] = useState('')
-  const [sending, setSending] = useState(false)
-  const [sendError, setSendError] = useState<string | null>(null)
-  const [blockDialogOpen, setBlockDialogOpen] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+  const { toast } = useToast()
 
-  // Voice recording state
-  const [isRecording, setIsRecording] = useState(false)
-  const [recordingDuration, setRecordingDuration] = useState(0)
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const topSentinelRef = useRef<HTMLDivElement>(null)
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const restoreRef = useRef<number | null>(null)
 
-  // Use WebSocket for real-time updates
+  const [blockOpen, setBlockOpen] = useState(false)
+  const [pending, setPending] = useState<PendingMessage[]>([])
+  const [playedIds, setPlayedIds] = useState<Set<string>>(new Set())
+
   const { connected, sendTyping, typingUsers } = useChatWebSocket(chatId)
 
-  // The newest page. Older history is fetched on demand into `olderMessages`
-  // below — without that, paginating the server silently truncated every
-  // conversation to its most recent 50 messages with no way to scroll back.
   const { data: chatData, isLoading, error } = useQuery({
     queryKey: ['chat', chatId],
     queryFn: () => getChatMessages({ data: { chatId } }),
-    // Keep a slow poll even when the socket is up. Disabling it on `connected`
-    // meant a socket that connected but delivered nothing left the thread
-    // frozen with no fallback — which is exactly what happened while the
-    // server never subscribed anyone to their own user topic.
     refetchInterval: connected ? 30000 : 5000,
     refetchOnWindowFocus: true,
   })
 
-  type ChatMessage = NonNullable<typeof chatData>['messages'][number]
-  const [olderMessages, setOlderMessages] = useState<ChatMessage[]>([])
+  type ServerMessage = NonNullable<typeof chatData>['messages'][number]
+  const [older, setOlder] = useState<ServerMessage[]>([])
   const [olderCursor, setOlderCursor] = useState<string | null>(null)
   const [loadingOlder, setLoadingOlder] = useState(false)
 
-  // Reset paged-in history when switching conversations.
   useEffect(() => {
-    setOlderMessages([])
+    setOlder([])
     setOlderCursor(null)
+    setPending([])
   }, [chatId])
 
   const hasOlder = (olderCursor ?? chatData?.nextCursor ?? null) !== null
 
-  const loadOlder = async () => {
+  const loadOlder = useCallback(async () => {
     const cursor = olderCursor ?? chatData?.nextCursor ?? null
     if (!cursor || loadingOlder) return
     setLoadingOlder(true)
+    const container = scrollRef.current
+    restoreRef.current = container ? container.scrollHeight - container.scrollTop : null
     try {
       const page = await getChatMessages({ data: { chatId, before: cursor } })
-      setOlderMessages((prev) => [...page.messages, ...prev])
+      setOlder((prev) => [...page.messages, ...prev])
       setOlderCursor(page.nextCursor ?? null)
     } catch {
-      // Leave the button available to retry.
+      restoreRef.current = null
     } finally {
       setLoadingOlder(false)
     }
-  }
+  }, [chatId, chatData?.nextCursor, loadingOlder, olderCursor])
 
-  // Deduplicate in case a poll refetch overlaps a page already loaded.
-  const messages = useMemo(() => {
+  useLayoutEffect(() => {
+    const container = scrollRef.current
+    const offset = restoreRef.current
+    if (!container || offset === null) return
+    container.scrollTop = container.scrollHeight - offset
+    restoreRef.current = null
+  }, [older])
+
+  useEffect(() => {
+    const sentinel = topSentinelRef.current
+    if (!sentinel || !hasOlder) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) void loadOlder()
+      },
+      { root: scrollRef.current, rootMargin: '120px' },
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasOlder, loadOlder])
+
+  const serverMessages = useMemo(() => {
     const seen = new Set<string>()
-    return [...olderMessages, ...(chatData?.messages ?? [])].filter((m) => {
+    return [...older, ...(chatData?.messages ?? [])].filter((m) => {
       if (seen.has(m.id)) return false
       seen.add(m.id)
       return true
     })
-  }, [olderMessages, chatData?.messages])
+  }, [older, chatData?.messages])
+
+  const messages: ChatMessageView[] = useMemo(() => {
+    const fromServer = serverMessages.map((m) => ({
+      id: m.id,
+      content: m.content,
+      type: (m as { type?: string }).type ?? 'text',
+      audioUrl: (m as { audioUrl?: string | null }).audioUrl ?? null,
+      createdAt: m.createdAt,
+      readAt: (m as { readAt?: Date | null }).readAt ?? null,
+      isMine: m.isMine,
+    }))
+    const optimistic = pending.map((p) => ({
+      id: p.tempId,
+      content: p.content,
+      type: p.type,
+      audioUrl: p.audioUrl ?? null,
+      createdAt: p.createdAt,
+      readAt: null,
+      isMine: true,
+      status: p.status,
+    }))
+    return [...fromServer, ...optimistic]
+  }, [serverMessages, pending])
 
   const peerId = chatData?.peerId ?? ''
+  const matchId = chatId.startsWith('match_') ? chatId.slice('match_'.length) : null
 
   const { data: peerProfile } = useQuery({
     queryKey: ['profile', peerId],
@@ -149,429 +155,274 @@ function UnifiedChatPage() {
     enabled: !!peerId,
   })
 
-  const blockMutation = useMutation({
-    mutationFn: blockUser,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['conversations'] })
-      qc.invalidateQueries({ queryKey: ['matches'] })
-      qc.invalidateQueries({ queryKey: ['blocked-users'] })
-      navigate({ to: '/chats' })
-    },
-  })
-
-  const matchId = chatId.startsWith('match_') ? chatId.slice('match_'.length) : null
   const { data: icebreakers } = useQuery({
     queryKey: ['icebreakers', matchId],
     queryFn: () => getIcebreakers({ data: matchId! }),
-    enabled: !!matchId && (chatData?.messages.length ?? 0) < 3,
+    enabled: !!matchId && messages.length === 0,
+  })
+
+  const block = useMutation({
+    mutationFn: blockUser,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['conversations'] })
+      qc.invalidateQueries({ queryKey: ['friends'] })
+      qc.invalidateQueries({ queryKey: ['blocked-users'] })
+      navigate({ to: '/chats' })
+    },
+    onError: () => toast('Could not block that account.', { tone: 'error' }),
   })
 
   useEffect(() => {
     if (!chatId) return
-    markChatRead({ data: chatId }).then(() => {
+    void markChatRead({ data: chatId }).then(() => {
       qc.invalidateQueries({ queryKey: ['conversations'] })
     })
   }, [chatId, qc])
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [chatData?.messages])
+    bottomRef.current?.scrollIntoView({ behavior: pending.length ? 'smooth' : 'auto' })
+  }, [chatData?.messages, pending.length])
 
-  // Recording timer
-  useEffect(() => {
-    if (isRecording) {
-      recordingTimerRef.current = setInterval(() => {
-        setRecordingDuration((d) => {
-          if (d >= 59) {
-            mediaRecorderRef.current?.stop()
-            return d
-          }
-          return d + 1
-        })
-      }, 1000)
-    } else {
-      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current)
-    }
-    return () => {
-      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current)
-    }
-  }, [isRecording])
-
-  // Handle typing indicator
-  const handleInputChange = (value: string) => {
-    setInput(value)
-    
-    // Send typing indicator
-    if (connected) {
-      sendTyping(chatId, true)
-      
-      // Clear existing timeout
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current)
-      }
-      
-      // Stop typing after 2 seconds of inactivity
-      typingTimeoutRef.current = setTimeout(() => {
-        sendTyping(chatId, false)
-      }, 2000)
-    }
+  const settle = (tempId: string, status: MessageStatus | 'done') => {
+    setPending((prev) =>
+      status === 'done'
+        ? prev.filter((p) => p.tempId !== tempId)
+        : prev.map((p) => (p.tempId === tempId ? { ...p, status } : p)),
+    )
   }
 
-  const handleSend = async () => {
-    if (!input.trim() || sending) return
-    setSending(true)
-    setSendError(null)
-    
-    // Stop typing indicator
-    if (connected) {
-      sendTyping(chatId, false)
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current)
-      }
-    }
-    
-    try {
-      await sendChatMessage({ data: { chatId, content: input.trim() } })
-      setInput('')
-      // Always invalidate. Gating this on `connected` assumed the socket would
-      // deliver the echo, which is not something the client can verify.
-      qc.invalidateQueries({ queryKey: ['chat', chatId] })
-      qc.invalidateQueries({ queryKey: ['conversations'] })
-    } catch (e: any) {
-      setSendError(e?.message || 'Failed to send message.')
-    } finally {
-      setSending(false)
-    }
-  }
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg'
-      const recorder = new MediaRecorder(stream, { mimeType })
-      const chunks: BlobPart[] = []
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data)
-      }
-
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: mimeType })
-        const url = URL.createObjectURL(blob)
-        setAudioBlob(blob)
-        setPreviewUrl(url)
-        setIsRecording(false)
-        // Stop all tracks to release microphone
-        stream.getTracks().forEach((t) => t.stop())
-      }
-
-      recorder.start()
-      mediaRecorderRef.current = recorder
-      setIsRecording(true)
-      setRecordingDuration(0)
-      setAudioBlob(null)
-      setPreviewUrl(null)
-
-      // Auto-stop after 60 seconds
-      setTimeout(() => {
-        if (recorder.state === 'recording') {
-          recorder.stop()
+  const deliver = useCallback(
+    async (item: PendingMessage) => {
+      try {
+        let audioUrl = item.audioUrl
+        if (item.type === 'voice' && item.blob && !audioUrl) {
+          if (!matchId) throw new Error('Voice messages are only available in direct chats')
+          const base64Audio = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onloadend = () => resolve(reader.result as string)
+            reader.onerror = () => reject(new Error('Could not read the recording'))
+            reader.readAsDataURL(item.blob!)
+          })
+          const uploaded = await uploadVoiceMessage({ data: { base64Audio, matchId } })
+          audioUrl = uploaded.audioUrl
         }
-      }, 60000)
-    } catch (e) {
-      console.error('Failed to start recording', e)
-      setSendError('Microphone access denied or unavailable')
+
+        await sendChatMessage({
+          data: {
+            chatId,
+            content: item.content,
+            ...(item.type === 'voice' ? { type: 'voice' as const, audioUrl } : {}),
+          },
+        })
+
+        settle(item.tempId, 'done')
+        qc.invalidateQueries({ queryKey: ['chat', chatId] })
+        qc.invalidateQueries({ queryKey: ['conversations'] })
+      } catch (e) {
+        settle(item.tempId, 'failed')
+        toast((e as Error)?.message || 'Message not sent.', { tone: 'error' })
+      }
+    },
+    [chatId, matchId, qc, toast],
+  )
+
+  const queueText = (content: string) => {
+    const item: PendingMessage = {
+      tempId: `pending_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      content,
+      type: 'text',
+      createdAt: new Date(),
+      status: 'sending',
+    }
+    setPending((prev) => [...prev, item])
+    void deliver(item)
+  }
+
+  const queueVoice = (blob: Blob, secondsLong: number) => {
+    const item: PendingMessage = {
+      tempId: `pending_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      content: `Voice message (${secondsLong}s)`,
+      type: 'voice',
+      blob,
+      createdAt: new Date(),
+      status: 'sending',
+    }
+    setPending((prev) => [...prev, item])
+    void deliver(item)
+  }
+
+  const retry = (tempId: string) => {
+    const item = pending.find((p) => p.tempId === tempId)
+    if (!item) return
+    settle(tempId, 'sending')
+    void deliver({ ...item, status: 'sending' })
+  }
+
+  const handleTyping = (typing: boolean) => {
+    if (!connected) return
+    sendTyping(chatId, typing)
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+    if (typing) {
+      typingTimeoutRef.current = setTimeout(() => sendTyping(chatId, false), 2500)
     }
   }
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop()
-    }
-  }
-
-  const cancelRecording = () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl)
-    setAudioBlob(null)
-    setPreviewUrl(null)
-    setRecordingDuration(0)
-    setIsRecording(false)
-    setSendError(null)
-  }
-
-  const handleSendVoice = async () => {
-    if (!audioBlob || !matchId) return
-    setSending(true)
-    setSendError(null)
-
-    try {
-      const reader = new FileReader()
-      const base64Promise = new Promise<string>((resolve) => {
-        reader.onloadend = () => resolve(reader.result as string)
-        reader.readAsDataURL(audioBlob)
-      })
-      const base64Audio = await base64Promise
-
-      const { audioUrl } = await uploadVoiceMessage({ data: { base64Audio, matchId } })
-      await sendChatMessage({
-        data: { chatId, content: 'Voice message', type: 'voice', audioUrl },
-      })
-
-      cancelRecording()
-      qc.invalidateQueries({ queryKey: ['chat', chatId] })
-      qc.invalidateQueries({ queryKey: ['conversations'] })
-    } catch (e: any) {
-      setSendError(e?.message || 'Failed to send voice message.')
-    } finally {
-      setSending(false)
-    }
-  }
-
-  const photo = peerProfile?.photos?.[0]
+  const presenceLabel = formatPresence(chatData?.peerLastActiveDate)
+  const peerOnline = isOnline(chatData?.peerLastActiveDate)
 
   if (error) {
     return (
-      <div className="page-wrap flex h-[calc(100dvh-112px)] flex-col items-center justify-center px-4 py-4 text-center">
-        <p className="text-sm text-[var(--mag-sale)]">{(error as any)?.message || 'Unable to open chat.'}</p>
-        <button
-          onClick={() => navigate({ to: '/chats' })}
-          className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 font-medium text-[var(--mag-bg)] transition active:scale-95 hover:opacity-80"
-        >
-          <ArrowLeft className="h-4 w-4" /> Go back
-        </button>
+      <div className="page-wrap flex h-[var(--app-viewport-h)] flex-col items-center justify-center">
+        <EmptyState
+          icon={MessageCircle}
+          title="This chat is unavailable"
+          description={(error as Error)?.message || 'It may have been removed.'}
+          action={<Button onClick={() => navigate({ to: '/chats' })}>Back to chats</Button>}
+        />
       </div>
     )
   }
 
   return (
-    <div className="page-wrap flex h-[calc(100dvh-112px)] flex-col px-4 py-4">
-      {/* Header */}
-      <div className="mb-3 flex items-center gap-2 border-b border-[var(--mag-line)] pb-3">
-        <button onClick={() => history.back()} className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">
+    <div className="flex h-[var(--app-viewport-h)] flex-col bg-canvas">
+      <header className="flex shrink-0 items-center gap-3 bg-canvas-raised px-3 py-2.5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => navigate({ to: '/chats' })}
+          aria-label="Back to chats"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-muted transition hover:bg-canvas-soft hover:text-ink"
+        >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <div className="flex flex-1 items-center justify-center gap-2">
-          <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-            <AvatarImage src={photo} alt={peerProfile?.name ?? ''} />
-          </div>
-          <div className="min-w-0 text-center">
-            <p className="truncate text-sm font-semibold text-[var(--mag-ink)] flex items-center justify-center gap-1.5">
-              {peerProfile?.name ?? 'User'}
-              {peerProfile?.verifiedAt && <VerifiedBadge />}
-            </p>
-            <p className="text-[10px] text-[var(--mag-ink-muted)]">
-              {connected ? (
-                <span className="flex items-center justify-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--mag-success)]"></span>
-                  Online
-                </span>
-              ) : (
-                peerProfile?.location
-              )}
-            </p>
-          </div>
+
+        <Avatar
+          src={peerProfile?.photos?.[0]}
+          alt={peerProfile?.name ?? ''}
+          size="sm"
+          priority
+          online={presenceLabel ? peerOnline : undefined}
+        />
+
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 truncate text-title text-ink">
+            {peerProfile?.name ?? 'Chat'}
+            {peerProfile?.verifiedAt && <VerifiedBadge />}
+          </p>
+          <p className="truncate text-caption text-ink-muted">
+            {typingUsers.length > 0 ? 'Typing…' : (presenceLabel ?? peerProfile?.location ?? '')}
+          </p>
         </div>
+
         <button
-          onClick={() => setBlockDialogOpen(true)}
-          className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
-          title="Block user"
+          type="button"
+          onClick={() => setBlockOpen(true)}
+          aria-label="Block this account"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-muted transition hover:bg-canvas-soft hover:text-danger"
         >
           <Ban className="h-5 w-5" />
         </button>
-      </div>
+      </header>
 
-      {/* Messages */}
-      <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain px-4 py-4">
         {isLoading ? (
-          <div className="flex h-full flex-col justify-end space-y-3 pb-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
-                <Skeleton className={`h-10 rounded-2xl px-4 py-2.5 ${i % 2 === 0 ? 'w-32 rounded-br-md' : 'w-40 rounded-bl-md'}`} />
+          <div className="flex h-full flex-col justify-end gap-3">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className={i % 2 ? 'flex justify-end' : 'flex justify-start'}>
+                <Skeleton className={`h-10 rounded-[22px] ${i % 2 ? 'w-36' : 'w-44'}`} />
               </div>
             ))}
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-sm text-[var(--mag-ink-muted)]">Start the conversation!</div>
-        ) : (
-          <>
-            {hasOlder && (
-              <div className="mb-2 flex justify-center">
-                <button
-                  onClick={loadOlder}
-                  disabled={loadingOlder}
-                  className="rounded-full bg-[var(--mag-card)] shadow-sm px-4 py-1.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
-                >
-                  {loadingOlder ? 'Loading…' : 'Load earlier messages'}
-                </button>
+          <div className="flex h-full flex-col justify-end">
+            <EmptyState
+              icon={MessageCircle}
+              title={`Say hello to ${peerProfile?.name ?? 'them'}`}
+              description="Chats open with no message requests here — just start talking."
+            />
+            {icebreakers && icebreakers.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <p className="text-label text-ink-faint">Try one of these</p>
+                {icebreakers.map((ice) => (
+                  <button
+                    key={ice.id}
+                    type="button"
+                    onClick={() => queueText(ice.text)}
+                    className="block w-full rounded-card bg-canvas-raised px-4 py-3 text-left text-body text-ink shadow-sm transition hover:bg-canvas-soft"
+                  >
+                    {ice.text}
+                  </button>
+                ))}
               </div>
             )}
-            {messages.map((msg: any) => (
-              <div key={msg.id} className={`flex ${msg.isMine ? 'justify-end' : 'justify-start'}`}>
-                {msg.type === 'voice' && msg.audioUrl ? (
-                  <div className="max-w-[75%]">
-                    <VoiceMessagePlayer url={msg.audioUrl} isMine={msg.isMine} />
-                    <div className="mt-1 flex items-center justify-end gap-1 text-[10px] text-[var(--mag-ink-muted)]">
-                      <span suppressHydrationWarning>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      {msg.isMine && (
-                        msg.readAt ? (
-                          <CheckCheck className="h-3 w-3" />
-                        ) : (
-                          <Check className="h-3 w-3" />
-                        )
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${msg.isMine ? 'rounded-br-md bg-[var(--mag-ink)] text-[var(--mag-bg)]' : 'rounded-bl-md bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
-                    {msg.content}
-                    <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${msg.isMine ? 'text-white/70' : 'text-[var(--mag-ink-muted)]'}`}>
-                      <span suppressHydrationWarning>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      {msg.isMine && (
-                        msg.readAt ? (
-                          <CheckCheck className="h-3 w-3" />
-                        ) : (
-                          <Check className="h-3 w-3" />
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </>
-        )}
-        
-        {/* Typing indicator */}
-        {typingUsers.length > 0 && (
-          <div className="flex justify-start">
-            <div className="rounded-2xl rounded-bl-md bg-[var(--mag-surface)] px-4 py-2.5">
-              <div className="flex gap-1">
-                <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--mag-ink-muted)]" style={{ animationDelay: '0ms' }}></span>
-                <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--mag-ink-muted)]" style={{ animationDelay: '150ms' }}></span>
-                <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--mag-ink-muted)]" style={{ animationDelay: '300ms' }}></span>
-              </div>
-            </div>
           </div>
-        )}
-      </div>
-
-      {matchId && icebreakers && icebreakers.length > 0 && (chatData?.messages.length ?? 0) < 3 && (
-        <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
-          {icebreakers.map((ice) => (
-            <button
-              key={ice.id}
-              onClick={() => setInput(ice.text)}
-              className="shrink-0 rounded-full bg-[var(--mag-card)] shadow-sm px-3 py-1.5 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
-            >
-              {ice.text}
-            </button>
-          ))}
-        </div>
-      )}
-      {sendError && <p className="mb-1 text-xs text-[var(--mag-sale)]">{sendError}</p>}
-      <div className="mt-3 flex items-center gap-2">
-        {isRecording ? (
-          <>
-            <div className="flex flex-1 items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--mag-sale)]" />
-              <span>Recording {formatDuration(recordingDuration)}</span>
-            </div>
-            <button
-              onClick={stopRecording}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-sale)]"
-              aria-label="Stop recording"
-            >
-              <Square className="h-4 w-4 animate-pulse" />
-            </button>
-            <button disabled className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)] opacity-60">
-              <Send className="h-4 w-4" />
-            </button>
-          </>
-        ) : previewUrl ? (
-          <>
-            <div className="flex flex-1 items-center gap-2 rounded-full bg-[var(--input-bg)] px-4 py-2 text-sm">
-              <button
-                onClick={() => {
-                  const audio = new Audio(previewUrl)
-                  audio.play()
-                }}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-line)]"
-                aria-label="Play voice preview"
-              >
-                <Play className="h-4 w-4" />
-              </button>
-              <span className="text-[var(--mag-ink)]">Voice message</span>
-            </div>
-            <button
-              onClick={cancelRecording}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-muted)]"
-              aria-label="Cancel voice message"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <button
-              onClick={handleSendVoice}
-              disabled={sending}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-60"
-            >
-              <Send className="h-4 w-4" />
-            </button>
-          </>
         ) : (
           <>
-            <input type="text" value={input} onChange={(e) => handleInputChange(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Type a message..."
-              disabled={sending}
-              className="flex-1 rounded-full bg-[var(--input-bg)] px-4 py-2 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-line)] disabled:opacity-60" />
-            {matchId && (
-              <button
-                onClick={startRecording}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-surface)] text-[var(--mag-ink-muted)]"
-                aria-label="Record voice message"
-              >
-                <Mic className="h-5 w-5" />
-              </button>
+            <div ref={topSentinelRef} />
+            {loadingOlder && (
+              <p className="mb-3 text-center text-caption text-ink-faint">Loading earlier messages…</p>
             )}
-            <button onClick={handleSend} disabled={sending} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-ink)] text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-60">
-              <Send className="h-4 w-4" />
-            </button>
+            {messages.map((message, i) => {
+              const previous = messages[i - 1]
+              const next = messages[i + 1]
+
+              const startsDay = !previous || dayKey(previous.createdAt) !== dayKey(message.createdAt)
+              const isGroupEnd =
+                !next ||
+                next.isMine !== message.isMine ||
+                dayKey(next.createdAt) !== dayKey(message.createdAt) ||
+                new Date(next.createdAt).getTime() - new Date(message.createdAt).getTime() >
+                  GROUP_WINDOW_MS
+
+              return (
+                <div key={message.id}>
+                  {startsDay && <DaySeparator label={formatDayLabel(message.createdAt)} />}
+                  <MessageBubble
+                    message={message}
+                    isGroupEnd={isGroupEnd}
+                    onRetry={message.status === 'failed' ? () => retry(message.id) : undefined}
+                    played={message.isMine ? undefined : playedIds.has(message.id)}
+                    onPlayed={() => setPlayedIds((prev) => new Set(prev).add(message.id))}
+                  />
+                </div>
+              )
+            })}
+            {typingUsers.length > 0 && <TypingBubble />}
+            <div ref={bottomRef} />
           </>
         )}
       </div>
 
-      {/* Block Confirmation Dialog */}
-      {blockDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] shadow-sm p-5">
-            <div className="mb-1 flex items-center gap-2 text-[var(--mag-sale)]">
-              <Ban className="h-5 w-5" />
-              <h3 className="text-sm font-semibold">Block {peerProfile?.name ?? 'User'}</h3>
-            </div>
-            <p className="mb-4 text-sm text-[var(--mag-ink-soft)]">
-              Block {peerProfile?.name ?? 'this user'}? They won't see you in events anymore.
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setBlockDialogOpen(false)}
-                className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm px-6 py-3 font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (peerId) blockMutation.mutate({ data: peerId })
-                }}
-                disabled={blockMutation.isPending || !peerId}
-                className="flex-1 rounded-full bg-[var(--mag-sale)] px-6 py-3 font-medium text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50"
-              >
-                {blockMutation.isPending ? 'Blocking…' : 'Block'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="shrink-0 bg-canvas-raised px-3 pt-2.5 pb-2.5 shadow-[0_-1px_16px_rgba(14,14,22,0.08)]">
+        <Composer
+          onSend={queueText}
+          onSendVoice={queueVoice}
+          onTyping={handleTyping}
+          allowVoice={!!matchId}
+          placeholder={`Message ${peerProfile?.name ?? ''}`.trim()}
+        />
+      </div>
+
+      <Sheet
+        open={blockOpen}
+        onClose={() => setBlockOpen(false)}
+        title={`Block ${peerProfile?.name ?? 'this account'}?`}
+        description="You disappear from each other everywhere in the app, and this chat closes."
+        footer={
+          <>
+            <Button variant="outline" block onClick={() => setBlockOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              block
+              loading={block.isPending}
+              onClick={() => peerId && block.mutate({ data: peerId })}
+            >
+              Block
+            </Button>
+          </>
+        }
+      />
     </div>
   )
 }

@@ -20,15 +20,26 @@ export function SegmentedControl<T extends string>({
   className?: string
   'aria-label'?: string
 }) {
+  const activeIndex = Math.max(
+    0,
+    segments.findIndex((s) => s.value === value),
+  )
+
   return (
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className={cn(
-        'flex items-center gap-1 rounded-full bg-canvas-soft p-1',
-        className,
-      )}
+      className={cn('relative flex items-center rounded-full bg-canvas-soft p-1', className)}
     >
+      <span
+        aria-hidden="true"
+        style={{
+          width: `calc((100% - 0.5rem) / ${segments.length})`,
+          transform: `translateX(${activeIndex * 100}%)`,
+        }}
+        className="absolute inset-y-1 left-1 rounded-full bg-canvas-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
+      />
+
       {segments.map((segment) => {
         const active = segment.value === value
         return (
@@ -39,10 +50,8 @@ export function SegmentedControl<T extends string>({
             aria-selected={active}
             onClick={() => onChange(segment.value)}
             className={cn(
-              'flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-body-sm font-semibold transition',
-              active
-                ? 'bg-canvas-raised text-ink shadow-sm'
-                : 'text-ink-muted hover:text-ink',
+              'relative z-10 flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-body-sm font-semibold transition-colors duration-200',
+              active ? 'text-ink' : 'text-ink-muted hover:text-ink',
             )}
           >
             <span className="truncate">{segment.label}</span>

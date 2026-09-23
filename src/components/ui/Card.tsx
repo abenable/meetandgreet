@@ -3,10 +3,6 @@ import { cn } from '#/lib/cn'
 
 export type CardVariant = 'plain' | 'soft' | 'inverse' | 'dashed'
 
-/**
- * Elevation levels 1–3 from DESIGN.md. There is no shadow variant on purpose:
- * hierarchy is fill difference and hairlines.
- */
 const VARIANTS: Record<CardVariant, string> = {
   plain: 'bg-canvas-raised border border-hairline-soft',
   soft: 'bg-canvas-soft',

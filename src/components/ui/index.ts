@@ -1,7 +1,3 @@
-/**
- * The design-system kit. Screens should build from these rather than
- * re-deriving chrome — see DESIGN.md for the system they implement.
- */
 export { Avatar } from './Avatar'
 export type { AvatarProps, AvatarSize } from './Avatar'
 export { Badge, CountBadge } from './Badge'

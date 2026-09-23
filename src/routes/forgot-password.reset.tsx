@@ -26,8 +26,6 @@ function ResetPasswordPage() {
   const redirect = typeof (search as any)?.redirect === 'string' ? (search as any).redirect : ''
   const carry = redirect ? { redirect } : undefined
 
-  // The verified code is handed over in history state rather than the query
-  // string, so it never reaches the address bar or an outbound Referer.
   const resetOtp = useRouterState({
     select: (s) => (s.location.state as { resetOtp?: string } | undefined)?.resetOtp ?? '',
   })
@@ -69,9 +67,6 @@ function ResetPasswordPage() {
         setLoading(false)
         return
       }
-      // Every session for this account was just invalidated server-side, so
-      // the only way forward is a fresh log in — say so instead of dropping
-      // the user at a blank login screen with no idea whether it worked.
       toast('Password updated. Log in with your new password.', { tone: 'success', duration: 6000 })
       navigate({
         to: '/login',

@@ -44,9 +44,6 @@ function SignupVerifyPage() {
           setLoading(false)
           return
         }
-        // Full reload rather than a client navigation: the router context still
-        // holds a session snapshot with emailVerified=false, and every loader on
-        // the destination reads it.
         window.location.href = isSafeRedirect(redirect) ? redirect : '/discover'
       } catch (err: any) {
         setError(err?.message || 'Something went wrong')
@@ -72,10 +69,6 @@ function SignupVerifyPage() {
     }
   }
 
-  // Landing here without an address means the flow was resumed from a cold
-  // link. The old copy said "sign up again", which is wrong for the common
-  // case — these people already have an account and only need the code
-  // re-issued against their address.
   if (!email) {
     return (
       <AuthLayout title="We need your email" back={{ to: '/login', label: 'Back to log in' }}>

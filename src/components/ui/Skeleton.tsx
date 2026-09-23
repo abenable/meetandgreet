@@ -1,9 +1,5 @@
 import { cn } from '#/lib/cn'
 
-/**
- * Replaces @heroui/react's Skeleton, whose greys were fixed and did not follow
- * the palette in either theme. The shimmer here runs across the tint ladder.
- */
 export function Skeleton({ className }: { className?: string }) {
   return (
     <div
@@ -13,8 +9,6 @@ export function Skeleton({ className }: { className?: string }) {
   )
 }
 
-/** A stack of text-line placeholders with a short last line, which reads as
- *  copy rather than as blocks. */
 export function SkeletonText({
   lines = 3,
   className,

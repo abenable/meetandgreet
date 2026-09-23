@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Briefcase, Heart, ImagePlus, Users, X } from 'lucide-react'
+import { Briefcase, Check, ChevronDown, Heart, ImagePlus, Users, X } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import { PageHeader } from '#/components/PageHeader'
 import {
@@ -10,6 +10,8 @@ import {
   buttonClasses,
   Field,
   Input,
+  Select,
+  Sheet,
   Skeleton,
   Textarea,
   useToast,
@@ -49,6 +51,7 @@ function EditProfilePage() {
   const [interests, setInterests] = useState<string[]>([])
   const [interestDraft, setInterestDraft] = useState('')
   const [lookingFor, setLookingFor] = useState<Intent[]>([])
+  const [intentSheetOpen, setIntentSheetOpen] = useState(false)
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
@@ -168,38 +171,42 @@ function EditProfilePage() {
           )}
         </Field>
 
-        <div>
-          <p className="mb-2 text-body-sm font-semibold text-ink-soft">Gender</p>
-          <div className="flex flex-wrap gap-2">
-            {GENDER_OPTIONS.map((option) => (
-              <Button
-                key={option}
-                size="sm"
-                variant={gender === option ? 'primary' : 'outline'}
-                onClick={() => setGender(option)}
-              >
-                {option}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <Field label="Gender">
+          {({ id }) => (
+            <Select
+              id={id}
+              value={gender}
+              placeholder="Select your gender"
+              onChange={(e) => setGender(e.target.value)}
+            >
+              {GENDER_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </Select>
+          )}
+        </Field>
 
-        <div>
-          <p className="mb-2 text-body-sm font-semibold text-ink-soft">I'm looking for</p>
-          <div className="flex flex-wrap gap-2">
-            {INTENTS.map(({ value, label, icon: Icon }) => (
-              <Button
-                key={value}
-                size="sm"
-                variant={lookingFor.includes(value) ? 'primary' : 'outline'}
-                onClick={() => toggleIntent(value)}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <Field label="I'm looking for" hint="Pick as many as apply.">
+          {({ id, describedBy }) => (
+            <button
+              id={id}
+              type="button"
+              aria-describedby={describedBy}
+              aria-haspopup="dialog"
+              onClick={() => setIntentSheetOpen(true)}
+              className="flex h-11 w-full items-center gap-2 rounded-full bg-field px-4 text-left transition-[background-color,box-shadow] duration-200 hover:bg-canvas-soft"
+            >
+              <span className={cn('min-w-0 flex-1 truncate text-body', lookingFor.length ? 'text-ink' : 'text-ink-faint')}>
+                {lookingFor.length
+                  ? INTENTS.filter((i) => lookingFor.includes(i.value)).map((i) => i.label).join(', ')
+                  : 'Select what you are here for'}
+              </span>
+              <ChevronDown className="h-4 w-4 shrink-0 text-ink-faint" />
+            </button>
+          )}
+        </Field>
 
         <Field label="Location">
           {({ id }) => (
@@ -274,13 +281,10 @@ function EditProfilePage() {
         </Field>
       </div>
 
-      <div className={cn('mt-8 flex gap-2')}>
-        <Link to="/profile" className={buttonClasses({ variant: 'ghost', block: true })}>
-          Cancel
-        </Link>
+      <div className="mt-8 flex flex-col gap-2">
         <Button
           block
-          size="md"
+          size="lg"
           loading={save.isPending}
           onClick={() =>
             save.mutate({
@@ -299,7 +303,48 @@ function EditProfilePage() {
         >
           Save changes
         </Button>
+        <Link to="/profile" className={buttonClasses({ variant: 'ghost', size: 'lg', block: true })}>
+          Cancel
+        </Link>
       </div>
+
+      <Sheet
+        open={intentSheetOpen}
+        onClose={() => setIntentSheetOpen(false)}
+        title="I'm looking for"
+        description="Pick as many as apply. This shows on your profile."
+        footer={
+          <Button block onClick={() => setIntentSheetOpen(false)}>
+            Done
+          </Button>
+        }
+      >
+        <div className="flex flex-col">
+          {INTENTS.map(({ value, label, icon: Icon }) => {
+            const selected = lookingFor.includes(value)
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => toggleIntent(value)}
+                aria-pressed={selected}
+                className="flex items-center gap-3 rounded-media px-2 py-3 text-left transition hover:bg-canvas-soft"
+              >
+                <Icon className="h-5 w-5 shrink-0 text-ink-muted" />
+                <span className="flex-1 text-body text-ink">{label}</span>
+                <span
+                  className={cn(
+                    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition',
+                    selected ? 'bg-ink text-on-ink' : 'bg-canvas-soft text-transparent',
+                  )}
+                >
+                  <Check className="h-3.5 w-3.5" />
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </Sheet>
     </main>
   )
 }

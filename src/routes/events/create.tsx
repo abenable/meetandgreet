@@ -1,6 +1,7 @@
+import { SegmentedControl } from '#/components/ui'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
-import { ArrowLeft, Calendar, MapPin, Plus, Users, X, ImageIcon, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Calendar, MapPin, Plus, Users, X, ImageIcon } from 'lucide-react'
 import { createEvent } from '#/server/events'
 import { localDatetimeToUTCISO } from '#/lib/datetime'
 
@@ -172,31 +173,16 @@ function CreateEventPage() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Visibility</label>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsPublic(true)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                isPublic
-                  ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
-                  : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
-              }`}
-            >
-              <Eye className="h-3.5 w-3.5" /> Public
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPublic(false)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                !isPublic
-                  ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
-                  : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
-              }`}
-            >
-              <EyeOff className="h-3.5 w-3.5" /> Private
-            </button>
-          </div>
+          <label className="mb-2 block text-sm font-medium text-[var(--mag-ink)]">Visibility</label>
+          <SegmentedControl
+            aria-label="Event visibility"
+            value={isPublic ? 'public' : 'private'}
+            onChange={(v) => setIsPublic(v === 'public')}
+            segments={[
+              { value: 'public', label: 'Public' },
+              { value: 'private', label: 'Private' },
+            ]}
+          />
           <p className="mt-1 text-xs text-[var(--mag-ink-muted)]">
             {isPublic 
               ? 'Anyone can find this event on the browse page.' 

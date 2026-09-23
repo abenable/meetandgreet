@@ -55,6 +55,10 @@ function EventsExplorePage() {
     setJoinError('')
     setJoinSuccess('')
     const result = await joinEvent({ data: { code, force } })
+    if (!result) {
+      setJoinError('The server did not respond. Reload the page and try again.')
+      return
+    }
     if (result.success) {
       if ((result as any).waitlisted) {
         setJoinSuccess('You are on the waitlist! You will be added automatically when the event starts.')

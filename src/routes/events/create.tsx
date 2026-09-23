@@ -83,6 +83,11 @@ function CreateEventPage() {
         force,
       } })
 
+      if (!result) {
+        setCreateError('The server did not respond. Reload the page and try again.')
+        return
+      }
+
       if ((result as any).needsConfirm) {
         setConfirmModal({
           open: true,

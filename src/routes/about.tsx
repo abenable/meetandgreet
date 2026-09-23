@@ -12,7 +12,7 @@ function AboutPage() {
           <Logo className="h-16 w-16" />
         </div>
         <h1 className="text-2xl font-bold text-[var(--mag-ink)]">About Meet & Greet</h1>
-        <p className="mt-2 text-sm text-[var(--mag-ink-soft)]">
+        <p className="mt-2 text-base text-[var(--mag-ink-soft)]">
           Making connections that matter.
         </p>
       </div>
@@ -45,8 +45,8 @@ function AboutPage() {
               <item.icon className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-[var(--mag-ink)]">{item.title}</h3>
-              <p className="mt-0.5 text-xs leading-relaxed text-[var(--mag-ink-soft)]">{item.desc}</p>
+              <h3 className="text-base font-semibold text-[var(--mag-ink)]">{item.title}</h3>
+              <p className="mt-0.5 text-sm leading-relaxed text-[var(--mag-ink-soft)]">{item.desc}</p>
             </div>
           </div>
         ))}

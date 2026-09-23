@@ -98,7 +98,7 @@ function VerifyCapturePage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-lg font-bold text-[var(--mag-ink)]">Photo Verification</h1>
+        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Photo Verification</h1>
       </div>
 
       {alreadyHandled && step !== 'submitted' && (
@@ -113,14 +113,14 @@ function VerifyCapturePage() {
           <h2 className="text-2xl font-bold text-[var(--mag-ink)]">
             {status?.verifiedAt ? 'You are verified' : 'Review in progress'}
           </h2>
-          <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
+          <p className="mt-2 max-w-xs text-base text-[var(--mag-ink-soft)]">
             {status?.verifiedAt
               ? 'Your badge is live on your profile.'
               : 'We have your photo. A moderator reviews each submission — we will notify you when it is done.'}
           </p>
           <button
             onClick={() => navigate({ to: '/profile' })}
-            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
+            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
           >
             Back to Profile
           </button>
@@ -132,23 +132,23 @@ function VerifyCapturePage() {
           <div className="mb-6 rounded-3xl border-4 border-dashed border-[var(--mag-line)] bg-[var(--mag-surface)] p-12">
             <div className="text-6xl font-bold text-[var(--mag-ink-muted)]">✌</div>
           </div>
-          <h2 className="text-lg font-bold text-[var(--mag-ink)]">Strike a pose</h2>
-          <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
+          <h2 className="text-xl font-bold text-[var(--mag-ink)]">Strike a pose</h2>
+          <p className="mt-2 max-w-xs text-base text-[var(--mag-ink-soft)]">
             Hold up two fingers next to your face, like the example above. A moderator compares this
             with your profile photos.
           </p>
           {status?.status === 'rejected' && (
-            <p className="mt-3 max-w-xs text-xs text-[var(--mag-sale)]">
+            <p className="mt-3 max-w-xs text-sm text-[var(--mag-sale)]">
               Your last submission was not approved. Make sure your face and both fingers are clearly
               visible.
             </p>
           )}
           {cameraError && (
-            <p className="mt-3 max-w-xs text-xs text-[var(--mag-sale)]">{cameraError}</p>
+            <p className="mt-3 max-w-xs text-sm text-[var(--mag-sale)]">{cameraError}</p>
           )}
           <button
             onClick={() => void startCamera()}
-            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
+            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
           >
             I am Ready
           </button>
@@ -166,7 +166,7 @@ function VerifyCapturePage() {
               style={{ transform: 'scaleX(-1)' }}
             />
             <div className="pointer-events-none absolute inset-0 rounded-3xl border-4 border-white/20" />
-            <p className="pointer-events-none absolute top-6 left-0 right-0 text-center text-sm font-medium text-white">
+            <p className="pointer-events-none absolute top-6 left-0 right-0 text-center text-base font-medium text-white">
               Position your face in the frame
             </p>
           </div>
@@ -187,26 +187,26 @@ function VerifyCapturePage() {
           </div>
 
           {submitMutation.isError && (
-            <p className="mt-3 text-xs text-[var(--mag-sale)]">
+            <p className="mt-3 text-sm text-[var(--mag-sale)]">
               {(submitMutation.error as Error)?.message || 'Upload failed. Please try again.'}
             </p>
           )}
           {submitMutation.data && !submitMutation.data.success && (
-            <p className="mt-3 text-xs text-[var(--mag-sale)]">{submitMutation.data.message}</p>
+            <p className="mt-3 text-sm text-[var(--mag-sale)]">{submitMutation.data.message}</p>
           )}
 
           <div className="mt-6 flex w-full max-w-sm gap-2">
             <button
               onClick={retake}
               disabled={submitMutation.isPending}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--mag-card)] shadow-sm py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--mag-card)] shadow-sm py-3 text-base font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
             >
               <RefreshCw className="h-4 w-4" /> Retake
             </button>
             <button
               onClick={() => submitMutation.mutate({ data: { imageBase64: capture } })}
               disabled={submitMutation.isPending}
-              className="flex flex-1 items-center justify-center rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-50"
+              className="flex flex-1 items-center justify-center rounded-full bg-[var(--mag-ink)] py-3 text-base font-bold text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-50"
             >
               {submitMutation.isPending ? 'Submitting…' : 'Submit for review'}
             </button>
@@ -220,13 +220,13 @@ function VerifyCapturePage() {
             <ShieldAlert className="h-10 w-10 text-[var(--mag-ink)]" />
           </div>
           <h2 className="text-2xl font-bold text-[var(--mag-ink)]">Submitted for review</h2>
-          <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
+          <p className="mt-2 max-w-xs text-base text-[var(--mag-ink-soft)]">
             A moderator will compare your photo with your profile. You will get a notification when
             your badge is approved.
           </p>
           <button
             onClick={() => navigate({ to: '/profile' })}
-            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
+            className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
           >
             Back to Profile
           </button>

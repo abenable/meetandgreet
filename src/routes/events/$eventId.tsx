@@ -38,10 +38,10 @@ function EventDetailPage() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-lg font-bold text-[var(--mag-ink)]">Event Details</h1>
+          <h1 className="text-xl font-bold text-[var(--mag-ink)]">Event Details</h1>
         </div>
         <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-5 text-center">
-          <p className="text-sm font-semibold text-[var(--mag-ink)]">Event not found.</p>
+          <p className="text-base font-semibold text-[var(--mag-ink)]">Event not found.</p>
         </div>
       </main>
     )
@@ -59,12 +59,12 @@ function EventDetailPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-lg font-bold text-[var(--mag-ink)]">Event Details</h1>
+        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Event Details</h1>
       </div>
 
       {hasSponsor && (
         <div className="mb-4 flex items-center justify-center gap-2 rounded-2xl bg-[var(--mag-card)] shadow-sm py-3">
-          <span className="text-xs font-medium text-[var(--mag-ink-soft)]">Sponsored by</span>
+          <span className="text-sm font-medium text-[var(--mag-ink-soft)]">Sponsored by</span>
           {(event as any).sponsorLogo ? (
             <img
               src={(event as any).sponsorLogo}
@@ -72,7 +72,7 @@ function EventDetailPage() {
               className="h-6 max-w-[180px] object-contain"
             />
           ) : (
-            <span className="text-xs font-bold text-[var(--mag-ink)]">{(event as any).sponsorName}</span>
+            <span className="text-sm font-bold text-[var(--mag-ink)]">{(event as any).sponsorName}</span>
           )}
         </div>
       )}
@@ -97,12 +97,12 @@ function EventDetailPage() {
             />
           )}
           <div className="min-w-0 flex-1">
-            <h2 className="text-xl font-bold text-[var(--mag-ink)]">{event.name}</h2>
-            <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">{event.description}</p>
+            <h2 className="text-2xl font-bold text-[var(--mag-ink)]">{event.name}</h2>
+            <p className="mt-1 text-base text-[var(--mag-ink-soft)]">{event.description}</p>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-[var(--mag-ink-soft)]">
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-[var(--mag-ink-soft)]">
           {event.location && (
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" />

@@ -10,7 +10,7 @@ function VerifyIntroPage() {
         <Shield className="h-10 w-10 text-[var(--mag-ink)]" />
       </div>
       <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Get Verified</h1>
-      <p className="mt-2 max-w-sm text-sm text-[var(--mag-ink-soft)]">
+      <p className="mt-2 max-w-sm text-base text-[var(--mag-ink-soft)]">
         Verified profiles get more matches. Complete a quick photo pose to earn your blue checkmark.
       </p>
 
@@ -22,14 +22,14 @@ function VerifyIntroPage() {
         ].map((step, i) => (
           <div key={i} className="flex items-center justify-center gap-3 rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
             <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--mag-ink)]" />
-            <span className="text-sm text-[var(--mag-ink)]">{step}</span>
+            <span className="text-base text-[var(--mag-ink)]">{step}</span>
           </div>
         ))}
       </div>
 
       <Link
         to="/verify/capture"
-        className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 no-underline"
+        className="mx-auto mt-8 flex w-full max-w-sm items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 no-underline"
       >
         Start Verification
         <ChevronRight className="h-4 w-4" />

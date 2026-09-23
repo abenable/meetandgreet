@@ -42,7 +42,7 @@ function ExplorePage() {
   return (
     <main className="page-wrap px-4 py-4">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Explore</h1>
+        <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Explore</h1>
         <button onClick={() => setShowSearch((s) => !s)} className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">
           {showSearch ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
         </button>
@@ -51,15 +51,15 @@ function ExplorePage() {
       {showSearch && (
         <div className="mb-4">
           <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search people, interests, or locations..."
-            className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+            className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
         </div>
       )}
 
       {isFiltering && (
         <div className="mb-4 flex items-center gap-2">
-          <span className="text-xs text-[var(--mag-ink-soft)]">{filteredProfiles.length} result{filteredProfiles.length !== 1 ? 's' : ''}</span>
+          <span className="text-sm text-[var(--mag-ink-soft)]">{filteredProfiles.length} result{filteredProfiles.length !== 1 ? 's' : ''}</span>
           {activeCategory && (
-            <button onClick={() => setActiveCategory(null)} className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-line)]">
+            <button onClick={() => setActiveCategory(null)} className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-line)]">
               {activeCategory} <X className="h-3 w-3" />
             </button>
           )}
@@ -67,7 +67,7 @@ function ExplorePage() {
       )}
 
       {filteredProfiles.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[50vh] py-12 text-center text-[var(--mag-ink-muted)] text-sm">No results found.</div>
+        <div className="flex flex-col items-center justify-center min-h-[50vh] py-12 text-center text-[var(--mag-ink-muted)] text-base">No results found.</div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
           {filteredProfiles.map((profile) => (
@@ -75,8 +75,8 @@ function ExplorePage() {
               <img src={profile.photos[0]} alt={profile.name} className="aspect-[3/4] w-full object-cover" />
               <div className="gradient-overlay absolute inset-0" />
               <div className="absolute bottom-0 left-0 right-0 p-3">
-                <h3 className="text-sm font-bold text-white">{profile.name}</h3>
-                <span className="inline-flex items-center gap-1 text-[10px] text-white/80">
+                <h3 className="text-base font-bold text-white">{profile.name}</h3>
+                <span className="inline-flex items-center gap-1 text-xs text-white/80">
                   <MapPin className="h-3 w-3" />{profile.distance}
                 </span>
               </div>

@@ -43,7 +43,7 @@ export default function BottomNav() {
               <span className="relative">
                 <Icon className="h-6 w-6" strokeWidth={active ? 2.4 : 1.9} />
                 {badge > 0 && (
-                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold text-accent-contrast tabular-nums">
+                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-xs font-semibold text-accent-contrast tabular-nums">
                     {badge > 9 ? '9+' : badge}
                   </span>
                 )}

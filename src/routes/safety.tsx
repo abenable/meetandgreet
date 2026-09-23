@@ -18,15 +18,15 @@ function SafetyPage() {
         <Link to="/settings/privacy" className="rounded-full p-2 text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)] no-underline">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-lg font-bold text-[var(--mag-ink)]">Safety Center</h1>
+        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Safety Center</h1>
       </div>
 
       <div className="mb-6 rounded-2xl bg-[var(--mag-ink)] p-4 md:p-5 text-[var(--mag-bg)]">
         <div className="flex items-center gap-2">
           <Shield className="h-6 w-6" />
-          <h2 className="text-lg font-bold">Your safety matters</h2>
+          <h2 className="text-xl font-bold">Your safety matters</h2>
         </div>
-        <p className="mt-1 text-xs opacity-90">
+        <p className="mt-1 text-sm opacity-90">
           We are committed to fostering a respectful community. Here is how to stay safe while meeting new people.
         </p>
       </div>
@@ -64,8 +64,8 @@ function SafetyPage() {
               <item.icon className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-[var(--mag-ink)]">{item.title}</h3>
-              <p className="mt-0.5 text-xs leading-relaxed text-[var(--mag-ink-soft)]">{item.desc}</p>
+              <h3 className="text-base font-semibold text-[var(--mag-ink)]">{item.title}</h3>
+              <p className="mt-0.5 text-sm leading-relaxed text-[var(--mag-ink-soft)]">{item.desc}</p>
             </div>
           </div>
         ))}

@@ -39,7 +39,7 @@ function WaitlistRoomPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-lg font-bold text-[var(--mag-ink)]">Waiting Room</h1>
+        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Waiting Room</h1>
       </div>
 
       {eventLoading ? (
@@ -48,7 +48,7 @@ function WaitlistRoomPage() {
         </div>
       ) : !event ? (
         <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-5 text-center">
-          <p className="text-sm text-[var(--mag-ink-soft)]">Event not found.</p>
+          <p className="text-base text-[var(--mag-ink-soft)]">Event not found.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -60,11 +60,11 @@ function WaitlistRoomPage() {
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-[var(--mag-ink)]">{event.name}</h2>
-                  <span className="shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-bg)]">Waitlisted</span>
+                  <h2 className="text-lg font-bold text-[var(--mag-ink)]">{event.name}</h2>
+                  <span className="shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-xs font-bold text-[var(--mag-bg)]">Waitlisted</span>
                 </div>
-                <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">{event.description}</p>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                <p className="mt-0.5 text-sm text-[var(--mag-ink-soft)]">{event.description}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--mag-ink-muted)]">
                   <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
                   {event.startsAt && (
                     <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />Starts {new Date(event.startsAt).toLocaleString()}</span>
@@ -73,17 +73,17 @@ function WaitlistRoomPage() {
               </div>
             </div>
             {isStarted ? (
-              <p className="mt-3 text-center text-xs font-semibold text-[var(--mag-ink)]">
+              <p className="mt-3 text-center text-sm font-semibold text-[var(--mag-ink)]">
                 The event has started — you should be added automatically. Pull down to refresh.
               </p>
             ) : (
-              <p className="mt-3 text-center text-xs text-[var(--mag-ink-soft)]">
+              <p className="mt-3 text-center text-sm text-[var(--mag-ink-soft)]">
                 You will automatically join when the event starts.
               </p>
             )}
             <button
               onClick={handleLeave}
-              className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-xs font-bold text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+              className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-sm font-bold text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
             >
               Leave Waitlist
             </button>
@@ -92,8 +92,8 @@ function WaitlistRoomPage() {
           {/* Waitlist */}
           <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[var(--mag-ink)]">People Waiting</h3>
-              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--mag-ink-muted)]">
+              <h3 className="text-base font-bold text-[var(--mag-ink)]">People Waiting</h3>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-xs font-medium text-[var(--mag-ink-muted)]">
                 <ListOrdered className="h-3 w-3" />
                 {waitlist.length} total
               </span>
@@ -104,7 +104,7 @@ function WaitlistRoomPage() {
                 <Loader2 className="h-5 w-5 animate-spin text-[var(--mag-ink)]" />
               </div>
             ) : waitlist.length === 0 ? (
-              <p className="py-6 text-center text-xs text-[var(--mag-ink-muted)]">Nobody else is waiting yet.</p>
+              <p className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">Nobody else is waiting yet.</p>
             ) : (
               <div className="space-y-3">
                 {waitlist.map((person: any, index: number) => (
@@ -112,17 +112,17 @@ function WaitlistRoomPage() {
                     key={person.userId}
                     className="flex items-center gap-3 rounded-2xl bg-[var(--mag-surface)] p-3"
                   >
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--mag-line)] text-[10px] font-bold text-[var(--mag-ink-muted)]">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--mag-line)] text-xs font-bold text-[var(--mag-ink-muted)]">
                       {index + 1}
                     </div>
                     <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
                       <AvatarImage src={person.photo} alt={person.name ?? ''} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-[var(--mag-ink)]">
+                      <p className="truncate text-base font-medium text-[var(--mag-ink)]">
                         {person.name ?? 'Unnamed'}
                       </p>
-                      <p className="truncate text-[10px] text-[var(--mag-ink-muted)]">
+                      <p className="truncate text-xs text-[var(--mag-ink-muted)]">
                         Joined waitlist {new Date(person.joinedAt).toLocaleDateString()}
                       </p>
                     </div>

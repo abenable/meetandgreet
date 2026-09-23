@@ -164,7 +164,7 @@ function OnboardingPage() {
     <div className="page-wrap flex min-h-[100dvh] flex-col px-4 py-6">
       <div className="mx-auto w-full max-w-sm">
         <div className="mb-6 flex items-center justify-between">
-          <span className="text-xs font-medium text-[var(--mag-ink-muted)]">
+          <span className="text-sm font-medium text-[var(--mag-ink-muted)]">
             Step {step} of {totalSteps} · {STEP_TITLES[step - 1]}
           </span>
           <div className="flex gap-1.5">
@@ -182,7 +182,7 @@ function OnboardingPage() {
         {step === 1 && (
           <div className="rise-in flex flex-1 flex-col">
             <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">Add a photo</h1>
-            <p className="mb-6 text-sm text-[var(--mag-ink-soft)]">
+            <p className="mb-6 text-base text-[var(--mag-ink-soft)]">
               Optional, but profiles with photos get far more matches. Your first photo is your avatar — or just hit Next to skip.
             </p>
             <div className="grid grid-cols-3 gap-3">
@@ -193,7 +193,7 @@ function OnboardingPage() {
                     <div key={i} className="group relative aspect-[3/4] overflow-hidden rounded-xl bg-[var(--mag-surface)]">
                       <AvatarImage src={url} alt={`Photo ${i + 1}`} />
                       {i === 0 && (
-                        <span className="absolute left-1 top-1 rounded-full bg-[var(--mag-ink)]/90 px-1.5 py-0.5 text-[9px] font-bold text-[var(--mag-bg)]">
+                        <span className="absolute left-1 top-1 rounded-full bg-[var(--mag-ink)]/90 px-1.5 py-0.5 text-xs font-bold text-[var(--mag-bg)]">
                           AVATAR
                         </span>
                       )}
@@ -230,13 +230,13 @@ function OnboardingPage() {
         {step === 2 && (
           <div className="rise-in flex flex-1 flex-col">
             <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">About you</h1>
-            <p className="mb-6 text-sm text-[var(--mag-ink-soft)]">
+            <p className="mb-6 text-base text-[var(--mag-ink-soft)]">
               Tell us a little about yourself.
             </p>
 
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">Name</label>
+                <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink-soft)]">Name</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
                   <input
@@ -244,19 +244,19 @@ function OnboardingPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your name"
-                    className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                    className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink-soft)]">Gender</label>
+                <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink-soft)]">Gender</label>
                 <div className="flex flex-wrap gap-2">
                   {GENDER_OPTIONS.map((g) => (
                     <button
                       key={g}
                       onClick={() => setGender(gender === g ? '' : g)}
-                      className={`rounded-full px-4 py-2 text-xs font-medium transition ${
+                      className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                         gender === g
                           ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                           : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink)] hover:bg-[var(--mag-surface)]'
@@ -274,7 +274,7 @@ function OnboardingPage() {
         {step === 3 && (
           <div className="rise-in flex flex-1 flex-col">
             <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">Where are you?</h1>
-            <p className="mb-6 text-sm text-[var(--mag-ink-soft)]">
+            <p className="mb-6 text-base text-[var(--mag-ink-soft)]">
               Shown on your profile so people nearby can find you.
             </p>
             <div className="relative">
@@ -284,7 +284,7 @@ function OnboardingPage() {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="City, Country"
-                className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
               />
             </div>
           </div>
@@ -293,7 +293,7 @@ function OnboardingPage() {
         {step === 4 && (
           <div className="rise-in flex flex-1 flex-col">
             <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">Your bio</h1>
-            <p className="mb-6 text-sm text-[var(--mag-ink-soft)]">
+            <p className="mb-6 text-base text-[var(--mag-ink-soft)]">
               A quick intro — what you're about and what you're looking for.
             </p>
             <div className="relative">
@@ -303,17 +303,17 @@ function OnboardingPage() {
                 onChange={(e) => setBio(e.target.value.slice(0, MAX_BIO))}
                 placeholder="Hi! I'm into..."
                 rows={6}
-                className="w-full resize-none rounded-card bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                className="w-full resize-none rounded-card bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
               />
             </div>
-            <p className={`mt-1.5 text-right text-xs ${bio.trim().length === MAX_BIO ? 'text-red-600 dark:text-red-400' : 'text-[var(--mag-ink-muted)]'}`}>
+            <p className={`mt-1.5 text-right text-sm ${bio.trim().length === MAX_BIO ? 'text-red-600 dark:text-red-400' : 'text-[var(--mag-ink-muted)]'}`}>
               {bio.length}/{MAX_BIO}
             </p>
           </div>
         )}
 
         {error && (
-          <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+          <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
             {error}
           </p>
         )}
@@ -322,7 +322,7 @@ function OnboardingPage() {
           {step > 1 && (
             <button
               onClick={() => goTo((step - 1) as 1 | 2 | 3 | 4)}
-              className="rounded-full bg-[var(--mag-card)] shadow-sm px-8 py-3 text-sm font-semibold text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+              className="rounded-full bg-[var(--mag-card)] shadow-sm px-8 py-3 text-base font-semibold text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
             >
               Back
             </button>
@@ -330,7 +330,7 @@ function OnboardingPage() {
           <button
             onClick={handleContinue}
             disabled={!stepDone || save.isPending}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-8 py-3 text-sm font-semibold text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-40 disabled:active:scale-100"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-8 py-3 text-base font-semibold text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-40 disabled:active:scale-100"
           >
             {step < totalSteps ? (
               <>

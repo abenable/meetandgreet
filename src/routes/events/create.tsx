@@ -117,17 +117,17 @@ function CreateEventPage() {
         <button onClick={() => navigate({ to: '/events' })} className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-lg font-bold text-[var(--mag-ink)]">Create Event</h1>
+        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Create Event</h1>
       </div>
 
       {code ? (
         <div className="mb-6 rounded-2xl bg-[var(--mag-card)] shadow-sm p-4 text-center">
-          <p className="text-xs font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Created</p>
+          <p className="text-sm font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Created</p>
           <p className="mt-2 text-3xl font-mono font-bold tracking-widest text-[var(--mag-ink)]">{code}</p>
-          <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">Share this code or link so others can join</p>
+          <p className="mt-1 text-xs text-[var(--mag-ink-muted)]">Share this code or link so others can join</p>
           <button
             onClick={handleCopyLink}
-            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-xs font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
           >
             {copied ? 'Copied!' : 'Copy Share Link'}
           </button>
@@ -136,13 +136,13 @@ function CreateEventPage() {
 
       <div className="mx-auto max-w-md space-y-4">
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Event Name</label>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Event Name</label>
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Fremont Friday Night"
-            className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+            className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
         </div>
 
         <div>
-          <label className="mb-1.5 block text-center text-xs font-medium text-[var(--mag-ink)]">Event Photo</label>
+          <label className="mb-1.5 block text-center text-sm font-medium text-[var(--mag-ink)]">Event Photo</label>
           <div className="flex justify-center">
             {photo ? (
               <div className="relative inline-block">
@@ -167,17 +167,17 @@ function CreateEventPage() {
           <input type="file" accept="image/*" ref={fileRef} onChange={handleFile} className="hidden" />
           </div>
           {photoError && (
-            <p className="mt-2 text-center text-xs font-semibold text-[var(--mag-sale)]">{photoError}</p>
+            <p className="mt-2 text-center text-sm font-semibold text-[var(--mag-sale)]">{photoError}</p>
           )}
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Visibility</label>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Visibility</label>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setIsPublic(true)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                 isPublic
                   ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                   : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
@@ -188,7 +188,7 @@ function CreateEventPage() {
             <button
               type="button"
               onClick={() => setIsPublic(false)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                 !isPublic
                   ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
                   : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
@@ -197,7 +197,7 @@ function CreateEventPage() {
               <EyeOff className="h-3.5 w-3.5" /> Private
             </button>
           </div>
-          <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">
+          <p className="mt-1 text-xs text-[var(--mag-ink-muted)]">
             {isPublic 
               ? 'Anyone can find this event on the browse page.' 
               : 'Only people with the code or link can join.'}
@@ -205,42 +205,42 @@ function CreateEventPage() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Description</label>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Description</label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What is this event about?" rows={3}
-            className="w-full resize-none rounded-card bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+            className="w-full resize-none rounded-card bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Location</label>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Location</label>
           <div className="relative">
             <MapPin className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
             <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Capitol Hill, Seattle"
-              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
           </div>
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Max Attendees (optional)</label>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Max Attendees (optional)</label>
           <div className="relative">
             <Users className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
             <input type="number" min={1} max={1000} value={maxAttendees} onChange={(e) => setMaxAttendees(e.target.value === '' ? '' : Number(e.target.value))} placeholder="No limit"
-              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
           </div>
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Start Time (optional)</label>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Start Time (optional)</label>
           <div className="relative">
             <Calendar className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
             <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)}
-              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
+              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]" />
           </div>
         </div>
       </div>
 
       {createError && (
-        <p className="mt-4 text-center text-xs font-semibold text-[var(--mag-sale)]">{createError}</p>
+        <p className="mt-4 text-center text-sm font-semibold text-[var(--mag-sale)]">{createError}</p>
       )}
       <div className="mt-6 flex justify-center">
         <button onClick={() => handleCreate()} disabled={!name.trim() || !!code}
-          className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed">
+          className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3.5 text-base font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed">
           <Plus className="h-4 w-4" />Create Event
         </button>
       </div>
@@ -249,23 +249,23 @@ function CreateEventPage() {
       {confirmModal?.open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
           <div className="w-full max-w-sm rounded-card bg-[var(--mag-card)] p-5 shadow-lg">
-            <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Leave current event?</h3>
-            <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+            <h3 className="mb-1 text-lg font-bold text-[var(--mag-ink)]">Leave current event?</h3>
+            <p className="mb-4 text-sm text-[var(--mag-ink-soft)]">
               You are already checked into <strong className="text-[var(--mag-ink)]">{confirmModal.currentEventName}</strong>. You can only be in one event at a time.
             </p>
-            <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+            <p className="mb-4 text-sm text-[var(--mag-ink-soft)]">
               Create this event and leave your current one?
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmModal(null)}
-                className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-base font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmCreate}
-                className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+                className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-base font-bold text-[var(--mag-bg)] transition hover:opacity-80"
               >
                 Leave & Create
               </button>

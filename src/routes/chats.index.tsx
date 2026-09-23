@@ -16,7 +16,7 @@ function ChatsPage() {
 
   return (
     <div className="page-wrap flex flex-1 flex-col px-4 py-4">
-      <h1 className="mb-4 text-xl font-bold text-[var(--mag-ink)]">Chats</h1>
+      <h1 className="mb-4 text-2xl font-bold text-[var(--mag-ink)]">Chats</h1>
 
       {isLoading ? (
         <div className="space-y-0">
@@ -37,8 +37,8 @@ function ChatsPage() {
       ) : conversations.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <MessageCircle className="mb-3 h-12 w-12 text-[var(--mag-ink-muted)]" />
-          <p className="text-sm text-[var(--mag-ink-soft)]">No conversations yet.</p>
-          <p className="mt-1 text-xs text-[var(--mag-ink-muted)]">Start matching or join an event to chat.</p>
+          <p className="text-base text-[var(--mag-ink-soft)]">No conversations yet.</p>
+          <p className="mt-1 text-sm text-[var(--mag-ink-muted)]">Start matching or join an event to chat.</p>
         </div>
       ) : (
         <div className="border-t border-[var(--mag-line)]">
@@ -63,19 +63,19 @@ function ChatRow({ convo }: { convo: any }) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-[var(--mag-ink)]">{convo.peerName}</h3>
+          <h3 className="text-base font-semibold text-[var(--mag-ink)]">{convo.peerName}</h3>
           {convo.peerVerifiedAt && <VerifiedBadge />}
         </div>
-        <p className={`truncate text-xs ${convo.unreadCount > 0 ? 'font-medium text-[var(--mag-ink)]' : 'text-[var(--mag-ink-soft)]'}`}>
+        <p className={`truncate text-sm ${convo.unreadCount > 0 ? 'font-medium text-[var(--mag-ink)]' : 'text-[var(--mag-ink-soft)]'}`}>
           {convo.lastMessage}
         </p>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
-        <span className="text-[10px] text-[var(--mag-ink-muted)]" suppressHydrationWarning>
+        <span className="text-xs text-[var(--mag-ink-muted)]" suppressHydrationWarning>
           {new Date(convo.lastMessageAt).toLocaleDateString()}
         </span>
         {convo.unreadCount > 0 && (
-          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--mag-ink)] px-1.5 text-[10px] font-bold text-[var(--mag-bg)]">
+          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--mag-ink)] px-1.5 text-xs font-bold text-[var(--mag-bg)]">
             {convo.unreadCount}
           </span>
         )}

@@ -94,23 +94,23 @@ function ShareJoinPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-lg font-bold text-[var(--mag-ink)]">Join Event</h1>
+        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Join Event</h1>
       </div>
 
       {status === 'loading' || status === 'joining' ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Loader2 className="mb-3 h-8 w-8 animate-spin text-[var(--mag-ink)]" />
-          <p className="text-sm text-[var(--mag-ink-soft)]">
+          <p className="text-base text-[var(--mag-ink-soft)]">
             {status === 'joining' ? 'Joining…' : 'Loading…'}
           </p>
         </div>
       ) : status === 'success' ? (
         <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-5 text-center">
           <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-[var(--mag-ink)]" />
-          <h2 className="text-lg font-bold text-[var(--mag-ink)]">
+          <h2 className="text-xl font-bold text-[var(--mag-ink)]">
             {alreadyJoined ? 'You are already in!' : waitlisted ? 'You are on the waitlist!' : 'You are in!'}
           </h2>
-          <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">
+          <p className="mt-1 text-base text-[var(--mag-ink-soft)]">
             {waitlisted
               ? `${event?.name} — You will automatically join when the event starts.`
               : `${event?.name} — redirecting…`}
@@ -125,13 +125,13 @@ function ShareJoinPage() {
                   <img src={(event as any).photo} alt={event.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-base font-bold text-[var(--mag-ink)]">
+                  <h2 className="text-lg font-bold text-[var(--mag-ink)]">
                     {event.name}
                   </h2>
-                  <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">
+                  <p className="mt-0.5 text-sm text-[var(--mag-ink-soft)]">
                     {event.description}
                   </p>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--mag-ink-muted)]">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
                       {event.location}
@@ -156,10 +156,10 @@ function ShareJoinPage() {
             <div className="flex items-center gap-3">
               <XCircle className="h-6 w-6 shrink-0 text-[var(--mag-sale)]" />
               <div>
-                <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">
+                <h3 className="text-base font-semibold text-red-600 dark:text-red-400">
                   Could not join
                 </h3>
-                <p className="text-xs text-[var(--mag-sale)] dark:text-red-400/80">
+                <p className="text-sm text-[var(--mag-sale)] dark:text-red-400/80">
                   {message}
                 </p>
               </div>
@@ -174,7 +174,7 @@ function ShareJoinPage() {
                   search: { redirect: `/events/join/${code}` },
                 })
               }
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold !text-[var(--mag-bg)] transition hover:opacity-80"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3 text-base font-bold !text-[var(--mag-bg)] transition hover:opacity-80"
             >
               <LogIn className="h-4 w-4" />
               Log in to Join
@@ -183,7 +183,7 @@ function ShareJoinPage() {
 
           <button
             onClick={() => navigate({ to: '/events' })}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-card)] shadow-sm py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-card)] shadow-sm py-3 text-base font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
           >
             Browse Events
           </button>
@@ -197,13 +197,13 @@ function ShareJoinPage() {
                   <img src={(event as any).photo} alt={event.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-base font-bold text-[var(--mag-ink)]">
+                  <h2 className="text-lg font-bold text-[var(--mag-ink)]">
                     {event.name}
                   </h2>
-                  <p className="mt-0.5 text-xs text-[var(--mag-ink-soft)]">
+                  <p className="mt-0.5 text-sm text-[var(--mag-ink-soft)]">
                     {event.description}
                   </p>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[var(--mag-ink-muted)]">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--mag-ink-muted)]">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
                       {event.location}
@@ -226,23 +226,23 @@ function ShareJoinPage() {
 
           {confirmInfo ? (
             <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
-              <h3 className="mb-2 text-sm font-bold text-[var(--mag-ink)]">Leave current event?</h3>
-              <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+              <h3 className="mb-2 text-base font-bold text-[var(--mag-ink)]">Leave current event?</h3>
+              <p className="mb-4 text-sm text-[var(--mag-ink-soft)]">
                 You are already checked into <strong className="text-[var(--mag-ink)]">{confirmInfo.currentEventName}</strong>. You can only be in one event at a time.
               </p>
-              <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+              <p className="mb-4 text-sm text-[var(--mag-ink-soft)]">
                 Join <strong className="text-[var(--mag-ink)]">{confirmInfo.eventName}</strong> anyway?
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => { setConfirmInfo(null); navigate({ to: '/events' }) }}
-                  className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                  className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-base font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => doJoin(true)}
-                  className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80"
+                  className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-base font-bold text-[var(--mag-bg)] transition hover:opacity-80"
                 >
                   Switch Event
                 </button>
@@ -251,7 +251,7 @@ function ShareJoinPage() {
           ) : (
             <button
               onClick={() => doJoin()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3 text-sm font-bold !text-[var(--mag-bg)] transition hover:opacity-80"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3 text-base font-bold !text-[var(--mag-bg)] transition hover:opacity-80"
             >
               {event && event.startsAt && new Date(event.startsAt) > new Date() ? (
                 <>

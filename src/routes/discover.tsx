@@ -316,11 +316,11 @@ function DiscoverPage() {
     return (
       <div className="page-wrap flex h-[var(--app-viewport-h)] flex-col items-center justify-center px-4 text-center">
         <Users className="mb-4 h-16 w-16 text-[var(--mag-ink-muted)]" />
-        <h2 className="text-xl font-bold text-[var(--mag-ink)]">Join an Event First</h2>
-        <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
+        <h2 className="text-2xl font-bold text-[var(--mag-ink)]">Join an Event First</h2>
+        <p className="mt-2 max-w-xs text-base text-[var(--mag-ink-soft)]">
           Your discovery is set to event-only in Settings. Check into an event to start swiping, or switch back to the global pool.
         </p>
-        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-bold !text-[var(--mag-bg)] no-underline transition hover:opacity-80 active:scale-95">
+        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-bold !text-[var(--mag-bg)] no-underline transition hover:opacity-80 active:scale-95">
           Browse Events <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -339,13 +339,13 @@ function DiscoverPage() {
     return (
       <div className="page-wrap flex h-[var(--app-viewport-h)] flex-col items-center justify-center px-4 text-center">
         <Users className="mb-4 h-16 w-16 text-[var(--mag-ink-muted)]" />
-        <h2 className="text-xl font-bold text-[var(--mag-ink)]">Nobody Here Yet</h2>
-        <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
+        <h2 className="text-2xl font-bold text-[var(--mag-ink)]">Nobody Here Yet</h2>
+        <p className="mt-2 max-w-xs text-base text-[var(--mag-ink-soft)]">
           {isEventMode
             ? "Other attendees haven't joined, or you've already swiped through everyone in this event."
             : "Nobody new to show right now, or you've already swiped through everyone."}
         </p>
-        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-bold !text-[var(--mag-bg)] no-underline transition hover:opacity-80 active:scale-95">
+        <Link to="/events" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-base font-bold !text-[var(--mag-bg)] no-underline transition hover:opacity-80 active:scale-95">
           Browse Events <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -422,7 +422,7 @@ function DiscoverPage() {
                   {profile.verifiedAt && <VerifiedBadge />}
                 </h2>
                 {lastActive && (
-                  <div className="mt-1 flex items-center gap-1.5 text-xs font-medium text-white/80">
+                  <div className="mt-1 flex items-center gap-1.5 text-sm font-medium text-white/80">
                     {lastActive.isOnline && (
                       <span className="h-2 w-2 rounded-full bg-emerald-400" />
                     )}
@@ -434,19 +434,19 @@ function DiscoverPage() {
                     {profile.lookingFor.map((intent) => (
                       <span
                         key={intent}
-                        className="rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm"
+                        className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-white backdrop-blur-sm"
                       >
                         {intent.charAt(0).toUpperCase() + intent.slice(1)}
                       </span>
                     ))}
                   </div>
                 )}
-                <div className="mt-1 flex items-center gap-1.5 text-sm text-white/80">
+                <div className="mt-1 flex items-center gap-1.5 text-base text-white/80">
                   <MapPin className="h-4 w-4" />
                   <span>{profile.location}</span>
                 </div>
                 {sharedInterests.length > 0 && (
-                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[var(--mag-ink)]/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[var(--mag-ink)]/80 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                     <Sparkles className="h-3 w-3" />
                     <span>
                       {sharedInterests.length} thing{sharedInterests.length === 1 ? '' : 's'} in common:{' '}
@@ -454,12 +454,12 @@ function DiscoverPage() {
                     </span>
                   </div>
                 )}
-                <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">{profile.bio}</p>
+                <p className="mt-2 max-w-md text-base leading-relaxed text-white/80">{profile.bio}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {profile.interests.slice(0, 5).map((interest) => (
                     <span
                       key={interest}
-                      className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
+                      className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm"
                     >
                       {interest}
                     </span>
@@ -551,13 +551,13 @@ function DiscoverPage() {
       {reportModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 px-4 pb-20 sm:items-center sm:pb-0">
           <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] shadow-sm p-5">
-            <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Report user</h3>
-            <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
+            <h3 className="mb-1 text-lg font-bold text-[var(--mag-ink)]">Report user</h3>
+            <p className="mb-4 text-sm text-[var(--mag-ink-soft)]">
               This will be sent to the event organizer. Be honest — false reports may result in action against you.
             </p>
 
             {reportSuccess ? (
-              <div className="rounded-2xl bg-[var(--mag-surface)] px-4 py-3 text-xs text-[var(--mag-success)]">
+              <div className="rounded-2xl bg-[var(--mag-surface)] px-4 py-3 text-sm text-[var(--mag-success)]">
                 {reportSuccess}
               </div>
             ) : (
@@ -576,7 +576,7 @@ function DiscoverPage() {
                         onChange={() => setReportReason(r)}
                         className="h-4 w-4 accent-[#111111]"
                       />
-                      <span className="text-sm text-[var(--mag-ink)]">{r}</span>
+                      <span className="text-base text-[var(--mag-ink)]">{r}</span>
                     </label>
                   ))}
                 </div>
@@ -587,14 +587,14 @@ function DiscoverPage() {
                     onChange={(e) => setReportCustom(e.target.value)}
                     placeholder="Describe the issue..."
                     rows={3}
-                    className="mb-3 w-full resize-none rounded-card bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
+                    className="mb-3 w-full resize-none rounded-card bg-[var(--input-bg)] px-3 py-2 text-base text-[var(--mag-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-ink)]"
                   />
                 )}
 
                 <div className="flex gap-2">
                   <button
                     onClick={() => setReportModalOpen(false)}
-                    className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                    className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-base font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
                   >
                     Cancel
                   </button>
@@ -603,7 +603,7 @@ function DiscoverPage() {
                     disabled={
                       !reportReason || (reportReason === 'Other' && !reportCustom.trim()) || reportMutation.isPending
                     }
-                    className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 active:scale-95"
+                    className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-base font-bold text-[var(--mag-bg)] transition hover:opacity-80 disabled:opacity-50 active:scale-95"
                   >
                     {reportMutation.isPending ? 'Submitting…' : 'Submit Report'}
                   </button>

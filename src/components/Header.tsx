@@ -45,7 +45,7 @@ export default function Header() {
       <div className="page-wrap flex items-center justify-between py-3">
         <Link to="/" className="flex items-center gap-1.5 no-underline">
           <Logo className="h-6 w-auto" />
-          <span className="text-base font-medium tracking-normal text-[var(--mag-ink)]">Meet & Greet</span>
+          <span className="text-lg font-medium tracking-normal text-[var(--mag-ink)]">Meet & Greet</span>
         </Link>
         <div className="flex items-center gap-1">
           {session?.user && (
@@ -55,7 +55,7 @@ export default function Header() {
             >
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <span className="absolute top-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--mag-sale)] px-1 text-[10px] font-bold text-[var(--mag-bg)]">
+                <span className="absolute top-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--mag-sale)] px-1 text-xs font-bold text-[var(--mag-bg)]">
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}

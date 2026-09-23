@@ -55,13 +55,13 @@ function NotificationsPage() {
           <button onClick={() => history.back()} className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-bold text-[var(--mag-ink)]">Notifications</h1>
+          <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Notifications</h1>
         </div>
         {unreadCount > 0 && (
           <button
             onClick={() => markAllMutation.mutate({ data: undefined })}
             disabled={markAllMutation.isPending}
-            className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm px-3 py-1.5 text-[10px] font-semibold text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm px-3 py-1.5 text-xs font-semibold text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
           >
             <CheckCheck className="h-3 w-3" /> Mark all read
           </button>
@@ -84,7 +84,7 @@ function NotificationsPage() {
       ) : notifications.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <Bell className="mb-3 h-12 w-12 text-[var(--mag-ink-muted)]" />
-          <p className="text-sm text-[var(--mag-ink-soft)]">No notifications yet.</p>
+          <p className="text-base text-[var(--mag-ink-soft)]">No notifications yet.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -105,9 +105,9 @@ function NotificationsPage() {
                   <Icon className={`h-5 w-5 ${cfg.color}`} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-[var(--mag-ink)]">{n.title}</p>
-                  <p className="text-xs text-[var(--mag-ink-soft)]">{n.body}</p>
-                  <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]" suppressHydrationWarning>
+                  <p className="text-base font-semibold text-[var(--mag-ink)]">{n.title}</p>
+                  <p className="text-sm text-[var(--mag-ink-soft)]">{n.body}</p>
+                  <p className="mt-1 text-xs text-[var(--mag-ink-muted)]" suppressHydrationWarning>
                     {new Date(n.createdAt).toLocaleString()}
                   </p>
                 </div>

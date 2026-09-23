@@ -1,4 +1,4 @@
-import { SegmentedControl } from '#/components/ui'
+import { Button, SegmentedControl, Sheet } from '#/components/ui'
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -15,10 +15,7 @@ import {
   CheckCircle2,
   Link2,
   MessageCircle,
-  Ban,
   UserX,
-  Flag,
-  ShieldAlert,
   X,
   ImageIcon,
   ListOrdered,
@@ -29,16 +26,9 @@ import {
   deleteEvent,
   getEventAttendees,
   removeEventAttendee,
-  blockEventAttendee,
-  unblockEventAttendee,
-  getEventBlockedUsers,
-  getEventReports,
   getEventWaitlist,
   removeFromWaitlist,
-  getEventPosts,
-  createEventPost,
 } from '#/server/events'
-import { updateEventSponsor, removeEventSponsor } from '#/server/sponsors'
 import { getSession } from '#/server/auth'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
@@ -72,18 +62,6 @@ function ManageEventPage() {
     enabled: !!eventId,
   })
 
-  const { data: reports = [] } = useQuery({
-    queryKey: ['event-reports', eventId],
-    queryFn: () => getEventReports({ data: eventId }),
-    enabled: !!eventId,
-  })
-
-  const { data: blockedUsers = [] } = useQuery({
-    queryKey: ['event-blocked', eventId],
-    queryFn: () => getEventBlockedUsers({ data: eventId }),
-    enabled: !!eventId,
-  })
-
   const { data: waitlist = [], isLoading: waitlistLoading } = useQuery({
     queryKey: ['event-waitlist', eventId],
     queryFn: () => getEventWaitlist({ data: eventId }),
@@ -91,32 +69,6 @@ function ManageEventPage() {
   })
 
   const attendeeCount = (event as any)?._count?.attendees ?? 0
-
-  const { data: postsData, isLoading: postsLoading } = useQuery({
-    queryKey: ['event-posts', eventId],
-    queryFn: () => getEventPosts({ data: { eventId, limit: 20 } }),
-    enabled: !!eventId,
-  })
-  const eventPosts = postsData?.items ?? []
-
-  const [postContent, setPostContent] = useState('')
-
-  const loadMorePosts = async () => {
-    if (!postsData?.nextCursor) return
-    const more = await getEventPosts({ data: { eventId, cursor: postsData.nextCursor, limit: 20 } })
-    queryClient.setQueryData(['event-posts', eventId], {
-      items: [...eventPosts, ...more.items],
-      nextCursor: more.nextCursor,
-    })
-  }
-
-  const createPostMutation = useMutation({
-    mutationFn: createEventPost,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event-posts', eventId] })
-      setPostContent('')
-    },
-  })
 
   // Editable form state
   const [name, setName] = useState('')
@@ -126,20 +78,19 @@ function ManageEventPage() {
   const [startsAt, setStartsAt] = useState<string>('')
   const [savedMsg, setSavedMsg] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [activeTab, setActiveTab] = useState<'attendees' | 'waitlist' | 'reports' | 'blocked' | 'activity'>('attendees')
+  const [activeTab, setActiveTab] = useState<'attendees' | 'waitlist'>('attendees')
 
   const [eventPhoto, setEventPhoto] = useState<string | null>(null)
   const [eventIsPublic, setEventIsPublic] = useState(true)
   const [photoError, setPhotoError] = useState('')
   const [saveError, setSaveError] = useState('')
+  const [confirmAction, setConfirmAction] = useState<
+    | { kind: 'delete' }
+    | { kind: 'remove'; userId: string; name: string }
+    | { kind: 'waitlist'; userId: string; name: string }
+    | null
+  >(null)
   const fileRef = useRef<HTMLInputElement>(null)
-
-  // Sponsor branding state
-  const [sponsorName, setSponsorName] = useState('')
-  const [sponsorLogo, setSponsorLogo] = useState('')
-  const [sponsorFrameUrl, setSponsorFrameUrl] = useState('')
-  const [sponsorSaved, setSponsorSaved] = useState(false)
-  const [sponsorError, setSponsorError] = useState('')
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -169,9 +120,6 @@ function ManageEventPage() {
       setStartsAt(event.startsAt ? toDatetimeLocalValue(event.startsAt) : '')
       setEventPhoto(event.photo ?? null)
       setEventIsPublic((event as any).isPublic ?? true)
-      setSponsorName((event as any).sponsorName ?? '')
-      setSponsorLogo((event as any).sponsorLogo ?? '')
-      setSponsorFrameUrl((event as any).sponsorFrameUrl ?? '')
     }
   }, [event])
 
@@ -216,22 +164,6 @@ function ManageEventPage() {
     },
   })
 
-  const blockMutation = useMutation({
-    mutationFn: blockEventAttendee,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event-attendees', eventId] })
-      queryClient.invalidateQueries({ queryKey: ['event-blocked', eventId] })
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
-    },
-  })
-
-  const unblockMutation = useMutation({
-    mutationFn: unblockEventAttendee,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event-blocked', eventId] })
-    },
-  })
-
   const removeWaitlistMutation = useMutation({
     mutationFn: removeFromWaitlist,
     onSuccess: () => {
@@ -240,36 +172,37 @@ function ManageEventPage() {
     },
   })
 
-  const updateSponsorMutation = useMutation({
-    mutationFn: updateEventSponsor,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
-      queryClient.invalidateQueries({ queryKey: ['events'] })
-      setSponsorError('')
-      setSponsorSaved(true)
-      setTimeout(() => setSponsorSaved(false), 2000)
-    },
-    onError: (err: any) => {
-      const message = err?.message || err?.error?.message || 'Failed to update sponsor.'
-      setSponsorError(message)
-    },
-  })
 
-  const removeSponsorMutation = useMutation({
-    mutationFn: removeEventSponsor,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
-      queryClient.invalidateQueries({ queryKey: ['events'] })
-      setSponsorName('')
-      setSponsorLogo('')
-      setSponsorFrameUrl('')
-      setSponsorError('')
+  const CONFIRM_COPY = {
+    delete: {
+      title: 'Delete this event?',
+      description:
+        'The event, its attendees and its waitlist are removed. This cannot be undone.',
+      action: 'Delete event',
     },
-    onError: (err: any) => {
-      const message = err?.message || err?.error?.message || 'Failed to remove sponsor.'
-      setSponsorError(message)
+    remove: {
+      title: 'Remove from the event?',
+      description: 'They stop appearing to other attendees. They can join again with the code.',
+      action: 'Remove',
     },
-  })
+    waitlist: {
+      title: 'Remove from the waitlist?',
+      description: 'They lose their place and will not be promoted when a space opens.',
+      action: 'Remove',
+    },
+  } as const
+
+  const runConfirmedAction = () => {
+    if (!confirmAction) return
+    if (confirmAction.kind === 'delete') deleteMutation.mutate({ data: eventId })
+    if (confirmAction.kind === 'remove') {
+      removeMutation.mutate({ data: { eventId, userId: confirmAction.userId } })
+    }
+    if (confirmAction.kind === 'waitlist') {
+      removeWaitlistMutation.mutate({ data: { eventId, userId: confirmAction.userId } })
+    }
+    setConfirmAction(null)
+  }
 
   const handleSave = () => {
     const startsAtIso = startsAt ? localDatetimeToUTCISO(startsAt) : undefined
@@ -302,10 +235,7 @@ function ManageEventPage() {
     })
   }
 
-  const handleDelete = () => {
-    if (!confirm('Are you sure you want to delete this event? This cannot be undone.')) return
-    deleteMutation.mutate({ data: eventId })
-  }
+  const handleDelete = () => setConfirmAction({ kind: 'delete' })
 
   const handleCopyLink = () => {
     const link = `${window.location.origin}/events/join/${(event as any).code}`
@@ -315,26 +245,12 @@ function ManageEventPage() {
     })
   }
 
-  const handleRemove = (userId: string, name: string) => {
-    if (!confirm(`Remove ${name || 'this user'} from the event?`)) return
-    removeMutation.mutate({ data: { eventId, userId } })
-  }
+  const handleRemove = (userId: string, name: string) =>
+    setConfirmAction({ kind: 'remove', userId, name })
 
-  const handleBlock = (userId: string, name: string) => {
-    const reason = prompt(`Why do you want to block ${name || 'this user'}? (optional)`)
-    if (reason === null) return // cancelled
-    blockMutation.mutate({ data: { eventId, userId, reason: reason || undefined } })
-  }
+  const handleRemoveWaitlist = (userId: string, name: string) =>
+    setConfirmAction({ kind: 'waitlist', userId, name })
 
-  const handleUnblock = (userId: string) => {
-    if (!confirm('Unblock this user? They will be able to join again.')) return
-    unblockMutation.mutate({ data: { eventId, userId } })
-  }
-
-  const handleRemoveWaitlist = (userId: string, name: string) => {
-    if (!confirm(`Remove ${name || 'this user'} from the waitlist?`)) return
-    removeWaitlistMutation.mutate({ data: { eventId, userId } })
-  }
 
   if (eventLoading) {
     return (
@@ -640,150 +556,17 @@ function ManageEventPage() {
         </div>
       </section>
 
-      {/* Sponsor Branding */}
-      {isCreator && (
-        <section className="mb-6 rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
-          <h2 className="mb-3 text-base font-bold text-[var(--mag-ink)]">Sponsor Branding</h2>
 
-          {!(event as any)?.sponsorName && !(event as any)?.sponsorLogo && !(event as any)?.sponsorFrameUrl ? (
-            <p className="mb-3 text-sm text-[var(--mag-ink-muted)]">
-              Add sponsor branding
-            </p>
-          ) : (
-            <div className="mb-3 flex items-center gap-3">
-              {(event as any)?.sponsorLogo && (
-                <img
-                  src={(event as any).sponsorLogo}
-                  alt={(event as any).sponsorName || 'Sponsor logo'}
-                  className="h-8 max-w-[140px] object-contain"
-                />
-              )}
-              <div className="min-w-0">
-                {(event as any)?.sponsorName && (
-                  <p className="text-sm font-semibold text-[var(--mag-ink)]">{(event as any).sponsorName}</p>
-                )}
-                {(event as any)?.sponsorFrameUrl && (
-                  <p className="text-xs text-[var(--mag-ink-muted)]">Frame image set</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="mx-auto max-w-md space-y-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Sponsor Name</label>
-              <input
-                type="text"
-                value={sponsorName}
-                onChange={(e) => setSponsorName(e.target.value)}
-                placeholder="e.g. Acme Corp"
-                className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Sponsor Logo URL</label>
-              <input
-                type="url"
-                value={sponsorLogo}
-                onChange={(e) => setSponsorLogo(e.target.value)}
-                placeholder="https://example.com/logo.png"
-                className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
-              />
-              {sponsorLogo && (
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-xs text-[var(--mag-ink-muted)]">Preview:</span>
-                  <img src={sponsorLogo} alt="Logo preview" className="h-6 max-w-[120px] object-contain" />
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-[var(--mag-ink)]">Sponsor Frame URL</label>
-              <input
-                type="url"
-                value={sponsorFrameUrl}
-                onChange={(e) => setSponsorFrameUrl(e.target.value)}
-                placeholder="https://example.com/frame.png"
-                className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-base text-[var(--mag-ink)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
-              />
-              <p className="mt-1 text-xs text-[var(--mag-ink-muted)]">
-                A decorative border/frame image that wraps the event card
-              </p>
-            </div>
-          </div>
-
-          {sponsorError && (
-            <p className="mt-2 text-center text-sm font-semibold text-[var(--mag-sale)]">{sponsorError}</p>
-          )}
-
-          <div className="mt-4 flex items-center justify-center gap-3">
-            <button
-              onClick={() => {
-                updateSponsorMutation.mutate({
-                  data: {
-                    eventId,
-                    sponsorName: sponsorName.trim() || undefined,
-                    sponsorLogo: sponsorLogo.trim() || null,
-                    sponsorFrameUrl: sponsorFrameUrl.trim() || null,
-                  },
-                })
-              }}
-              disabled={updateSponsorMutation.isPending}
-              className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Save className="h-3.5 w-3.5" />
-              {updateSponsorMutation.isPending ? 'Saving…' : 'Save Sponsor'}
-            </button>
-            {sponsorSaved && (
-              <span className="inline-flex items-center gap-1 text-sm font-medium text-[var(--mag-ink)]">
-                <CheckCircle2 className="h-3.5 w-3.5" /> Saved
-              </span>
-            )}
-          </div>
-
-          {((event as any)?.sponsorName || (event as any)?.sponsorLogo || (event as any)?.sponsorFrameUrl) && (
-            <div className="mt-3 flex items-center justify-center">
-              <button
-                onClick={() => {
-                  if (confirm('Remove sponsor branding from this event?')) {
-                    removeSponsorMutation.mutate({ data: eventId })
-                  }
-                }}
-                disabled={removeSponsorMutation.isPending}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--mag-sale)]/30 px-4 py-2 text-xs font-bold text-[var(--mag-sale)] transition hover:bg-[var(--mag-sale-bg)] disabled:opacity-50"
-              >
-                <Trash2 className="h-3 w-3" /> Remove Sponsor
-              </button>
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Tabs */}
-      <div className="mb-4 flex items-center gap-1 rounded-2xl bg-[var(--mag-card)] shadow-sm p-1">
-        {([
-          { key: 'attendees', label: 'Attendees', count: attendeeCount, icon: Users },
-          { key: 'activity', label: 'Activity', count: eventPosts.length, icon: MessageCircle },
-          { key: 'waitlist', label: 'Waitlist', count: waitlist.length, icon: ListOrdered },
-          { key: 'reports', label: 'Reports', count: reports.length, icon: Flag },
-          { key: 'blocked', label: 'Blocked', count: blockedUsers.length, icon: Ban },
-        ] as const).map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-semibold transition ${
-              activeTab === t.key
-                ? 'bg-[var(--mag-ink)] text-[var(--on-ink)]'
-                : 'text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
-            }`}
-          >
-            <t.icon className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{t.label}</span>
-            <span className="rounded-full bg-white/20 px-1.5 py-0 text-xs">{t.count}</span>
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        aria-label="Event management sections"
+        className="mb-4"
+        value={activeTab}
+        onChange={setActiveTab}
+        segments={[
+          { value: 'attendees', label: 'Attendees', count: attendeeCount },
+          { value: 'waitlist', label: 'Waitlist', count: waitlist.length },
+        ]}
+      />
 
       {/* Tab Content */}
       <section className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
@@ -849,14 +632,6 @@ function ManageEventPage() {
                         >
                           <UserX className="h-3.5 w-3.5" />
                         </button>
-                        <button
-                          onClick={() => handleBlock(profile.userId, profile.name)}
-                          title="Block"
-                          disabled={blockMutation.isPending}
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mag-sale)]/10 text-[var(--mag-sale)] transition hover:bg-[var(--mag-sale)]/20 disabled:opacity-50"
-                        >
-                          <Ban className="h-3.5 w-3.5" />
-                        </button>
                       </div>
                     </div>
                   )
@@ -866,90 +641,6 @@ function ManageEventPage() {
           </>
         )}
 
-        {activeTab === 'activity' && (
-          <>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-bold text-[var(--mag-ink)]">Activity Feed</h2>
-            </div>
-            <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm overflow-hidden">
-              <div className="sticky top-0 bg-[var(--mag-card)] z-10 px-4 py-3 border-b border-[var(--mag-line)]">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={postContent}
-                    onChange={(e) => setPostContent(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey && postContent.trim()) {
-                        e.preventDefault()
-                        createPostMutation.mutate({ data: { eventId, content: postContent.trim() } })
-                      }
-                    }}
-                    placeholder="Write something..."
-                    className="flex-1 rounded-full bg-[var(--input-bg)] px-4 py-2.5 text-base text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:outline-none focus:bg-[var(--mag-card)] focus:shadow-md"
-                  />
-                  <button
-                    onClick={() => {
-                      if (postContent.trim()) {
-                        createPostMutation.mutate({ data: { eventId, content: postContent.trim() } })
-                      }
-                    }}
-                    disabled={!postContent.trim() || createPostMutation.isPending}
-                    className="shrink-0 rounded-full bg-[var(--mag-ink)] px-4 py-2.5 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {createPostMutation.isPending ? 'Posting…' : 'Post'}
-                  </button>
-                </div>
-              </div>
-              <div className="max-h-[500px] overflow-y-auto">
-                {postsLoading ? (
-                  <div className="space-y-3 px-4 py-3">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
-                        <div className="min-w-0 flex-1 space-y-1.5">
-                          <Skeleton className="h-3 w-24 rounded-lg" />
-                          <Skeleton className="h-3 w-full rounded-lg" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : eventPosts.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No posts yet. Start the conversation!</p>
-                ) : (
-                  eventPosts.map((post: any) => (
-                    <div
-                      key={post.id}
-                      className="px-4 py-3 border-b border-[var(--mag-line)] last:border-b-0"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-                          <AvatarImage src={post.author?.photo} alt={post.author?.name ?? ''} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-0.5 flex items-center gap-2">
-                            <span className="text-sm font-semibold text-[var(--mag-ink)]">{post.author?.name ?? 'Unnamed'}</span>
-                            <span className="text-xs text-[var(--mag-ink-muted)]" suppressHydrationWarning>
-                              {new Date(post.createdAt).toLocaleString()}
-                            </span>
-                          </div>
-                          <p className="text-base text-[var(--mag-ink)] whitespace-pre-wrap break-words">{post.content}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-                {postsData?.nextCursor && (
-                  <button
-                    onClick={loadMorePosts}
-                    className="w-full py-2 text-center text-sm font-medium text-[var(--mag-ink-muted)] transition hover:text-[var(--mag-ink)]"
-                  >
-                    Load more posts
-                  </button>
-                )}
-              </div>
-            </div>
-          </>
-        )}
 
         {activeTab === 'waitlist' && (
           <>
@@ -1012,105 +703,33 @@ function ManageEventPage() {
           </>
         )}
 
-        {activeTab === 'reports' && (
-          <>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-bold text-[var(--mag-ink)]">Reports</h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-sale)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--mag-sale)]">
-                <ShieldAlert className="h-3 w-3" />
-                {reports.length} total
-              </span>
-            </div>
 
-            {reports.length === 0 ? (
-              <p className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No reports yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {(reports as any[]).map((report) => (
-                    <div key={report.id} className="rounded-2xl bg-[var(--mag-surface)] p-3">
-                    <div className="mb-2 flex items-center gap-2">
-                      <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-                        <AvatarImage src={(report.reported as any)?.photos?.[0]} alt="" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-[var(--mag-ink)]">
-                          {(report.reported as any)?.name ?? 'Unknown'} reported by {(report.reporter as any)?.name ?? 'Unknown'}
-                        </p>
-                        <p className="text-xs text-[var(--mag-ink-muted)]" suppressHydrationWarning>
-                          {new Date(report.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="rounded-lg bg-[var(--mag-card)] p-2 text-sm text-[var(--mag-ink-soft)]">
-                      {report.reason}
-                    </p>
-                    <div className="mt-2 flex gap-2">
-                      <button
-                        onClick={() => handleBlock(report.reportedId, (report.reported as any)?.name)}
-                        className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-sale)] px-3 py-1.5 text-xs font-bold text-[var(--on-ink)] transition hover:opacity-80"
-                      >
-                        <Ban className="h-3 w-3" /> Block user
-                      </button>
-                      <button
-                        onClick={() => navigate({ to: '/chats/$chatId', params: { chatId: `org_${eventId}_${report.reportedId}` } })}
-                        className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-ink)] shadow-sm px-3 py-1.5 text-xs font-medium text-[var(--on-ink)] transition hover:opacity-90"
-                      >
-                        <MessageCircle className="h-3 w-3" /> Message
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {activeTab === 'blocked' && (
-          <>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-bold text-[var(--mag-ink)]">Blocked Users</h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-sale)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--mag-sale)]">
-                <Ban className="h-3 w-3" />
-                {blockedUsers.length} total
-              </span>
-            </div>
-
-            {blockedUsers.length === 0 ? (
-              <p className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No blocked users.</p>
-            ) : (
-              <div className="space-y-3">
-                  {(blockedUsers as any[]).map((b) => {
-                  const photo = b.profile?.photos?.[0]
-                  return (
-                    <div key={b.userId} className="flex items-center gap-3 rounded-xl bg-[var(--mag-surface)] p-3">
-                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--mag-line)]">
-                        <AvatarImage src={photo} alt={b.profile?.name ?? ''} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-base font-medium text-[var(--mag-ink)]">
-                          {b.profile?.name ?? 'Unknown'}
-                        </p>
-                        <p className="truncate text-xs text-[var(--mag-ink-muted)]">
-                          {b.reason || 'No reason given'}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleUnblock(b.userId)}
-                        disabled={unblockMutation.isPending}
-                        className="shrink-0 rounded-full bg-[var(--mag-ink)] shadow-sm px-3 py-1.5 text-xs font-medium text-[var(--on-ink)] transition hover:border-[var(--mag-ink)] hover:text-[var(--on-ink)] disabled:opacity-50"
-                      >
-                        Unblock
-                      </button>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </>
-        )}
       </section>
 
 
+
+      <Sheet
+        open={!!confirmAction}
+        onClose={() => setConfirmAction(null)}
+        title={confirmAction ? CONFIRM_COPY[confirmAction.kind].title : ''}
+        description={
+          confirmAction
+            ? confirmAction.kind === 'delete'
+              ? CONFIRM_COPY.delete.description
+              : `${(confirmAction as { name: string }).name || 'This person'} — ${CONFIRM_COPY[confirmAction.kind].description}`
+            : ''
+        }
+        footer={
+          <>
+            <Button variant="ghost" block onClick={() => setConfirmAction(null)}>
+              Cancel
+            </Button>
+            <Button variant="danger" block onClick={runConfirmedAction}>
+              {confirmAction ? CONFIRM_COPY[confirmAction.kind].action : ''}
+            </Button>
+          </>
+        }
+      />
     </main>
   )
 }

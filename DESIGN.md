@@ -1,384 +1,415 @@
 ---
 version: alpha
-name: Nike-design-analysis
-description: |
-  A photography-first commerce system built on extreme typographic contrast — towering uppercase Futura display lockups burned into editorial campaign imagery, sitting above a dense, neutral, near-monochrome retail chrome of pill-shaped black CTAs, gray search and tag pills, and tight 8px-grid product cards. The brand's voice is athletic, kinetic, and absolute: pure black, pure white, a single soft surface gray, and a deliberately small set of semantic accents (sale red, success green, restrained category tints) — every chromatic moment is reserved for editorial photography or pricing signal, never decorative chrome.
+name: Mobbin Analysis
+description: An analysis of Mobbin's design language — a gallery-white, monochrome interface system built to disappear behind the content it curates. Near-black ink on white canvas, a ladder of barely-there neutral tints instead of shadows, stadium-pill controls, 24px card geometry, iOS-style 30% squircle icon tiles, and the Saans typeface at unusual variable weights (652 display, 456 text, 300 light). One electric blue accent is reserved for commercial signals; every other color on screen belongs to the product screenshots being showcased.
 
 colors:
-  primary: "#111111"
+  primary: "#141414"
   on-primary: "#ffffff"
+  ink: "#141414"
+  ink-soft: "#262626"
+  text-muted: "#707070"
+  text-faint: "#adadad"
   canvas: "#ffffff"
-  soft-cloud: "#f5f5f5"
-  ink: "#111111"
-  charcoal: "#39393b"
-  ash: "#4b4b4d"
-  mute: "#707072"
-  stone: "#9e9ea0"
-  hairline: "#cacacb"
-  hairline-soft: "#e5e5e5"
-  sale: "#d30005"
-  sale-deep: "#780700"
-  success: "#007d48"
-  success-bright: "#1eaa52"
-  info: "#1151ff"
-  info-deep: "#0034e3"
-  accent-pink: "#ed1aa0"
-  accent-pink-soft: "#ffb0dd"
-  accent-purple-soft: "#beaffd"
-  accent-purple-pale: "#d6d1ff"
-  accent-teal: "#0a7281"
-  accent-pink-deep: "#4c012d"
+  canvas-soft: "#f3f3f3"
+  field: "#f0f0f0"
+  hairline-soft: "#f0f0f0"
+  hairline: "#e0e0e0"
+  accent: "#0066ff"
 
 typography:
-  display-campaign:
-    fontFamily: Nike Futura ND
-    fontSize: 96px
-    fontWeight: 500
-    lineHeight: 0.9
+  display:
+    fontFamily: Saans
+    fontSize: 80px
+    fontWeight: 652
+    lineHeight: 1
     letterSpacing: 0
-    textTransform: uppercase
-  heading-xl:
-    fontFamily: Helvetica Now Display Medium
+  heading-1:
+    fontFamily: Saans
+    fontSize: 56px
+    fontWeight: 652
+    lineHeight: 1
+    letterSpacing: 0
+  heading-2:
+    fontFamily: Saans
+    fontSize: 44px
+    fontWeight: 652
+    lineHeight: 1.13
+    letterSpacing: 0
+  heading-3:
+    fontFamily: Saans
     fontSize: 32px
-    fontWeight: 500
-    lineHeight: 1.2
+    fontWeight: 652
+    lineHeight: 1.13
     letterSpacing: 0
-  heading-lg:
-    fontFamily: Helvetica Now Display Medium
+  heading-4:
+    fontFamily: Saans
     fontSize: 24px
-    fontWeight: 500
-    lineHeight: 1.2
+    fontWeight: 652
+    lineHeight: 1.25
     letterSpacing: 0
-  heading-md:
-    fontFamily: Helvetica Now Display Medium
+  title:
+    fontFamily: Saans
+    fontSize: 20px
+    fontWeight: 600
+    lineHeight: 1.3
+    letterSpacing: 0
+  body-lg:
+    fontFamily: Saans
+    fontSize: 20px
+    fontWeight: 300
+    lineHeight: 1.38
+    letterSpacing: 0
+  body:
+    fontFamily: Saans
     fontSize: 16px
-    fontWeight: 500
-    lineHeight: 1.75
+    fontWeight: 456
+    lineHeight: 1.38
     letterSpacing: 0
-  body-md:
-    fontFamily: Helvetica Now Text
-    fontSize: 16px
-    fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: 0
-  body-strong:
-    fontFamily: Helvetica Now Text Medium
-    fontSize: 16px
-    fontWeight: 500
-    lineHeight: 1.5
-    letterSpacing: 0
-  button-lg:
-    fontFamily: Helvetica Now Display Medium
-    fontSize: 24px
-    fontWeight: 500
-    lineHeight: 1.2
-    letterSpacing: 0
-  button-md:
-    fontFamily: Helvetica Now Text Medium
-    fontSize: 16px
-    fontWeight: 500
-    lineHeight: 1.5
-    letterSpacing: 0
-  button-sm:
-    fontFamily: Helvetica Now Text Medium
+  body-sm:
+    fontFamily: Saans
     fontSize: 14px
-    fontWeight: 500
-    lineHeight: 1.5
+    fontWeight: 456
+    lineHeight: 1.43
     letterSpacing: 0
-  link-md:
-    fontFamily: Helvetica Now Text
+  link:
+    fontFamily: Saans
     fontSize: 16px
-    fontWeight: 500
-    lineHeight: 1.75
+    fontWeight: 600
+    lineHeight: 1.38
     letterSpacing: 0
-    textDecoration: underline
-  caption-md:
-    fontFamily: Helvetica Now Text Medium
-    fontSize: 14px
-    fontWeight: 500
-    lineHeight: 1.5
-    letterSpacing: 0
-  caption-sm:
-    fontFamily: Helvetica Now Text Medium
+  label:
+    fontFamily: Saans
     fontSize: 12px
-    fontWeight: 500
-    lineHeight: 1.5
+    fontWeight: 600
+    lineHeight: 1.33
     letterSpacing: 0
-  utility-xs:
-    fontFamily: Helvetica Neue
-    fontSize: 9px
-    fontWeight: 500
-    lineHeight: 1.75
+  caption:
+    fontFamily: Saans
+    fontSize: 12px
+    fontWeight: 456
+    lineHeight: 1.33
     letterSpacing: 0
 
 rounded:
   none: 0px
-  sm: 18px
+  sm: 16px
   md: 24px
-  lg: 30px
   full: 9999px
 
 spacing:
-  xxs: 2px
-  xs: 4px
-  sm: 8px
-  md: 12px
-  lg: 18px
-  xl: 24px
-  xxl: 30px
-  section: 48px
+  xxs: 4px
+  xs: 8px
+  sm: 12px
+  md: 16px
+  lg: 24px
+  xl: 32px
+  xxl: 48px
+  section: 80px
+  section-lg: 120px
 
 components:
+  nav-pill:
+    backgroundColor: "{colors.canvas-soft}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.full}"
+
   button-primary:
-    backgroundColor: "{colors.ink}"
+    backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
-    typography: "{typography.button-md}"
+    typography: "{typography.link}"
     rounded: "{rounded.full}"
-    padding: 16px 32px
-    height: 48px
-  button-primary-active:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.full}"
-  button-secondary:
-    backgroundColor: "{colors.soft-cloud}"
-    textColor: "{colors.ink}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.full}"
-    padding: 16px 32px
-    height: 48px
-  button-outline-on-image:
+    padding: "0px {spacing.md}"
+
+  button-outline:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.button-md}"
+    borderColor: "{colors.hairline}"
     rounded: "{rounded.full}"
-    padding: 12px 24px
-  button-icon-circular:
-    backgroundColor: "{colors.soft-cloud}"
+
+  button-pill-soft:
+    backgroundColor: "{colors.canvas-soft}"
     textColor: "{colors.ink}"
     rounded: "{rounded.full}"
-    size: 40px
-  search-pill:
-    backgroundColor: "{colors.soft-cloud}"
+
+  text-input:
+    backgroundColor: "{colors.field}"
     textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
+    rounded: "{rounded.sm}"
+    padding: "{spacing.sm} {spacing.md}"
+
+  text-input-focused:
+    backgroundColor: "{colors.field}"
+    textColor: "{colors.ink}"
+    borderColor: "{colors.ink}"
+    rounded: "{rounded.sm}"
+    padding: "{spacing.sm} {spacing.md}"
+
+  badge-popular:
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.on-primary}"
+
+  badge-overlay:
+    backgroundColor: "rgba(115, 115, 115, 0.56)"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.label}"
+    rounded: "{rounded.full}"
+
+  pricing-card:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    borderColor: "{colors.hairline-soft}"
     rounded: "{rounded.md}"
-    padding: 8px 16px
-    height: 40px
-  search-pill-focused:
-    backgroundColor: "{colors.canvas}"
+
+  pricing-card-featured:
+    backgroundColor: "{colors.canvas-soft}"
     textColor: "{colors.ink}"
     rounded: "{rounded.md}"
-  filter-chip:
+
+  segmented-control:
+    backgroundColor: "{colors.canvas-soft}"
+    rounded: "{rounded.full}"
+
+  segmented-control-active:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.button-md}"
     rounded: "{rounded.full}"
-    padding: 8px 16px
-  filter-chip-active:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.full}"
-  badge-promo:
+
+  testimonial-card:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.caption-sm}"
-    rounded: "{rounded.full}"
-    padding: 4px 12px
-  badge-sale-text:
-    textColor: "{colors.sale}"
-    typography: "{typography.caption-md}"
-  product-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-strong}"
-    rounded: "{rounded.none}"
-    padding: 0px
-  product-card-image:
-    backgroundColor: "{colors.soft-cloud}"
-    rounded: "{rounded.none}"
-  swatch-dot:
-    backgroundColor: "{colors.ink}"
-    rounded: "{rounded.full}"
-    size: 12px
-  swatch-dot-active:
-    backgroundColor: "{colors.ink}"
-    rounded: "{rounded.full}"
-    size: 12px
-  campaign-tile:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.display-campaign}"
-    rounded: "{rounded.none}"
-  category-icon-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.caption-md}"
-    rounded: "{rounded.none}"
-  member-benefit-card:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.heading-lg}"
-    rounded: "{rounded.none}"
+    borderColor: "{colors.hairline-soft}"
+    rounded: "{rounded.sm}"
+
   faq-row:
-    backgroundColor: "{colors.canvas}"
+    backgroundColor: "{colors.canvas-soft}"
     textColor: "{colors.ink}"
-    typography: "{typography.heading-md}"
-    rounded: "{rounded.none}"
-    padding: 24px 0px
-  pdp-disclosure-row:
-    backgroundColor: "{colors.canvas}"
+    rounded: "{rounded.sm}"
+
+  app-icon-squircle:
+    cornerRadius: "30%"
+
+  brand-chip:
     textColor: "{colors.ink}"
-    typography: "{typography.body-strong}"
-    rounded: "{rounded.none}"
-    padding: 24px 0px
-  utility-bar:
-    backgroundColor: "{colors.soft-cloud}"
+    typography: "{typography.heading-3}"
+
+  portrait-tile:
+    rounded: "{rounded.md}"
+    textColor: "{colors.on-primary}"
+
+  award-lockup:
     textColor: "{colors.ink}"
-    typography: "{typography.caption-sm}"
-    rounded: "{rounded.none}"
-    height: 36px
-  primary-nav:
-    backgroundColor: "{colors.canvas}"
+    typography: "{typography.heading-3}"
+
+  compare-table:
+    rowBorder: "{colors.canvas-soft}"
+    highlightBackground: "{colors.canvas-soft}"
     textColor: "{colors.ink}"
-    typography: "{typography.body-strong}"
-    rounded: "{rounded.none}"
-    height: 56px
-  filter-sidebar:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-strong}"
-    rounded: "{rounded.none}"
+
   footer:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.md}"
+
+  # ─── Examples (illustrative) — kit-mirror surfaces referencing brand primitives ───
+  ex-pricing-tier:
+    description: "Default Pricing tier card. Re-uses feature-card chrome with brand canvas-soft surface."
+    backgroundColor: "{colors.canvas-soft}"
+    textColor: "{colors.ink}"
+    borderColor: "{colors.hairline}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.lg}"
+  ex-pricing-tier-featured:
+    description: "Featured/highlighted tier — polarity-flipped surface (dark fill + light text in light mode, light fill + dark text in dark mode)."
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.lg}"
+  ex-product-selector:
+    description: "What's Included summary card — re-purposed for SaaS / B2B verticals (NOT a literal product gallery)."
+    backgroundColor: "{colors.canvas-soft}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.lg}"
+  ex-cart-drawer:
+    description: "Subscription summary — re-purposed for SaaS / B2B (line items per add-on, not literal cart)."
     backgroundColor: "{colors.canvas}"
-    textColor: "{colors.mute}"
-    typography: "{typography.caption-md}"
-    rounded: "{rounded.none}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.lg}"
+    item-divider: "{colors.hairline}"
+  ex-app-shell-row:
+    description: "Sidebar nav row inside the App Shell example. Active state uses brand primary as the indicator."
+    backgroundColor: "{colors.canvas}"
+    activeIndicator: "{colors.primary}"
+    rounded: "{rounded.sm}"
+    padding: "{spacing.xs} {spacing.md}"
+  ex-data-table-cell:
+    description: "Default data-table th + td chrome. Header uses mono-caps eyebrow typography; body uses body-sm."
+    headerBackground: "{colors.canvas-soft}"
+    headerTypography: "{typography.caption}"
+    bodyTypography: "{typography.body-sm}"
+    cellPadding: "{spacing.sm} {spacing.md}"
+    rowBorder: "{colors.hairline}"
+  ex-auth-form-card:
+    description: "Sign-in / sign-up card. Re-uses feature-card chrome with text-input primitives inside."
+    backgroundColor: "{colors.canvas-soft}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.lg}"
+  ex-modal-card:
+    description: "Modal dialog surface — same chrome as feature-card with elevated shadow."
+    backgroundColor: "{colors.canvas}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.lg}"
+  ex-empty-state-card:
+    description: "Empty-state illustration frame."
+    backgroundColor: "{colors.canvas-soft}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.xxl}"
+    captionTypography: "{typography.body}"
+  ex-toast:
+    description: "Toast notification surface — feature-card shape + medium shadow."
+    backgroundColor: "{colors.canvas}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.sm} {spacing.md}"
+    typography: "{typography.body-sm}"
+
 ---
+
 
 ## Overview
 
-Nike's commerce system is built on a single, almost violently simple idea: photography speaks, the chrome doesn't. Every page reads as an athletic editorial — towering uppercase Futura display lockups (`{typography.display-campaign}`) burned into full-bleed campaign imagery, with everything else (nav, filters, buttons, cards, footer) reduced to neutral typography and pill geometry on `{colors.canvas}` and `{colors.soft-cloud}`. There is no decorative gradient, no soft shadow nostalgia, no accent color used for "tone" — the system saves all chromatic energy for product photography and the small handful of moments that actually need to signal (sale price `{colors.sale}`, success `{colors.success}`, swatch dots).
+Mobbin is a reference library of real product interfaces, and its own interface is engineered to get out of the way. The system is strictly monochrome: near-black ink (`{colors.ink}` — #141414) on a pure white canvas (`{colors.canvas}`), with structure carried by a ladder of barely-perceptible neutral tints rather than by shadows or color. The thousands of app screenshots, icon tiles, and brand logos the site exists to show are the only saturated elements on any page — the chrome frames them the way a gallery wall frames paintings.
 
-The result is a layout that feels physical — campaign hero, product grid, sport tile, footer — stacked like a printed catalog rather than animated like a typical SaaS landing page. Density is high but never crowded, because the system relies on three relentless devices: square or near-square 1:1 product imagery on `{colors.soft-cloud}`, pill-shaped black CTAs (`{rounded.full}`) anchoring every actionable surface, and a tight 8px-base spacing scale that keeps cards and filters mathematically aligned across PLP, PDP, and editorial pages.
+The geometry does the brand work that color refuses to do. Every interactive element is a stadium pill (`{rounded.full}`): the floating navigation bar, every button, the segmented billing toggle, the overlay badges. Containers sit at a calm `{rounded.md}` (24px), media tiles at `{rounded.sm}` (16px), and app icons render as iOS-style squircles at 30% corner radius. Type is set in Saans at deliberately non-standard variable weights — a chunky 652 for every heading, a bookish 456 for text, an airy 300 for hero subtitles — which gives the monochrome pages a strong typographic voice without a single decorative flourish.
 
-Across `/men`, the trail-running listing, the Zegama PDP, `/membership`, and Jordan Golf, the same chrome appears in identical proportions — only the photography and copy change. That is the system's signature: maximum editorial expression in the imagery, maximum mechanical restraint everywhere else.
+One color is allowed to interrupt: an electric blue accent (`{colors.accent}` — #0066ff), used exclusively for commercial signals — the "Popular" plan badge and the yearly-savings callout on pricing. Its scarcity is the point; when blue appears, it is asking for a decision.
 
 **Key Characteristics:**
-- Editorial campaign hero with `{typography.display-campaign}` (Nike Futura ND, 96px, line-height 0.9, uppercase) burned directly into full-bleed photography
-- Pure black/white/single-gray UI palette: `{colors.ink}`, `{colors.canvas}`, and `{colors.soft-cloud}` carry ~95% of the chrome surface area
-- Pill geometry everywhere: every CTA, search field, filter chip, and badge uses `{rounded.full}` (30px) or `{rounded.md}` (24px) — there are no sharp-cornered buttons in the system
-- Product cards have zero radius, zero shadow, sit directly on `{colors.soft-cloud}` swatch backgrounds — the photograph is the card
-- Two-tone CTA hierarchy: `{component.button-primary}` (black on anything light) versus `{component.button-secondary}` (`{colors.soft-cloud}` on anything bright) — never both at once on the same surface
-- 8px spacing system with section rhythm at `{spacing.section}` (48px) creating consistent vertical breathing across PLP, PDP, and editorial pages
-- Sale signaling is the only place a non-neutral color appears in retail chrome: `{colors.sale}` price + strike-through original price, no badge background
+- Gallery-white monochrome palette — `{colors.ink}` on `{colors.canvas}`, zero brand chroma outside the single `{colors.accent}` blue
+- Stadium-pill interaction language: nav bar, buttons, toggles, and badges all at `{rounded.full}`
+- Shadow-free elevation — hierarchy built from a neutral tint ladder (`{colors.canvas-soft}`, `{colors.field}`, `{colors.hairline}`) and 1px hairlines
+- Saans at signature variable weights: 652 headings with tight 1.0–1.13 line-height, 456 body, 300 light subtitles
+- iOS-style squircle icon tiles (30% radius) as a recurring visual motif across library counters and brand marquees
+- Content supplies the color: app screenshots, brand icons, and grayscale curator portraits carry all visual richness
+- Full-bleed near-black `{colors.ink}` footer with rounded top corners closes every page in polarity inversion
 
 ## Colors
 
-> **Source pages:** `/men` (primary), `/w/mens-acg-trail-running-shoes-…`, `/t/acg-zegama-…`, `/membership`, `/w/jordan-golf-…`. The chrome palette is identical across all five — only photography varies.
+Source pages: home, pricing, awards, signup.
 
 ### Brand & Accent
-- **Nike Black** (`{colors.ink}` — `#111111`): The brand's only "color." It is the primary CTA, the swatch dot, the active filter chip, the campaign overlay, the headline color, and the body text. When Nike wants to assert anything, it goes black.
-- **Pure White** (`{colors.on-primary}`, `{colors.canvas}` — `#ffffff`): Equal partner to black. Carries every page background, the on-image CTA, and the inverse text on `{colors.ink}` surfaces.
+- **Ink Black** (`{colors.primary}` — #141414): The brand color. Fills every primary CTA pill, the footer band, and all display typography. Mobbin's identity is this near-black, softened just off pure black to sit comfortably next to photography.
+- **Electric Blue** (`{colors.accent}` — #0066ff): The only chromatic accent in the system. Reserved for commercial emphasis — the "Popular" pricing badge and savings callouts. Never used decoratively, never used for CTAs.
 
 ### Surface
-- **Soft Cloud** (`{colors.soft-cloud}` — `#f5f5f5`): The most-used non-white surface in the entire system. Product card image backgrounds, search pill, secondary CTA, utility bar, sport-category swatch tiles. It is the "color" of every product photograph's stage.
-- **Hairline** (`{colors.hairline}` — `#cacacb`): 1px dividers between filter rows, footer columns, and PDP disclosure rows.
-- **Hairline Soft** (`{colors.hairline-soft}` — `#e5e5e5`): Inset 1px shadow under sticky bars and tab strips, the only "shadow" the system uses.
+- **Canvas** (`{colors.canvas}` — #ffffff): Default page and card background across all pages.
+- **Soft Canvas** (`{colors.canvas-soft}` — #f3f3f3): The workhorse tint — a 6% ink wash over white. Fills the floating nav pill, the featured pricing card, FAQ accordion rows, soft utility pills, segmented-control tracks, and the highlighted comparison-table column.
+- **Field** (`{colors.field}` — #f0f0f0): An 8% ink wash used as the fill for form inputs, giving fields presence without borders.
+- **Soft Hairline** (`{colors.hairline-soft}` — #f0f0f0): 1px card outlines — the faintest possible edge, used on white-on-white cards (pricing, testimonials).
+- **Hairline** (`{colors.hairline}` — #e0e0e0): The stronger 16% control border, used on outlined pill buttons and interactive chrome.
 
 ### Text
-- **Ink** (`{colors.ink}` — `#111111`): Primary text on light surfaces — headlines, product names, prices, nav.
-- **Charcoal** (`{colors.charcoal}` — `#39393b`): Slightly softer body where ink is too heavy.
-- **Ash** (`{colors.ash}` — `#4b4b4d`): Disabled secondary border on dark surfaces and very low-emphasis utility text.
-- **Mute** (`{colors.mute}` — `#707072`): Product category subtitles ("Men's Trail Running Shoes"), footer link text, secondary metadata.
-- **Stone** (`{colors.stone}` — `#9e9ea0`): Inverse secondary text on dark surfaces and lowest-emphasis utility text.
+- **Ink** (`{colors.ink}` — #141414): Headings, body copy, and nav links.
+- **Soft Ink** (`{colors.ink-soft}` — #262626): Slightly lifted dark used for secondary lockups and the awards wordmark.
+- **Muted** (`{colors.text-muted}` — #707070): Secondary copy — supporting paragraphs, plan descriptions, vote counts, underlined inline links.
+- **Faint** (`{colors.text-faint}` — #adadad): Tertiary text — placeholders, de-emphasized footer links, fine print.
 
 ### Semantic
-- **Sale** (`{colors.sale}` — `#d30005`): Discounted price color and "% off" copy — the only red in the entire retail chrome.
-- **Sale Deep** (`{colors.sale-deep}` — `#780700`): Sale price hover/pressed and dark-mode sale anchor.
-- **Success** (`{colors.success}` — `#007d48`): Confirmation messages, in-stock indicators, eligibility ticks.
-- **Success Bright** (`{colors.success-bright}` — `#1eaa52`): Inverse success on dark surfaces.
-- **Info** (`{colors.info}` — `#1151ff`): Informational link/badge accent in member-experience callouts.
-- **Info Deep** (`{colors.info-deep}` — `#0034e3`): Pressed state for info accent.
-
-### Category Accents (sport / collection chips)
-These appear sparingly — almost exclusively as small chip backgrounds, swatch dots, or category illustrations in editorial tiles. They are never used as text or primary CTA color.
-- **Accent Pink** (`{colors.accent-pink}` — `#ed1aa0`): SKIMS / women's collection moments.
-- **Accent Pink Soft** (`{colors.accent-pink-soft}` — `#ffb0dd`): Soft tinting on member-experience tiles.
-- **Accent Purple Soft** (`{colors.accent-purple-soft}` — `#beaffd`): Editorial swatch dot, soft category chip.
-- **Accent Purple Pale** (`{colors.accent-purple-pale}` — `#d6d1ff`): Lightest soft-tile fill.
-- **Accent Teal** (`{colors.accent-teal}` — `#0a7281`): Trail / outdoor / ACG editorial accent in lockups.
-- **Accent Pink Deep** (`{colors.accent-pink-deep}` — `#4c012d`): Deepest editorial overlay tint, used as wash on heritage / Jordan tiles.
+- The system ships no dedicated success/warning/error palette on its marketing surfaces; state communication stays within the monochrome ladder, with `{colors.accent}` as the sole positive-emphasis signal.
 
 ## Typography
 
 ### Font Family
-- **Nike Futura ND** (display campaign only) — proprietary geometric sans for the towering uppercase headlines burned into campaign hero photography. Falls back to Helvetica Now Text Medium → Helvetica → Arial.
-- **Helvetica Now Display Medium** (headings 16–32px) — modern Helvetica cut tuned for display sizes; carries every section title, PDP product name, and dialog headline.
-- **Helvetica Now Text Medium** (UI 12–16px) — buttons, captions, swatch labels, badge text. The system's UI workhorse.
-- **Helvetica Now Text** (body and links) — long-form body and underlined inline links.
-- **Neue Frutiger Arabic** — RTL pairing for Arabic locales at `{typography.heading-lg}` and caption sizes.
-- **Helvetica Neue 9px** — legal-fine-print utility row only (`{typography.utility-xs}`).
 
-When substituting on systems without proprietary Nike fonts: pair **Inter** (Display 700 for body chrome, Display 500 for buttons) with **Bebas Neue** or **Anton** at 96px/0.9 line-height for the campaign headline tier. Tighten letter-spacing slightly (-0.5%) on the substitute to approximate Futura ND's optical weight.
+**Saans** — a contemporary neo-grotesque used exclusively, across every page and every role. It is loaded as a variable font, and the brand's voice comes from where it sits on the weight axis: headings render at an unusual 652 (heavier than semibold, lighter than bold), running text at 456 (a hair over regular), and hero subtitles at a genuinely light 300. Fallback stack: system sans (`-apple-system, "Helvetica Neue", Arial, sans-serif`).
 
 ### Hierarchy
 
 | Token | Size | Weight | Line Height | Letter Spacing | Use |
 |---|---|---|---|---|---|
-| `{typography.display-campaign}` | 96px | 500 | 0.9 | 0 | Editorial campaign headline burned into hero photography (uppercase) |
-| `{typography.heading-xl}` | 32px | 500 | 1.2 | 0 | Section headers — "FEATURED FOOTWEAR", "LATEST IN CLOTHING", PDP product title block |
-| `{typography.heading-lg}` | 24px | 500 | 1.2 | 0 | Subsection / member-benefit card title, large CTA label, PDP price |
-| `{typography.heading-md}` | 16px | 500 | 1.75 | 0 | Card title, FAQ row label, filter group header |
-| `{typography.body-md}` | 16px | 400 | 1.5 | 0 | Body copy, search-pill placeholder, product description |
-| `{typography.body-strong}` | 16px | 500 | 1.5 | 0 | Product card name, filter row label, primary nav link |
-| `{typography.button-lg}` | 24px | 500 | 1.2 | 0 | Pressed-letter campaign CTA inside hero blocks |
-| `{typography.button-md}` | 16px | 500 | 1.5 | 0 | Standard pill CTAs across the system |
-| `{typography.button-sm}` | 14px | 500 | 1.5 | 0 | Compact pill CTA, badge label, geo-selector button |
-| `{typography.link-md}` | 16px | 500 | 1.75 | 0 | Underlined inline link, "View Product Details" |
-| `{typography.caption-md}` | 14px | 500 | 1.5 | 0 | Product subtitle ("Men's Trail Running Shoes"), filter count, footer link |
-| `{typography.caption-sm}` | 12px | 500 | 1.5 | 0 | Filter chip label, badge text, color count |
-| `{typography.utility-xs}` | 9px | 500 | 1.75 | 0 | Legal copyright / fine-print row at the very bottom |
+| `{typography.display}` | 80px | 652 | 1.0 | 0 | Homepage hero statements and library counters |
+| `{typography.heading-1}` | 56px | 652 | 1.0 | 0 | Page heroes ("Design like a Pro.", "The votes are in.") |
+| `{typography.heading-2}` | 44px | 652 | 1.13 | 0 | Section headings on content pages |
+| `{typography.heading-3}` | 32px | 652 | 1.13 | 0 | Card-level headlines, award winner names, auth headings |
+| `{typography.heading-4}` | 24px | 652 | 1.25 | 0 | Sub-section headings, plan names |
+| `{typography.title}` | 20px | 600 | 1.3 | 0 | Feature titles, emphasized rows |
+| `{typography.body-lg}` | 20px | 300 | 1.38 | 0 | Hero subtitles and lead paragraphs — the light counterpoint to 652 headings |
+| `{typography.body}` | 16px | 456 | 1.38 | 0 | Default body copy, testimonial quotes |
+| `{typography.body-sm}` | 14px | 456 | 1.43 | 0 | Supporting copy, plan feature lists, legal text |
+| `{typography.link}` | 16px | 600 | 1.38 | 0 | Nav links and button labels |
+| `{typography.label}` | 12px | 600 | 1.33 | 0 | Badge and pill labels |
+| `{typography.caption}` | 12px | 456 | 1.33 | 0 | Captions, metadata, form fine print |
 
 ### Principles
-The system runs on extreme typographic contrast: a single 96px uppercase display tier reserved for editorial campaign moments, and a quiet 12–16px Helvetica Now Text/Medium tier carrying everything else. There is almost no middle ground — the jump from `{typography.heading-xl}` (32px) directly to `{typography.body-strong}` (16px) is intentional and creates the "billboard above, catalog below" effect across every page. Letter-spacing is left at 0 (Futura ND and Helvetica Now are both cut for tight optical fit at scale).
+
+- **Weight contrast is the drama.** Pairing 652 headings against 300 light subtitles at the same scale step (e.g. 80px display over 20px light lead) creates hierarchy without color or ornament.
+- **Tight leading up top.** Display and heading-1 sit at line-height 1.0; headings never breathe more than 1.25. Body text opens up to 1.38–1.43.
+- **Zero letter-spacing everywhere.** The grotesque is trusted at its natural fit; no tracking adjustments at any size.
+- **Sentence case with terminal periods.** Headlines read as declarative sentences: "Discover real-world design inspiration." — the period is part of the voice.
 
 ### Note on Font Substitutes
-The closest open-source path to Nike's display tier is **Bebas Neue** (free, geometric condensed) at 96px / 0.9 / uppercase / 500. For UI text, **Inter** is the safest substitute — match weights 400/500 and the system reads almost identically at button and caption sizes.
+
+Saans is a commercial typeface. The closest widely-available substitutes are **Inter** (variable, supports the 300/450/650 weight positions via its variable axis) or **Hanken Grotesk**. When substituting, map weight 652 → 650 (or 700 at static weights), 456 → 450 (or 500), and keep line-heights as specified — Saans has a compact x-height, so substitutes may need line-height reduced by ~0.05.
 
 ## Layout
 
 ### Spacing System
-- **Base unit:** 8px
-- **Tokens (front matter):** `{spacing.xxs}` (2px) · `{spacing.xs}` (4px) · `{spacing.sm}` (8px) · `{spacing.md}` (12px) · `{spacing.lg}` (18px) · `{spacing.xl}` (24px) · `{spacing.xxl}` (30px) · `{spacing.section}` (48px+)
-- **Universal rhythm:** every page in the set uses `{spacing.section}` (48px) as the vertical gap between major content blocks (campaign hero → trending row → featured row → shop-by-sport → latest-in-clothing → footer). PLP card grids use `{spacing.sm}` (8px) gutters. PDP disclosure rows are stacked at `{spacing.xl}` (24px) vertical padding.
-- **Card internal padding:** product cards use 0px internal padding — image is full-bleed; metadata rows sit directly below with `{spacing.sm}` (8px) gap between name, subtitle, and price.
+- **Base unit**: 8px, with 4px half-steps for fine rhythm
+- **Tokens**: `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 24px · `{spacing.xl}` 32px · `{spacing.xxl}` 48px · `{spacing.section}` 80px · `{spacing.section-lg}` 120px
+- Buttons are fixed-height pills padded horizontally at `{spacing.md}`; inputs pad `{spacing.sm} {spacing.md}`
+- Universal rhythm constants: 28px and 80px vertical steps recur on every page; 120px separates major homepage acts
 
 ### Grid & Container
-- **Max width:** ~1440px content area with edge gutters that grow to ~80px at 1920px (the system lets very wide viewports breathe rather than stretch).
-- **Column patterns:** PLP listing uses 3-up at desktop, collapsing to 2-up at 1023px and 1-up at 599px. The men's home `/men` mixes a 2-up campaign hero row, a 3- or 4-up "Trending Now" row, a horizontal-scroll "Shop by Sport" rail, and a 4-up "Latest in Clothing" thumbnail grid.
-- **Filter sidebar:** ~220px fixed-width left rail on PLP at desktop, collapsing into a `Hide Filters` toggle button at narrow widths.
+- Content rides a centered column: single-column centered lockups for heroes and award winners, a 2-up card grid for pricing plans, 3-up for portrait tiles, and a 4-column masonry for testimonials.
+- The floating nav pill is detached from the viewport edge and horizontally centered, rather than a full-width bar — the page canvas visibly wraps around it.
+- Marquee strips (brand logos, app screenshots) run full-bleed beyond the content column.
 
 ### Whitespace Philosophy
-Whitespace is a tool for separation, not for breath. Sections butt directly against each other vertically with `{spacing.section}` rhythm, and product photos tile edge-to-edge inside their grid — there is no padding wrapped around the product image itself. The "air" comes from the `{colors.soft-cloud}` background of the photograph, not from layout margin. Headlines do not have decorative whitespace above them; they sit immediately under the section divider line.
+
+Whitespace is the primary grouping device. Sections are separated by `{spacing.section}` to `{spacing.section-lg}` of empty canvas with no divider rules; within cards, generous `{spacing.lg}` padding keeps content off the hairline edges. The homepage alternates dense collage moments (icon clouds, screenshot grids) with near-empty typographic interludes — compression and release.
+
+### Responsive Strategy
+
+#### Breakpoints
+
+| Name | Width | Key Changes |
+|---|---|---|
+| 2xl | 1536px | Max content width engaged; marquees widen |
+| xl | 1280px | Default desktop grid |
+| lg | 1024px | Comparison table condenses; testimonial masonry drops to 3 columns |
+| md | 840px / 768px | Pricing cards stack to 1-up; portrait grid drops to 2-up; nav links collapse |
+| sm | 719px / 640px | Single-column layouts; display type scales down from 80px |
+| xs | 600px | Minimum layout; auth split-panel drops its screenshot marquee |
+
+#### Touch Targets
+- Pill buttons and nav CTAs are fixed-height stadium shapes comfortably above the 44px minimum; form inputs pad to a similar height via `{spacing.sm} {spacing.md}`.
+- The segmented billing toggle presents each option as a full pill target, not a small radio dot.
+
+#### Collapsing Strategy
+- The floating `nav-pill` persists on scroll and across breakpoints, tightening to logomark + CTA on narrow screens.
+- Multi-column grids (pricing 2-up, portraits 3-up, testimonials 4-up) collapse column-by-column rather than reflowing horizontally.
+- The signup page's two-panel split (form left, angled screenshot marquee right) drops the marquee panel entirely on narrow viewports, keeping the centered form column.
+
+#### Image Behavior
+- App screenshots and device mockups keep fixed aspect ratios and `{rounded.md}` corners at all sizes.
+- Marquee strips overflow the viewport intentionally and animate horizontally; they crop rather than scale.
+- Curator portraits stay square-ish tiles, lazily loaded, always grayscale.
 
 ## Elevation & Depth
 
 | Level | Treatment | Use |
 |---|---|---|
-| 0 — Flat | No shadow, no border | Default for cards, buttons, sections — the dominant treatment |
-| 1 — Hairline divider | 1px solid `{colors.hairline}` | Filter row separators, footer column borders, PDP disclosure-row separators |
-| 2 — Inset bottom-line | `box-shadow: inset 0 -1px 0 {colors.hairline-soft}` | Sticky utility/sub-nav bar bottom edge, tab strip underline |
+| 0 | Flat on `{colors.canvas}` | Default — most of every page |
+| 1 | `{colors.canvas-soft}` fill, no border | Nav pill, featured pricing card, FAQ rows, soft pills |
+| 2 | 1px `{colors.hairline-soft}` outline on white | Pricing and testimonial cards |
+| 3 | 1px inset ring | Comparison-table highlight column edge |
+| Inverse | `{colors.ink}` fill, `{colors.on-primary}` text | Footer band, primary CTAs |
 
-The system has no drop-shadow elevation in its retail chrome at all. Cards do not lift on the page. The only depth cue is the 1px inset hairline on sticky strips and the contrast between full-bleed photography and `{colors.soft-cloud}` product backdrops.
+The system is essentially shadow-free: no drop shadows appear on any card, button, or nav element. Elevation is communicated by *fill difference* (white vs. 6–8% ink tints) and by hairlines, which keeps every surface print-flat and lets the screenshot content supply all depth cues. The one soft-shadow exception is the active segment of the segmented control, which lifts off its `{colors.canvas-soft}` track as a white pill.
 
 ### Decorative Depth
-Depth in Nike's system comes entirely from photography, not from CSS effects:
-- **Editorial campaign tiles** create depth via cinematic perspective — a runner on a trail, a model in a courtyard — with the Futura display headline overlaid in white or `{colors.ink}` directly on the image.
-- **Product card photography** is shot on flat `{colors.soft-cloud}` to remove any background depth, so the product itself is the only thing with form on the page.
-- **Sport-category tiles** on the home page are full-bleed cinematic photography with a small `{component.button-outline-on-image}` pill anchored at the bottom-left, giving a moment of crisp white pill against atmospheric image.
+- **Glass monoliths** — the awards hero renders tall trophy pillars in a white-to-gray vertical gradient, reading as frosted glass against the `{colors.canvas-soft}` band; the page's only atmospheric gradient.
+- **Photography as depth** — floating app-icon squircles, angled screenshot collages (signup's rotated marquee panel), and device mockups create parallax-like layering on a flat canvas.
+- **Polarity inversion** — the `{colors.ink}` footer with `{rounded.md}` top corners acts as a heavy baseboard, giving each page a physical end-stop.
 
 ## Shapes
 
@@ -386,190 +417,146 @@ Depth in Nike's system comes entirely from photography, not from CSS effects:
 
 | Token | Value | Use |
 |---|---|---|
-| `{rounded.none}` | 0px | Cards, campaign tiles, product imagery, navigation, footer — every container in the system |
-| `{rounded.sm}` | 18px | Avatar / icon container in member-benefit lockups |
-| `{rounded.md}` | 24px | Search pill, search submit, filter input |
-| `{rounded.lg}` | 30px | Every CTA pill — primary, secondary, on-image, filter chip, geo-selector, "Notify Me" |
-| `{rounded.full}` | 9999px | Color swatch dots and circular icon buttons (back, share, favorite, carousel paddle) |
+| `{rounded.none}` | 0px | Full-bleed media strips and marquee images |
+| `{rounded.sm}` | 16px | Inputs, video tiles, testimonial cards, FAQ rows |
+| `{rounded.md}` | 24px | Content cards, device mockups, portrait tiles, footer top corners |
+| `{rounded.full}` | 9999px | Every pill: nav, buttons, badges, toggles |
 
 ### Photography Geometry
-- **Product cards:** consistent 1:1 square or near-square (~4:5 portrait on tall product crops), full-bleed within the card with no padding, sitting on `{colors.soft-cloud}` backdrop.
-- **Editorial campaign hero:** ~16:9 or wider cinematic crop, full-bleed across the content max-width, with the Futura display headline burned into the lower-left or upper-left third.
-- **Sport-category rail:** 4:5 portrait full-bleed thumbnails with a small CTA pill anchored bottom-left.
-- **PDP main image:** square primary image with vertical thumbnail rail to its left (~5–7 thumbnails stacked at small size), enabling rapid color/angle browsing without leaving the page.
-- **Avatar / category icon cards:** centered illustrated icon at ~80–96px on `{colors.canvas}` with `{typography.caption-md}` label below.
+- App screenshots render inside device-shaped frames at `{rounded.md}`.
+- App icons use the signature 30% squircle radius (`app-icon-squircle`) — the iOS icon silhouette — at every size from 32px chips to 96px hero tiles.
+- Curator portraits are near-square tiles at `{rounded.md}`, always black-and-white, with name captions overlaid in `{colors.on-primary}` on a `badge-overlay` scrim near the lower edge.
+- Avatars in testimonial cards are small circles (`{rounded.full}`) with a tiny company logo badge overlapping the bottom-right corner.
 
 ## Components
 
-> **No hover states documented** per system policy. Each spec covers Default and Active/Pressed only; variants live as separate `components:` entries in the front matter.
-
 ### Buttons
 
-**`button-primary`** — the universal Nike CTA
-- Background `{colors.ink}`, text `{colors.on-primary}`, type `{typography.button-md}`, padding `16px 32px`, height `{spacing.section}` (48px), rounded `{rounded.lg}` (30px pill).
-- Used on every primary action in the system: "Sign Up", "Notify Me", "Buy", "Türkiye" geo-confirm, "Shop" overlay on sport tiles, "Continue".
-- Pressed state lives in `button-primary-active` — the bg stays `{colors.ink}` while the surface shrinks to `scale(0.5)` with `opacity: 0.5` (Nike's signature "tap collapse" feedback that's extracted across all five pages).
+**`button-primary`** — "Join for free", "Get started", "Continue", "View winners"
+- Fill `{colors.primary}`, label `{colors.on-primary}` in `{typography.link}`, shape `{rounded.full}`, padding `0px {spacing.md}` on a fixed-height pill
+- The single CTA style everywhere: nav, pricing cards, auth form, awards hero
 
-**`button-secondary`** — soft alternative on light surfaces
-- Background `{colors.soft-cloud}`, text `{colors.ink}`, type `{typography.button-md}`, padding `16px 32px`, rounded `{rounded.lg}`.
-- Used as the lower-emphasis alternate when a primary CTA already exists, e.g., "United States" geo-decline next to the black "Türkiye" confirm; "Cancel" or "Discover More" on light cards.
+**`button-outline`** — "Continue with Google", secondary "Get started"
+- Fill `{colors.canvas}`, label `{colors.ink}`, 1px `{colors.hairline}` border, shape `{rounded.full}`
+- The de-emphasized twin of the primary pill; used when two actions sit side by side or for third-party auth
 
-**`button-outline-on-image`** — overlay CTA on photography
-- Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.button-md}`, padding `12px 24px`, rounded `{rounded.lg}`.
-- The crisp white pill that anchors the bottom-left of every full-bleed sport-category and editorial campaign tile.
-
-**`button-icon-circular`** — chrome icon controls
-- Background `{colors.soft-cloud}` or transparent, icon `{colors.ink}`, rounded `{rounded.full}`, size 40px.
-- Used for back-arrow, carousel paddle (left/right), wishlist heart, share, and "Hide Filters" toggle.
-
-**`filter-chip`** + **`filter-chip-active`**
-- Default: background `{colors.canvas}`, text `{colors.ink}`, 1px hairline `{colors.hairline}`, type `{typography.button-md}`, rounded `{rounded.lg}`, padding `8px 16px`.
-- Active: background `{colors.ink}`, text `{colors.on-primary}` — the chip flips fully inverted when selected. No middle state.
-
-### Inputs & Forms
-
-**`search-pill`** + **`search-pill-focused`**
-- Default: background `{colors.soft-cloud}`, text `{colors.ink}`, type `{typography.body-md}`, rounded `{rounded.md}` (24px), padding `8px 16px`, height `40px`. Anchored to the right of the primary nav with a small magnifier icon.
-- Focused: background `{colors.canvas}`, 2px solid border `{colors.ink}`, with a 12px outer halo of `{colors.soft-cloud}` (the system's only "focus ring" effect). The pill shape stays `{rounded.md}` so the halo reads as a soft glove, not a hard outline.
+**`button-pill-soft`** — "Explore ↗", "Mobbin ↗", "Read more"
+- Fill `{colors.canvas-soft}`, label `{colors.ink}`, shape `{rounded.full}`
+- Tertiary utility pill for outbound and in-page links; no border, relies on its tint fill
 
 ### Cards & Containers
 
-**`product-card`**
-- Container: background `{colors.canvas}`, rounded `{rounded.none}`, padding 0, no shadow.
-- Image area: `{component.product-card-image}` — full-bleed product photo on `{colors.soft-cloud}` square.
-- Below image (in this order with `{spacing.sm}` between): swatch dot row (3–6 dots at 12px circular), promo badge if applicable (`{component.badge-promo}` "Just In", "Coming Soon", "Recycled Materials"), product name `{typography.body-strong}` `{colors.ink}`, category subtitle `{typography.caption-md}` `{colors.mute}`, price row.
-- Price row: regular price `{typography.body-strong}` `{colors.ink}`. If on sale: discounted price `{colors.sale}` followed by strike-through original `{colors.mute}` followed by "% off" in `{colors.sale}`.
+**`pricing-card`** — default plan tier (Team)
+- `{colors.canvas}` fill, 1px `{colors.hairline-soft}` outline, `{rounded.md}` corners
+- Plan name in `{typography.heading-4}`, price figure large with stacked `{typography.caption}` qualifiers, feature list rows in `{typography.body-sm}` with `{colors.text-muted}` icons
 
-**`campaign-tile`** — the brand's signature editorial unit
-- Full-bleed photography with `{typography.display-campaign}` headline burned in (uppercase, 96px, line-height 0.9).
-- Headline color is whichever of `{colors.canvas}` or `{colors.ink}` reads against the underlying image — not parameterized; chosen per-asset.
-- A single `{component.button-outline-on-image}` pill anchored bottom-left of the tile carries the call-to-action.
+**`pricing-card-featured`** — highlighted plan tier (Pro)
+- `{colors.canvas-soft}` fill, borderless, `{rounded.md}` corners — emphasis by tint, not by outline or polarity flip
+- Carries the `badge-popular` chip beside the plan name and a full-width `button-primary` CTA, while the default tier gets `button-outline`
 
-**`category-icon-card`**
-- Container: background `{colors.canvas}`, rounded `{rounded.none}`.
-- Centered category illustration (~80px) + label `{typography.caption-md}` `{colors.ink}` directly below. Used in the "Latest in Clothing" 4–8-up icon strip on `/men`.
+**`testimonial-card`** — user quote tile
+- `{colors.canvas}` fill, 1px `{colors.hairline-soft}` outline, `{rounded.sm}` corners
+- Circular avatar with overlapping company mini-badge, name in `{typography.link}`, company in `{colors.text-muted}` `{typography.body-sm}`, quote in `{typography.body}`
+- Laid out as a 4-column masonry of varying heights
 
-**`member-benefit-card`**
-- Full-bleed photographic card on a dark image background; copy slot at the bottom-left with `{typography.heading-lg}` headline `{colors.on-primary}` and a `{component.button-outline-on-image}` "Explore" pill below.
-- Used in the `/membership` "Member Benefits" 3-up grid.
+**`faq-row`** — accordion item
+- Full-width `{colors.canvas-soft}` bar, `{rounded.sm}` corners, question in `{typography.body}` with a trailing chevron; rows stack with `{spacing.sm}` gaps
 
-**`swatch-dot`** + **`swatch-dot-active`**
-- 12px circle, rounded `{rounded.full}`, no border in default state. Renders the colorway options on every product card and PDP color picker.
-- Default: filled with the colorway's actual product color (extracted at runtime from the product image), 1px subtle outer ring in `{colors.hairline}` for white/light colorways so they remain visible on `{colors.canvas}`.
-- Active: identical fill with a 2px `{colors.ink}` outer ring and 2px white interior gap, creating Nike's signature concentric-ring "selected" state. No size change between default and active.
+**`portrait-tile`** — curator/juror grid cell
+- Grayscale photograph at `{rounded.md}`, name + role caption overlaid at bottom center in `{colors.on-primary}`
+- The strict black-and-white treatment keeps the people grid inside the monochrome system
 
-**`badge-promo`**
-- Background `{colors.canvas}` with 1px hairline `{colors.hairline}`, text `{colors.ink}`, type `{typography.caption-sm}`, rounded `{rounded.lg}`, padding `4px 12px`.
-- Sits on top of product imagery (top-left of card) with copy like "Just In", "Coming Soon", "Recycled Materials", "Member Exclusive".
+### Inputs & Forms
 
-**`badge-sale-text`**
-- Inline price-row text in `{colors.sale}` with no background — the only "badge" in the system that has no container.
+**`text-input`**
+- `{colors.field}` fill, no border, `{colors.ink}` text with `{colors.text-faint}` placeholder, `{rounded.sm}` corners, padding `{spacing.sm} {spacing.md}`
+
+**`text-input-focused`**
+- Same chrome plus a 2px `{colors.ink}` ring — focus is signaled in ink, consistent with the monochrome system
 
 ### Navigation
 
-**`utility-bar`** — top utility strip
-- Background `{colors.soft-cloud}`, text `{colors.ink}`, type `{typography.caption-sm}`, height ~36px, rounded `{rounded.none}`.
-- Right-aligned cluster: "Find a Store · Help · Join Us · Sign In". Always present; never collapses.
-
-**`primary-nav`** — main navigation
-- Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-strong}` for nav links, height 56–64px, rounded `{rounded.none}`.
-- Layout: Nike swoosh logo at left (32×32), centered nav row ("New & Featured · Men · Women · Kids · Jordan · Nike SKIMS · Sport"), right cluster (search pill, wishlist heart icon, bag icon).
-- The active section gets a 2px-bottom underline in `{colors.ink}` — no background fill.
-
-**Sub-nav strip** (PLP) — appears under primary nav with breadcrumb + sort + hide-filters controls.
-- Same `{colors.canvas}` background with a 1px inset hairline-soft bottom edge.
-- Left: breadcrumb in `{typography.caption-md}` `{colors.mute}` separated by " / ".
-- Right: "Hide Filters" toggle + "Sort By: …" dropdown — both in `{typography.button-md}` with chevron icons.
+**`nav-pill`** — Top Nav (Desktop)
+- A floating, horizontally-centered stadium bar in `{colors.canvas-soft}`: logomark + wordmark left, text links ("Pricing", "Awards", "Log in") in `{typography.link}` right, capped by a `button-primary` CTA
+- Detaches from the page edge with visible canvas above it; persists as a sticky element on scroll
 
 **Top Nav (Mobile)**
-- Hamburger menu icon (left), Nike swoosh (center), search + bag icons (right).
-- Search pill collapses into an icon-only button at narrow widths; tapping expands a full-width overlay search pill with `{rounded.md}`.
-- Primary nav collapses into a full-height drawer that slides in from the left, listing nav rows top-down with `{spacing.xl}` vertical padding.
+- The pill tightens to logomark + CTA; links collapse behind the pill
+
+**Sub-nav (Awards)**
+- Minimal corner marks instead of a bar: logomark + section name top-left, a `button-pill-soft` "Mobbin ↗" return link top-right
 
 ### Signature Components
 
-**`pdp-disclosure-row`** — PDP information accordion rows
-- Stacked rows for "View Product Details", "Shipping & Returns", "Reviews (n)" with `{spacing.xl}` vertical padding and a 1px `{colors.hairline}` divider below each.
-- Label `{typography.body-strong}` `{colors.ink}` left-aligned; chevron `{colors.ink}` right-aligned.
+**`app-icon-squircle`** — the recurring 30%-radius icon tile; floats in loose clouds around library counters, lines up in "Other nominees" rows, and anchors `brand-chip` entries
 
-**`faq-row`** — `/membership` FAQ accordion
-- Identical pattern to `pdp-disclosure-row` but with `{typography.heading-md}` label weight; 1px `{colors.hairline}` divider below each.
+**`brand-chip`** — marquee lockup of squircle icon + brand name in `{typography.heading-3}` ink; scrolls horizontally in full-bleed strips of recognizable products
 
-**`filter-sidebar`** — PLP left rail
-- Container `{colors.canvas}`, rounded `{rounded.none}`.
-- Section headers `{typography.body-strong}` `{colors.ink}` with `{spacing.lg}` (18px) vertical gap between groups.
-- Active filters get a 1px ink underline; counts in parentheses use `{colors.mute}`.
+**`badge-popular`** — compact `{colors.accent}` chip with `{colors.on-primary}` label marking the featured pricing tier; the only blue element on the page
 
-**`footer`**
-- Background `{colors.canvas}` with a single 1px `{colors.hairline}` top divider.
-- Four columns: Resources / Help / Company / Promotions & Discounts, each with column header `{typography.body-strong}` `{colors.ink}` and link list `{typography.caption-md}` `{colors.mute}`.
-- Below the columns: a horizontal rule, then a fine-print row with `{typography.utility-xs}` `{colors.mute}` (copyright, locale switcher, terms, privacy, supply-chain act).
+**`badge-overlay`** — translucent gray pill (rgba(115, 115, 115, 0.56)) with `{colors.on-primary}` `{typography.label}` text, laid over photography and screenshots (category tags, portrait captions)
+
+**`segmented-control`** + **`segmented-control-active`** — billing-period toggle: a `{colors.canvas-soft}` stadium track holding two pill options; the active option is a `{colors.canvas}` white pill, the inactive label sits in `{colors.text-muted}`
+
+**`award-lockup`** — centered winner presentation: laurel-flanked category eyebrow in `{colors.text-muted}`, winner name in `{typography.heading-3}`, description in `{colors.text-muted}` `{typography.body}`, vote share in `{typography.body-sm}`, closed by a `button-pill-soft` "Explore ↗"
+
+**`compare-table`** — the pricing comparison grid: feature rows divided by 1px `{colors.canvas-soft}` rules, the recommended plan's column washed in `{colors.canvas-soft}` with an inset ring edge
+
+**`footer`** — full-width `{colors.ink}` band with `{rounded.md}` top corners: white wordmark at display scale, tagline in `{colors.text-faint}`, two columns of `{colors.text-faint}` links that read in `{colors.on-primary}` for emphasis rows
+
+### Examples (illustrative)
+
+> Kit-mirror demonstration surfaces. Each `ex-*` entry references brand-native primitives via token syntax so downstream consumers re-skin the same 10 surfaces consistently; none carries invented literal values.
+
+**`ex-pricing-tier`** — Default Pricing tier card. Re-uses feature-card chrome with brand canvas-soft surface.
+- Properties: `backgroundColor`, `textColor`, `borderColor`, `rounded`, `padding`
+
+**`ex-pricing-tier-featured`** — Featured/highlighted tier — polarity-flipped surface (dark fill + light text in light mode, light fill + dark text in dark mode).
+- Properties: `backgroundColor`, `textColor`, `rounded`, `padding`
+
+**`ex-product-selector`** — What's Included summary card — re-purposed for SaaS / B2B verticals (NOT a literal product gallery).
+- Properties: `backgroundColor`, `rounded`, `padding`
+
+**`ex-cart-drawer`** — Subscription summary — re-purposed for SaaS / B2B (line items per add-on, not literal cart).
+- Properties: `backgroundColor`, `rounded`, `padding`, `item-divider`
+
+**`ex-app-shell-row`** — Sidebar nav row inside the App Shell example. Active state uses brand primary as the indicator.
+- Properties: `backgroundColor`, `activeIndicator`, `rounded`, `padding`
+
+**`ex-data-table-cell`** — Default data-table th + td chrome. Header uses mono-caps eyebrow typography; body uses body-sm.
+- Properties: `headerBackground`, `headerTypography`, `bodyTypography`, `cellPadding`, `rowBorder`
+
+**`ex-auth-form-card`** — Sign-in / sign-up card. Re-uses feature-card chrome with text-input primitives inside.
+- Properties: `backgroundColor`, `rounded`, `padding`
+
+**`ex-modal-card`** — Modal dialog surface — same chrome as feature-card with elevated shadow.
+- Properties: `backgroundColor`, `rounded`, `padding`
+
+**`ex-empty-state-card`** — Empty-state illustration frame.
+- Properties: `backgroundColor`, `rounded`, `padding`, `captionTypography`
+
+**`ex-toast`** — Toast notification surface — feature-card shape + medium shadow.
+- Properties: `backgroundColor`, `rounded`, `padding`, `typography`
+
 
 ## Do's and Don'ts
 
 ### Do
-- Reserve `{typography.display-campaign}` exclusively for editorial campaign hero lockups — never use 96px Futura for section headers or product titles.
-- Use `{component.button-primary}` (`{colors.ink}` pill) as the single primary action per viewport. Pair it at most with `{component.button-secondary}` (`{colors.soft-cloud}` pill) for a soft alternative.
-- Stage every product photograph on `{colors.soft-cloud}` — the gray is the system's "studio."
-- Keep all CTAs pill-shaped at `{rounded.lg}` (30px). Never introduce a square or `{rounded.sm}` button.
-- Use `{colors.sale}` only on price rows — never on backgrounds, badges, or chrome.
-- Stack content sections at `{spacing.section}` (48px) rhythm with no decorative dividers between them; the photography's bleed-edge is the divider.
-- Anchor on-image CTAs with `{component.button-outline-on-image}` (white pill) at bottom-left — the system's universal "shop this image" position.
+- Keep the canvas `{colors.canvas}` white and let imported content (screenshots, icons, logos) supply all saturation.
+- Use `{rounded.full}` for every interactive element — a rectangular button does not exist in this system.
+- Build emphasis with the tint ladder: `{colors.canvas-soft}` fill for featured surfaces, `{colors.hairline-soft}` outlines for resting cards.
+- Reserve `{colors.accent}` for commercial signals (featured badges, savings callouts) — one or two blue elements per page at most.
+- Set every heading in Saans 652 with line-height 1.0–1.13 and end headline sentences with a period.
+- Pair heavy 652 headings with 300-weight `{typography.body-lg}` subtitles for hierarchy without color.
+- Render app icons as 30% squircles and portraits in grayscale to keep third-party imagery inside the system.
+- Close pages with the inverse `{colors.ink}` footer, rounded at the top.
 
 ### Don't
-- Don't introduce drop shadows or card elevation. Cards sit flat on the page; the only depth cue is the 1px inset hairline on sticky bars.
-- Don't use any of the category accent colors (`{colors.accent-pink}`, `{colors.accent-purple-soft}`, `{colors.accent-teal}`) for primary chrome — they belong to swatch dots, soft tile fills, and editorial moments only.
-- Don't replace `{colors.ink}` with a near-black gray like `{colors.charcoal}` for a CTA — Nike's primary pill is true `#111111`.
-- Don't pad inside product cards. The image is full-bleed; metadata sits directly below with `{spacing.sm}` (8px) between rows.
-- Don't put two campaign-tile lockups in the same row at the same scale — Nike alternates a single full-bleed editorial tile with a 2-up or 4-up product/category grid.
-- Don't underline anything other than `{typography.link-md}` inline links and the active primary-nav indicator. Buttons, headings, and prices stay un-underlined.
-- Don't introduce a third button shape. Pill or icon-circular — that's the entire button shape vocabulary.
-
-## Responsive Behavior
-
-### Breakpoints
-
-| Name | Width | Key Changes |
-|---|---|---|
-| ultrawide | 1920px+ | Content max-width holds at ~1440px; outer gutters grow to ~80px on each side |
-| desktop-large | 1440px | Default desktop layout — 3-up product grid, 4-up clothing strip, full primary nav |
-| desktop | 1200px | Same as large with slightly narrower outer gutters |
-| desktop-small | 1024px | Filter sidebar starts compressing; sport rail shows ~3 visible tiles |
-| tablet | 1023–961px | 3-up PLP collapses to 2-up; "Hide Filters" becomes a default toggle |
-| tablet-narrow | 960–640px | Primary nav center cluster collapses to a hamburger drawer; search pill becomes icon-only |
-| mobile-landscape | 639–600px | 2-up PLP collapses to 1-up; product cards become full-width with image and metadata stacking |
-| mobile | 599–320px | Single-column everything; campaign tiles render at full screen width with shorter Futura sizes (~64px) |
-
-### Touch Targets
-All interactive elements meet WCAG AAA (44×44px minimum). Pills (`{component.button-primary}`, `{component.button-secondary}`) sit at 48px height with 32px horizontal padding. Icon-circular buttons (`{component.button-icon-circular}`) sit at 40px — Nike's PDP carousel paddle and wishlist heart sit just under AAA but above AA at 40×40, with hit-target padding extending the tappable area to 48px+. Filter-chip pills are 40px height with 16px padding.
-
-### Collapsing Strategy
-- **Primary nav:** desktop center cluster → mobile drawer triggered by hamburger at left of the swoosh.
-- **PLP grid:** 3-up → 2-up → 1-up at 1023, 599, and below; gutters drop from `{spacing.sm}` to `{spacing.xs}` on mobile.
-- **Filter sidebar:** 220px fixed → "Hide Filters" toggle → off-canvas full-screen filter drawer at mobile.
-- **Sport rail:** desktop horizontal scroll with ~5 visible → mobile horizontal scroll with ~1.5 visible (peek-next-card pattern).
-- **Section spacing:** `{spacing.section}` 48px desktop → 32px tablet → 24px mobile to keep editorial rhythm tight on small screens.
-- **Editorial campaign headline:** desktop 96px → tablet 64px → mobile 48px, line-height stays at 0.9 across all sizes.
-
-### Image Behavior
-- Product imagery is responsive at the same 1:1 ratio across all breakpoints — the image scales, the ratio doesn't.
-- Editorial campaign tiles use art-direction crops: a 16:9 wide hero on desktop swaps to a 4:5 portrait on mobile so the figure stays centered and the headline still has burn-in space.
-- All non-critical product imagery is lazy-loaded as the user scrolls into the next grid row.
-
-## Iteration Guide
-
-1. Focus on ONE component at a time. Pull its YAML entry from the front matter and verify every property resolves.
-2. Reference component names and tokens directly (`{colors.ink}`, `{component.button-primary-active}`, `{rounded.lg}`) — do not paraphrase color names or radii in prose.
-3. Run `npx @google/design.md lint DESIGN.md` after edits — `broken-ref`, `contrast-ratio`, and `orphaned-tokens` warnings flag issues automatically.
-4. Add new variants as separate component entries (`-active`, `-disabled`, `-focused`) — do not bury them inside prose. Nike's pressed state (`scale(0.5) opacity 0.5`) is intentional and must be its own entry, not a hover stand-in.
-5. Default body to `{typography.body-md}`; reach for `{typography.body-strong}` for product names and primary nav links; reserve `{typography.display-campaign}` strictly for hero campaign lockups.
-6. Keep `{colors.ink}` scarce per viewport — if more than one solid-black pill or block appears in the same fold, neutralize one to `{component.button-secondary}` or `{component.button-outline-on-image}`.
-7. When introducing a new component, ask whether it can be expressed with the existing pill + flat-card + photography-on-`{colors.soft-cloud}` vocabulary before adding new tokens. The system's strength is that it almost never needs new ones.
-
-## Known Gaps
-
-- **Mobile screenshots not captured** — responsive behavior described above synthesizes Nike's known mobile pattern (hamburger drawer, 1-up grid, headline downscale) from desktop evidence and the breakpoint list extracted from tokens.
-- **Hover states not documented** by system policy — Nike's CSS uses `--pds-color-element-hover` and `--pds-color-text-hover` tokens but these are not included here.
-- **Dialog / modal styling** beyond the geo-selector and the country-confirmation pill pair could not be confirmed from the captured surfaces; bag, wishlist, and login overlays are not documented.
-- **Form field styling** for checkout, sign-up, and address forms is not present in the captured surfaces — only the search pill is documented.
-- **Bag and wishlist** icon-state variants (filled count badges) not visible in the captured pages.
+- Don't add drop shadows — elevation is fills and hairlines only.
+- Don't use `{colors.accent}` for CTAs; primary actions are always `{colors.primary}` ink pills.
+- Don't introduce additional accent hues, gradients on UI chrome, or colored section bands.
+- Don't outline the featured pricing tier — feature it with the `{colors.canvas-soft}` fill and `badge-popular` instead.
+- Don't apply letter-spacing or all-caps styling; the type system runs at natural tracking in sentence case.
+- Don't put borders on form fields at rest — inputs are `{colors.field}` tint fills; the border appears only as the 2px ink focus ring.
+- Don't let full-color photography of people into the curator/juror grids; portraits are strictly black-and-white.
+- Don't square off pill geometry at small sizes — badges, chips, and toggles stay stadium-shaped.

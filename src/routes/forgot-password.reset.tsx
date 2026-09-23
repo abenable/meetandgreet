@@ -1,153 +1,146 @@
-import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  useNavigate,
+  useRouterState,
+  useSearch,
+} from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import { Lock, Eye, EyeOff, ArrowRight, Check, X } from 'lucide-react'
+import { KeyRound } from 'lucide-react'
 import { resetPasswordWithOtp } from '#/server/auth'
 import { normalizeAuthError, validatePassword } from '#/lib/auth-errors'
-import Logo from '#/components/Logo'
+import { AuthAlert, AuthLayout } from '#/components/auth/AuthLayout'
+import { PasswordField } from '#/components/auth/PasswordField'
+import { Button, EmptyState, useToast } from '#/components/ui'
 
 export const Route = createFileRoute('/forgot-password/reset')({ component: ResetPasswordPage })
+
+function isSafeRedirect(url: string) {
+  return url.startsWith('/') && !url.startsWith('//')
+}
 
 function ResetPasswordPage() {
   const navigate = useNavigate()
   const search = useSearch({ from: '/forgot-password/reset' })
   const email = (search as any)?.email || ''
-  const otp = (search as any)?.otp || ''
+  const redirect = typeof (search as any)?.redirect === 'string' ? (search as any).redirect : ''
+  const carry = redirect ? { redirect } : undefined
+
+  // The verified code is handed over in history state rather than the query
+  // string, so it never reaches the address bar or an outbound Referer.
+  const resetOtp = useRouterState({
+    select: (s) => (s.location.state as { resetOtp?: string } | undefined)?.resetOtp ?? '',
+  })
+
   const resetPasswordWithOtpFn = useServerFn(resetPasswordWithOtp)
+  const { toast } = useToast()
 
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [confirmError, setConfirmError] = useState('')
 
-  const { valid: passwordValid, requirements } = validatePassword(password)
+  const { valid: passwordValid } = validatePassword(password)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     e.stopPropagation()
     setError('')
+    setConfirmError('')
 
-    if (password !== confirm) {
-      setError('Passwords do not match.')
-      return
-    }
     if (!passwordValid) {
       setError('Please choose a stronger password.')
+      return
+    }
+    if (password !== confirm) {
+      setConfirmError('Passwords do not match.')
       return
     }
 
     setLoading(true)
 
     try {
-      const res = await resetPasswordWithOtpFn({ data: { email, otp, password } })
+      const res = await resetPasswordWithOtpFn({
+        data: { email, otp: resetOtp, password },
+      })
       if (!res.success && res.message) {
         setError(normalizeAuthError(res.message))
         setLoading(false)
         return
       }
-      navigate({ to: '/login' })
+      // Every session for this account was just invalidated server-side, so
+      // the only way forward is a fresh log in — say so instead of dropping
+      // the user at a blank login screen with no idea whether it worked.
+      toast('Password updated. Log in with your new password.', { tone: 'success', duration: 6000 })
+      navigate({
+        to: '/login',
+        search: (redirect && isSafeRedirect(redirect) ? { redirect } : undefined) as never,
+      })
     } catch (err: any) {
       setError(normalizeAuthError(err?.message || ''))
-    } finally {
       setLoading(false)
     }
   }
 
-  if (!email || !otp) {
+  if (!email || !resetOtp) {
     return (
-      <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8 text-center">
-        <Logo className="mx-auto mb-4 h-20 w-auto" />
-        <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Something went wrong</h1>
-        <p className="mt-2 text-sm text-[var(--mag-ink-soft)]">Please start the password reset flow again.</p>
-        <button
-          onClick={() => navigate({ to: '/forgot-password' })}
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95"
-        >
-          Start over <ArrowRight className="h-4 w-4" />
-        </button>
-      </div>
+      <AuthLayout title="Let's start again" back={{ to: '/login', label: 'Back to log in' }}>
+        <EmptyState
+          icon={KeyRound}
+          title="This reset link expired"
+          description="For your security the code is only held for the current session. Request a new one and you'll be through in a moment."
+          action={
+            <Button onClick={() => navigate({ to: '/forgot-password', search: carry as never })}>
+              Request a new code
+            </Button>
+          }
+        />
+      </AuthLayout>
     )
   }
 
   return (
-    <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8">
-      <div className="mb-8 text-center">
-        <Logo className="mx-auto mb-4 h-20 w-auto" />
-        <h1 className="text-2xl font-bold text-[var(--mag-ink)]">New password</h1>
-        <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">Create a new password for <strong className="text-[var(--mag-ink)]">{email}</strong>.</p>
-      </div>
+    <AuthLayout
+      mode="step"
+      step={{ current: 3, total: 3 }}
+      back={{ to: '/forgot-password/verify', search: { email, ...(carry ?? {}) }, label: 'Back' }}
+      title="Choose a new password"
+      subtitle={
+        <>
+          For <span className="text-ink">{email}</span>. You'll be signed out everywhere else.
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        <AuthAlert>{error}</AuthAlert>
 
-      <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
-        {error && (
-          <div className="rounded-2xl border border-[var(--mag-sale)] bg-[var(--mag-sale-bg)] px-4 py-3 text-xs text-[var(--mag-sale)]">
-            {error}
-          </div>
-        )}
+        <PasswordField
+          label="New password"
+          value={password}
+          onChange={setPassword}
+          placeholder="New password"
+          autoComplete="new-password"
+          autoFocus
+          showStrength
+        />
 
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-          <div className="relative">
-            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="New password"
-              required
-              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-10 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                setShowPassword((prev) => !prev)
-              }}
-              className="absolute right-0 top-0 z-10 flex h-full w-10 cursor-pointer items-center justify-center border-none bg-transparent text-[var(--mag-ink-muted)] transition hover:text-[var(--mag-ink)]"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
+        <PasswordField
+          label="Confirm password"
+          value={confirm}
+          onChange={(v) => {
+            setConfirm(v)
+            if (confirmError) setConfirmError('')
+          }}
+          placeholder="Repeat it"
+          autoComplete="new-password"
+          error={confirmError}
+        />
 
-          <div className="relative">
-            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              placeholder="Confirm password"
-              required
-              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
-            />
-          </div>
-
-          {password.length > 0 && (
-            <ul className="space-y-1 text-center">
-              {requirements.map((r) => (
-                <li key={r.label} className="flex items-center justify-center gap-1.5 text-[11px] text-[var(--mag-ink-muted)]">
-                  {r.met ? <Check className="h-3 w-3 text-[var(--mag-ink)]" /> : <X className="h-3 w-3 text-[var(--mag-sale)]" />}
-                  <span className={r.met ? 'text-[var(--mag-ink-soft)]' : ''}>{r.label}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-60"
-          >
-            {loading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-bg)] border-t-transparent" />
-            ) : (
-              <>
-                Reset password
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </button>
-        </form>
-      </div>
-    </div>
+        <Button type="submit" size="lg" block loading={loading} className="mt-2">
+          Update password
+        </Button>
+      </form>
+    </AuthLayout>
   )
 }

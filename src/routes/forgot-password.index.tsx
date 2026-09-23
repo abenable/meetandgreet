@@ -1,101 +1,94 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import { Mail, ArrowRight } from 'lucide-react'
 import { sendPasswordResetOtp } from '#/server/auth'
-import Logo from '#/components/Logo'
+import { EMAIL_REGEX } from '#/lib/auth-errors'
+import { AuthAlert, AuthLayout } from '#/components/auth/AuthLayout'
+import { markOtpSent } from '#/hooks/useResendCountdown'
+import { Button, Field, Input } from '#/components/ui'
 
 export const Route = createFileRoute('/forgot-password/')({ component: ForgotPasswordPage })
 
 function ForgotPasswordPage() {
   const navigate = useNavigate()
+  const search = useSearch({ from: '/forgot-password/' })
+  const redirect = typeof (search as any)?.redirect === 'string' ? (search as any).redirect : ''
+  const carry = redirect ? { redirect } : undefined
   const sendPasswordResetOtpFn = useServerFn(sendPasswordResetOtp)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [sent, setSent] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setLoading(true)
-    const normalizedEmail = email.toLowerCase().trim()
 
+    const normalizedEmail = email.toLowerCase().trim()
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
+      setError('Please enter a valid email address.')
+      return
+    }
+
+    setLoading(true)
     try {
       await sendPasswordResetOtpFn({ data: normalizedEmail })
-      setEmail(normalizedEmail)
-      setSent(true)
+      markOtpSent(normalizedEmail)
+      // Straight to the code step. This used to render a "check your email"
+      // screen whose only content was a button to continue — a stop with
+      // nothing on it.
+      navigate({
+        to: '/forgot-password/verify',
+        search: { email: normalizedEmail, redirect },
+      })
     } catch (err: any) {
-      setError(err?.message || 'Failed to send OTP')
-    } finally {
+      setError(err?.message || 'Failed to send code. Please try again.')
       setLoading(false)
     }
   }
 
-  if (sent) {
-    return (
-      <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8 text-center">
-        <div className="mx-auto w-full max-w-sm">
-          <Logo className="mx-auto mb-4 h-20 w-auto" />
-          <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Check your email</h1>
-          <p className="mt-2 text-sm text-[var(--mag-ink-soft)]">
-            We sent a 6-digit code to <strong className="text-[var(--mag-ink)]">{email}</strong>.
-          </p>
-          <button
-            onClick={() => navigate({ to: '/forgot-password/verify', search: { email } })}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 no-underline"
-          >
-            Enter code <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-8">
-      <div className="mb-8 text-center">
-        <Logo className="mx-auto mb-4 h-20 w-auto" />
-        <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Forgot password?</h1>
-        <p className="mt-1 text-sm text-[var(--mag-ink-soft)]">Enter your email and we will send you a reset code.</p>
-      </div>
+    <AuthLayout
+      mode="step"
+      step={{ current: 1, total: 3 }}
+      back={{ to: '/login', search: carry, label: 'Back to log in' }}
+      title="Reset your password"
+      subtitle="Enter your email and we'll send you a 6-digit code."
+      footer={
+        <p className="text-center text-body-sm text-ink-muted">
+          Remembered it?{' '}
+          <Link
+            to="/login"
+            search={carry as never}
+            className="text-ink underline underline-offset-2"
+          >
+            Log in
+          </Link>
+        </p>
+      }
+    >
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        <AuthAlert>{error}</AuthAlert>
 
-      <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
-        {error && (
-          <div className="rounded-2xl border border-[var(--mag-sale)] bg-[var(--mag-sale-bg)] px-4 py-3 text-xs text-[var(--mag-sale)]">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mag-ink-muted)]" />
-            <input
+        <Field label="Email">
+          {({ id, describedBy }) => (
+            <Input
+              id={id}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
+              placeholder="you@example.com"
+              autoComplete="email"
+              autoFocus
               required
-              className="w-full rounded-2xl border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
+              aria-describedby={describedBy}
             />
-          </div>
+          )}
+        </Field>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] px-6 py-3 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95 disabled:opacity-60"
-          >
-            {loading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--mag-bg)] border-t-transparent" />
-            ) : (
-              <>
-                Send code
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </button>
-        </form>
-      </div>
-    </div>
+        <Button type="submit" size="lg" block loading={loading} className="mt-2">
+          Send code
+        </Button>
+      </form>
+    </AuthLayout>
   )
 }

@@ -30,6 +30,7 @@ const PERSON_SELECT = {
       location: true,
       bio: true,
       verifiedAt: true,
+      showOnlineStatus: true,
     },
   },
 } as const
@@ -46,6 +47,7 @@ type PersonRow = {
     location: string | null
     bio: string | null
     verifiedAt: Date | null
+    showOnlineStatus: boolean
   } | null
 }
 
@@ -68,7 +70,7 @@ function toPerson(user: PersonRow): FriendPerson {
     location: user.profile?.location ?? '',
     bio: user.profile?.bio ?? '',
     verifiedAt: user.profile?.verifiedAt ?? null,
-    lastActiveDate: user.lastActiveDate ?? null,
+    lastActiveDate: user.profile?.showOnlineStatus === false ? null : (user.lastActiveDate ?? null),
   }
 }
 

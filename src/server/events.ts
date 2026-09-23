@@ -714,6 +714,7 @@ const DECK_PROFILE_SELECT = {
   verifiedAt: true,
   createdAt: true,
   updatedAt: true,
+  showOnlineStatus: true,
   user: {
     select: { name: true, image: true, email: true, lastActiveDate: true },
   },
@@ -791,6 +792,7 @@ async function buildSwipeDeck({
   const where: Prisma.ProfileWhereInput = {
     AND: [
       candidateWhere,
+      { hidden: false },
       {
         userId: {
           not: myUserId,
@@ -881,7 +883,7 @@ async function buildSwipeDeck({
           ? [user.image]
           : [],
     sharedInterests: (profile.interests ?? []).filter((i) => myInterests.has(i)),
-    lastActiveDate: user?.lastActiveDate ?? null,
+    lastActiveDate: profile.showOnlineStatus ? (user?.lastActiveDate ?? null) : null,
   }))
 
   return {
@@ -1017,6 +1019,12 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
         verificationSubmittedAt: null,
         verificationStatus: null,
         discoveryMode: 'global',
+        hidden: false,
+        showOnlineStatus: true,
+        notifyMessages: true,
+        notifyFriends: true,
+        notifyMatches: true,
+        notifyEvents: true,
         prefAgeMin: 18,
         prefAgeMax: 99,
         prefShowMe: 'Everyone',

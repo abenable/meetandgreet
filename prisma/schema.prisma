@@ -111,6 +111,12 @@ model Profile {
   verificationPhoto       String?
   verificationSubmittedAt DateTime?
   verificationStatus      String? // null | 'pending' | 'approved' | 'rejected'
+  hidden                  Boolean   @default(false)
+  showOnlineStatus        Boolean   @default(true)
+  notifyMessages          Boolean   @default(true)
+  notifyFriends           Boolean   @default(true)
+  notifyMatches           Boolean   @default(true)
+  notifyEvents            Boolean   @default(true)
   discoveryMode           String    @default("global") // 'global' | 'event'
   prefAgeMin              Int       @default(18)
   prefAgeMax              Int       @default(99)
@@ -119,6 +125,7 @@ model Profile {
   updatedAt               DateTime  @updatedAt
 
   @@index([discoveryMode])
+  @@index([hidden, discoveryMode])
   @@index([verificationStatus, verificationSubmittedAt])
 }
 

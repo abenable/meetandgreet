@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { Prisma } from '@prisma/client'
 import { prisma } from '#/db'
+import { gendersMatching } from '#/lib/gender'
 import { requireSession } from '#/server/auth'
 import { broadcastToEvent } from '#/server/websocket-broadcast'
 import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
@@ -714,6 +715,7 @@ const DECK_PROFILE_SELECT = {
   verifiedAt: true,
   createdAt: true,
   updatedAt: true,
+  showOnlineStatus: true,
   user: {
     select: { name: true, image: true, email: true, lastActiveDate: true },
   },
@@ -791,6 +793,7 @@ async function buildSwipeDeck({
   const where: Prisma.ProfileWhereInput = {
     AND: [
       candidateWhere,
+      { hidden: false },
       {
         userId: {
           not: myUserId,
@@ -817,7 +820,7 @@ async function buildSwipeDeck({
               OR: [
                 { gender: null },
                 { gender: '' },
-                { gender: prefShowMe === 'Women' ? 'Female' : 'Male' },
+                { gender: { in: gendersMatching(prefShowMe === 'Women' ? 'Women' : 'Men') } },
               ],
             },
           ]
@@ -881,7 +884,7 @@ async function buildSwipeDeck({
           ? [user.image]
           : [],
     sharedInterests: (profile.interests ?? []).filter((i) => myInterests.has(i)),
-    lastActiveDate: user?.lastActiveDate ?? null,
+    lastActiveDate: profile.showOnlineStatus ? (user?.lastActiveDate ?? null) : null,
   }))
 
   return {
@@ -1017,6 +1020,12 @@ export const getEventAttendees = createServerFn({ method: 'GET' })
         verificationSubmittedAt: null,
         verificationStatus: null,
         discoveryMode: 'global',
+        hidden: false,
+        showOnlineStatus: true,
+        notifyMessages: true,
+        notifyFriends: true,
+        notifyMatches: true,
+        notifyEvents: true,
         prefAgeMin: 18,
         prefAgeMax: 99,
         prefShowMe: 'Everyone',

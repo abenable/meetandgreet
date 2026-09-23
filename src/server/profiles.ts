@@ -80,6 +80,12 @@ export const updateProfile = createServerFn({ method: 'POST' })
     prefAgeMin: z.number().int().min(18).max(99).optional(),
     prefAgeMax: z.number().int().min(18).max(99).optional(),
     prefShowMe: z.enum(['Women', 'Men', 'Everyone']).optional(),
+    hidden: z.boolean().optional(),
+    showOnlineStatus: z.boolean().optional(),
+    notifyMessages: z.boolean().optional(),
+    notifyFriends: z.boolean().optional(),
+    notifyMatches: z.boolean().optional(),
+    notifyEvents: z.boolean().optional(),
   }))
   .handler(async ({ data }) => {
     const session = await requireSession()
@@ -109,6 +115,12 @@ export const updateProfile = createServerFn({ method: 'POST' })
         ...(data.prefAgeMin !== undefined && { prefAgeMin: data.prefAgeMin }),
         ...(data.prefAgeMax !== undefined && { prefAgeMax: data.prefAgeMax }),
         ...(data.prefShowMe !== undefined && { prefShowMe: data.prefShowMe }),
+        ...(data.hidden !== undefined && { hidden: data.hidden }),
+        ...(data.showOnlineStatus !== undefined && { showOnlineStatus: data.showOnlineStatus }),
+        ...(data.notifyMessages !== undefined && { notifyMessages: data.notifyMessages }),
+        ...(data.notifyFriends !== undefined && { notifyFriends: data.notifyFriends }),
+        ...(data.notifyMatches !== undefined && { notifyMatches: data.notifyMatches }),
+        ...(data.notifyEvents !== undefined && { notifyEvents: data.notifyEvents }),
       },
       create: {
         userId: session.user.id,

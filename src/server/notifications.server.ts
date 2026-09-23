@@ -9,9 +9,30 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   )
 }
 
+const PUSH_PREF_BY_TYPE = {
+  message: 'notifyMessages',
+  friend_request: 'notifyFriends',
+  friend_accepted: 'notifyFriends',
+  match: 'notifyMatches',
+  like: 'notifyMatches',
+  system: 'notifyEvents',
+} as const
+
+export type NotificationType = keyof typeof PUSH_PREF_BY_TYPE
+
+async function pushAllowed(userId: string, type: NotificationType) {
+  const field = PUSH_PREF_BY_TYPE[type]
+  const profile = await prisma.profile.findUnique({
+    where: { userId },
+    select: { [field]: true } as Record<string, true>,
+  })
+  if (!profile) return true
+  return (profile as Record<string, boolean>)[field] !== false
+}
+
 export async function createNotification(data: {
   userId: string
-  type: 'like' | 'match' | 'message' | 'system' | 'friend_request' | 'friend_accepted'
+  type: NotificationType
   title: string
   body: string
   link?: string
@@ -21,11 +42,16 @@ export async function createNotification(data: {
   // Push delivery is one outbound HTTP request per subscribed device. Awaiting
   // it put third-party network latency directly into the response time of
   // sending a message, so it is dispatched without blocking the caller.
-  void sendPushNotification(data.userId, {
-    title: data.title,
-    body: data.body,
-    url: data.link,
-  }).catch((err) => console.warn('[Push] delivery failed:', err))
+  void pushAllowed(data.userId, data.type)
+    .then((allowed) => {
+      if (!allowed) return
+      return sendPushNotification(data.userId, {
+        title: data.title,
+        body: data.body,
+        url: data.link,
+      })
+    })
+    .catch((err) => console.warn('[Push] delivery failed:', err))
 
   return notification
 }

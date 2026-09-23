@@ -1,15 +1,15 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Skeleton } from '@heroui/react'
 import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, RotateCcw, Sparkles, UserPlus, UserCheck } from 'lucide-react'
 import { getMyActiveEvent, reportUser } from '#/server/events'
 import { recordSwipe, getSwipeDeck, rewindLastSwipe } from '#/server/swipes'
 import { startConversation } from '#/server/conversations'
 import { sendFriendRequest } from '#/server/friends'
 import type { FriendState } from '#/server/friends'
-import { useToast } from '#/components/ui'
+import { Skeleton, useToast } from '#/components/ui'
 import { getMyProfile } from '#/server/profiles'
+import { genderInitial } from '#/lib/gender'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
 
@@ -24,11 +24,13 @@ const REPORT_REASONS = [
 ]
 
 function formatNameWithGender(name: string | null, gender: string | null): string {
-  const initial = gender === 'Male' ? 'M' : gender === 'Female' ? 'F' : ''
+  const initial = genderInitial(gender)
   return initial ? `${name || ''}, ${initial}` : (name || '')
 }
 
 const ONLINE_THRESHOLD_MS = 5 * 60 * 1000
+
+const PRELOAD_AHEAD = 4
 
 function formatLastActive(dateLike: string | Date | null | undefined): { label: string; isOnline: boolean } | null {
   if (!dateLike) return null
@@ -94,7 +96,6 @@ function DiscoverPage() {
   const [chatStartedIds, setChatStartedIds] = useState<Set<string>>(new Set())
   const [chatStartPendingIds, setChatStartPendingIds] = useState<Set<string>>(new Set())
   const [lastSwipe, setLastSwipe] = useState<{ userId: string; index: number } | null>(null)
-  const [rewindError, setRewindError] = useState('')
 
   // Report modal state
   const [reportModalOpen, setReportModalOpen] = useState(false)
@@ -102,7 +103,6 @@ function DiscoverPage() {
   const [reportCustom, setReportCustom] = useState('')
   const [reportSuccess, setReportSuccess] = useState('')
 
-  const [swipeError, setSwipeError] = useState('')
   const [friendStates, setFriendStates] = useState<Record<string, FriendState>>({})
   const [friendPendingIds, setFriendPendingIds] = useState<Set<string>>(new Set())
   const { toast } = useToast()
@@ -123,8 +123,7 @@ function DiscoverPage() {
         next.delete(vars.data.swipedId)
         return next
       })
-      setSwipeError((error as Error)?.message || 'Could not record that. Try again.')
-      setTimeout(() => setSwipeError(''), 3000)
+      toast((error as Error)?.message || 'Could not record that. Try again.', { tone: 'error' })
     },
   })
 
@@ -137,8 +136,7 @@ function DiscoverPage() {
       navigate({ to: '/chats/$chatId', params: { chatId: `match_${result.matchId}` } })
     },
     onError: (error) => {
-      setSwipeError((error as Error)?.message || 'Could not start that chat. Try again.')
-      setTimeout(() => setSwipeError(''), 3000)
+      toast((error as Error)?.message || 'Could not start that chat. Try again.', { tone: 'error' })
     },
     onSettled: (_, __, vars) => {
       setChatStartPendingIds((prev) => {
@@ -177,8 +175,7 @@ function DiscoverPage() {
       rewindLastSwipe({ data: { eventId: effectiveEventId, swipedId: vars.userId } }),
     onSuccess: (result, vars) => {
       if (!result.success) {
-        setRewindError(result.message || 'Unable to rewind')
-        setTimeout(() => setRewindError(''), 2000)
+        toast(result.message || 'Unable to rewind', { tone: 'error' })
         return
       }
       setSwipedIds((prev) => {
@@ -292,6 +289,18 @@ function DiscoverPage() {
 
   // Pull the next page as the user approaches the end of the loaded deck.
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    const ahead = baseProfiles.slice(currentIndex + 1, currentIndex + 1 + PRELOAD_AHEAD)
+    for (const profile of ahead) {
+      const src = profile.photos?.[0]
+      if (!src) continue
+      const img = new Image()
+      img.decoding = 'async'
+      img.src = src
+    }
+  }, [currentIndex, baseProfiles])
+
+  useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return
     if (baseProfiles.length - currentIndex > 8) return
     void fetchNextPage()
@@ -299,14 +308,14 @@ function DiscoverPage() {
 
   // Only mount cards near the viewport. Rendering the whole deck meant N
   // full-screen sections, each with its own image, live at once.
-  const WINDOW_BEHIND = 1
-  const WINDOW_AHEAD = 3
+  const WINDOW_BEHIND = 2
+  const WINDOW_AHEAD = 6
   const windowStart = Math.max(0, currentIndex - WINDOW_BEHIND)
   const windowEnd = Math.min(baseProfiles.length, currentIndex + WINDOW_AHEAD + 1)
 
   if (awaitingEventCheckIn) {
     return (
-      <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-16 text-center">
+      <div className="page-wrap flex h-[var(--app-viewport-h)] flex-col items-center justify-center px-4 text-center">
         <Users className="mb-4 h-16 w-16 text-[var(--mag-ink-muted)]" />
         <h2 className="text-xl font-bold text-[var(--mag-ink)]">Join an Event First</h2>
         <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
@@ -321,24 +330,15 @@ function DiscoverPage() {
 
   if (profileLoading || profilesLoading) {
     return (
-      <div className="flex h-[calc(100dvh-112px)] flex-col bg-[var(--mag-bg)]">
-        <div className="shrink-0 px-4 py-2">
-          <div className="flex gap-2 overflow-x-auto hide-scrollbar">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-7 w-24 shrink-0 rounded-full" />
-            ))}
-          </div>
-        </div>
-        <div className="flex-1 px-4 py-4">
-          <Skeleton className="h-full w-full rounded-2xl" />
-        </div>
+      <div className="h-[var(--app-viewport-h)] bg-canvas">
+        <Skeleton className="h-full w-full rounded-none" />
       </div>
     )
   }
 
   if (baseProfiles.length === 0) {
     return (
-      <div className="page-wrap flex min-h-[90vh] flex-col items-center justify-center px-4 py-16 text-center">
+      <div className="page-wrap flex h-[var(--app-viewport-h)] flex-col items-center justify-center px-4 text-center">
         <Users className="mb-4 h-16 w-16 text-[var(--mag-ink-muted)]" />
         <h2 className="text-xl font-bold text-[var(--mag-ink)]">Nobody Here Yet</h2>
         <p className="mt-2 max-w-xs text-sm text-[var(--mag-ink-soft)]">
@@ -354,19 +354,11 @@ function DiscoverPage() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-112px)] flex-col bg-[var(--mag-bg)]">
-      {(rewindError || swipeError) && (
-        <div className="shrink-0 px-4 pb-2">
-          <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-center">
-            <p className="text-xs font-medium text-amber-800">{rewindError || swipeError}</p>
-          </div>
-        </div>
-      )}
+    <div className="flex h-[var(--app-viewport-h)] flex-col bg-canvas">
       <div
         ref={containerRef}
         onScroll={onScroll}
-        className="hide-scrollbar flex-1 w-full snap-y snap-mandatory overflow-y-auto"
-        style={{ scrollBehavior: 'smooth' }}
+        className="hide-scrollbar w-full flex-1 snap-y snap-mandatory overflow-y-auto overscroll-y-contain"
       >
         {baseProfiles.map((profile, index) => {
           // Cards outside the window keep their slot (so scroll position and
@@ -377,7 +369,7 @@ function DiscoverPage() {
                 key={profile.userId}
                 data-index={index}
                 aria-hidden="true"
-                className="relative h-full w-full shrink-0 snap-start snap-stop overflow-hidden bg-[var(--mag-surface)]"
+                className="relative h-full w-full shrink-0 snap-start overflow-hidden bg-[var(--mag-surface)]"
               />
             )
           }
@@ -393,13 +385,13 @@ function DiscoverPage() {
             <section
               key={profile.userId}
               data-index={index}
-              className="relative h-full w-full shrink-0 snap-start snap-stop overflow-hidden"
+              className="relative h-full w-full shrink-0 snap-start overflow-hidden"
             >
               <div className="h-full w-full">
                 <AvatarImage
                   src={pic}
                   alt={profile.name ?? ''}
-                  priority={index === currentIndex}
+                  priority={Math.abs(index - currentIndex) <= 2}
                   imgClassName={isMystery ? 'blur-[20px] grayscale-[0.5] transition-all duration-1000' : ''}
                 />
               </div>
@@ -440,7 +432,7 @@ function DiscoverPage() {
                   />
                 </>
               )}
-              <div className="absolute bottom-0 left-0 right-0 p-5 pb-40">
+              <div className="absolute bottom-0 left-0 right-0 px-5 pt-5 pb-20">
                 <h2 className="text-3xl font-bold text-white flex items-center gap-2">
                   {formatNameWithGender(profile.name, profile.gender)}
                   {profile.verifiedAt && <VerifiedBadge />}
@@ -514,7 +506,7 @@ function DiscoverPage() {
                   <Flag className="h-4 w-4 text-white" />
                 </button>
               </div>
-              <div className="absolute inset-x-0 bottom-24 z-10 flex items-center justify-center gap-2.5 px-5">
+              <div className="absolute inset-x-0 bottom-3 z-10 flex items-center justify-center gap-2.5 px-4">
                 <button
                   onClick={() => handleAction('pass')}
                   disabled={swipedIds.has(profile.userId)}

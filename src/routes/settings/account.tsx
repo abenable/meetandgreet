@@ -1,158 +1,143 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, Mail, Phone, Globe, Trash2, Pencil, X } from 'lucide-react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { AtSign, KeyRound, ShieldCheck, Trash2 } from 'lucide-react'
+import { disableMyAccount, getSession } from '#/server/auth'
+import { PageHeader } from '#/components/PageHeader'
+import { Badge, Button, Card, Sheet, Skeleton, useToast } from '#/components/ui'
 
 export const Route = createFileRoute('/settings/account')({ component: AccountSettingsPage })
 
 function AccountSettingsPage() {
-  const [email, setEmail] = useState('user@example.com')
-  const [phone, setPhone] = useState('+1 (555) 012-3456')
-  const [language, setLanguage] = useState('English (US)')
-  const [editingField, setEditingField] = useState<string | null>(null)
-  const [editValue, setEditValue] = useState('')
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const navigate = useNavigate()
+  const { toast } = useToast()
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmText, setConfirmText] = useState('')
 
-  const openEdit = (field: string, current: string) => {
-    setEditingField(field)
-    setEditValue(current)
-  }
+  const { data: session, isLoading } = useQuery({
+    queryKey: ['session'],
+    queryFn: () => getSession(),
+  })
 
-  const saveEdit = () => {
-    if (editingField === 'email') setEmail(editValue)
-    if (editingField === 'phone') setPhone(editValue)
-    if (editingField === 'language') setLanguage(editValue)
-    setEditingField(null)
-  }
+  const disable = useMutation({
+    mutationFn: () => disableMyAccount(),
+    onSuccess: () => {
+      window.location.href = '/'
+    },
+    onError: () => {
+      setConfirmDelete(false)
+      toast('Could not delete the account. Try again.', { tone: 'error' })
+    },
+  })
 
-  const fieldMeta: Record<string, { label: string; icon: React.ElementType }> = {
-    email: { label: 'Email', icon: Mail },
-    phone: { label: 'Phone', icon: Phone },
-    language: { label: 'Language', icon: Globe },
-  }
+  const email = session?.user?.email ?? ''
+  const verified = !!session?.user?.emailVerified
 
   return (
-    <main className="page-wrap px-4 py-4">
-      <div className="mb-5 text-center">
-        <Link to="/settings" className="absolute left-4 top-4 rounded-full p-2 text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)] no-underline">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Account Settings</h1>
-      </div>
+    <main className="page-wrap py-5 pb-28">
+      <PageHeader title="Account" back="/settings" />
 
-      <div className="mx-auto max-w-md mb-5 overflow-hidden rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
-        <button
-          onClick={() => openEdit('email', email)}
-          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-3 py-3 transition hover:bg-[var(--mag-surface)] text-left"
-        >
-          <Mail className="h-5 w-5 text-[var(--mag-ink-soft)]" />
-          <div className="flex-1">
-            <p className="text-xs text-[var(--mag-ink-muted)]">Email</p>
-            <p className="text-sm text-[var(--mag-ink)]">{email}</p>
+      <section className="mb-7">
+        <h2 className="mb-2 text-label text-ink-faint">Sign-in</h2>
+        <Card padding="none">
+          <div className="flex items-start gap-3 border-b border-hairline-soft px-4 py-3.5">
+            <AtSign className="mt-0.5 h-5 w-5 shrink-0 text-ink-muted" />
+            <div className="min-w-0 flex-1">
+              <p className="text-body-sm text-ink-muted">Email</p>
+              {isLoading ? (
+                <Skeleton className="mt-1 h-4 w-40 rounded-full" />
+              ) : (
+                <p className="truncate text-body text-ink">{email}</p>
+              )}
+            </div>
+            {!isLoading &&
+              (verified ? (
+                <Badge tone="neutral" className="mt-0.5">
+                  <ShieldCheck className="h-3 w-3" /> Verified
+                </Badge>
+              ) : (
+                <Badge tone="danger" className="mt-0.5">Unverified</Badge>
+              ))}
           </div>
-          <Pencil className="h-3.5 w-3.5 text-[var(--mag-ink-muted)]" />
-        </button>
-        <button
-          onClick={() => openEdit('phone', phone)}
-          className="flex w-full items-center gap-3 border-b border-[var(--mag-line)] px-3 py-3 transition hover:bg-[var(--mag-surface)] text-left"
-        >
-          <Phone className="h-5 w-5 text-[var(--mag-ink-soft)]" />
-          <div className="flex-1">
-            <p className="text-xs text-[var(--mag-ink-muted)]">Phone</p>
-            <p className="text-sm text-[var(--mag-ink)]">{phone}</p>
-          </div>
-          <Pencil className="h-3.5 w-3.5 text-[var(--mag-ink-muted)]" />
-        </button>
-        <button
-          onClick={() => openEdit('language', language)}
-          className="flex w-full items-center gap-3 px-3 py-3 transition hover:bg-[var(--mag-surface)] text-left"
-        >
-          <Globe className="h-5 w-5 text-[var(--mag-ink-soft)]" />
-          <div className="flex-1">
-            <p className="text-xs text-[var(--mag-ink-muted)]">Language</p>
-            <p className="text-sm text-[var(--mag-ink)]">{language}</p>
-          </div>
-          <Pencil className="h-3.5 w-3.5 text-[var(--mag-ink-muted)]" />
-        </button>
-      </div>
 
-      <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--mag-ink-muted)]">
-        Danger Zone
-      </h2>
-      <button
-        onClick={() => setShowDeleteConfirm(true)}
-        className="mx-auto max-w-md flex w-full items-center gap-3 rounded-2xl border border-[var(--mag-sale)]/30 bg-[var(--mag-sale)]/10 px-3 py-3 transition hover:bg-[var(--mag-sale)]/20"
+          <Link
+            to="/forgot-password"
+            className="flex items-center gap-3 px-4 py-3.5 no-underline transition hover:bg-canvas-soft"
+          >
+            <KeyRound className="h-5 w-5 shrink-0 text-ink-muted" />
+            <div className="min-w-0 flex-1">
+              <p className="text-body text-ink">Change password</p>
+              <p className="text-body-sm text-ink-muted">
+                We'll email you a code to set a new one.
+              </p>
+            </div>
+          </Link>
+        </Card>
+        <p className="mt-2 px-1 text-body-sm text-ink-faint">
+          Your email address is how you sign in and can't be changed here. Contact support if you
+          need it moved.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="mb-2 text-label text-ink-faint">Danger zone</h2>
+        <Card padding="none">
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmText('')
+              setConfirmDelete(true)
+            }}
+            className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-danger-soft"
+          >
+            <Trash2 className="h-5 w-5 shrink-0 text-danger" />
+            <div className="min-w-0 flex-1">
+              <p className="text-body text-danger">Delete account</p>
+              <p className="text-body-sm text-ink-muted">
+                Removes you from discovery, events and chats.
+              </p>
+            </div>
+          </button>
+        </Card>
+      </section>
+
+      <Sheet
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        title="Delete your account?"
+        description="Your profile is removed from discovery, events and every chat. Your email is permanently blocked from registering again. This cannot be undone."
+        footer={
+          <>
+            <Button variant="outline" block onClick={() => setConfirmDelete(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              block
+              disabled={confirmText.trim().toLowerCase() !== 'delete'}
+              loading={disable.isPending}
+              onClick={() => disable.mutate()}
+            >
+              Delete
+            </Button>
+          </>
+        }
       >
-        <Trash2 className="h-5 w-5 text-[var(--mag-sale)]" />
-        <span className="flex-1 text-left text-sm font-semibold text-[var(--mag-sale)]">Delete Account</span>
-      </button>
+        <label htmlFor="confirm-delete" className="mb-2 block text-body-sm font-semibold text-ink-soft">
+          Type DELETE to confirm
+        </label>
+        <input
+          id="confirm-delete"
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+          autoComplete="off"
+          className="h-11 w-full rounded-full border border-transparent bg-field px-4 text-body text-ink outline-none focus:border-danger focus:ring-1 focus:ring-danger"
+        />
+      </Sheet>
 
-      {/* Edit Dialog */}
-      {editingField && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-[var(--mag-ink)]">
-                Edit {fieldMeta[editingField]?.label}
-              </h3>
-              <button onClick={() => setEditingField(null)} className="rounded-full p-1 text-[var(--mag-ink-muted)] hover:bg-[var(--mag-surface)]">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <input
-              type="text"
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              className="mb-4 w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] p-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => setEditingField(null)}
-                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveEdit}
-                className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-sm font-semibold text-[var(--mag-bg)] transition hover:opacity-80"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
-            <div className="mb-1 flex items-center gap-2 text-[var(--mag-sale)]">
-              <Trash2 className="h-5 w-5" />
-              <h3 className="text-sm font-semibold">Delete Account</h3>
-            </div>
-            <p className="mb-4 text-sm text-[var(--mag-ink-soft)]">
-              This will permanently delete your account and all your data. This action cannot be undone.
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setShowDeleteConfirm(false)
-                  alert('Account deleted (demo)')
-                }}
-                className="flex-1 rounded-full bg-[var(--mag-sale)] py-2.5 text-sm font-semibold text-[var(--mag-bg)] transition hover:bg-[var(--mag-sale-deep)]"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Button variant="ghost" block className="mt-8" onClick={() => navigate({ to: '/settings' })}>
+        Back to settings
+      </Button>
     </main>
   )
 }

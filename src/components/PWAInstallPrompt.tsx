@@ -8,8 +8,8 @@ export default function PWAInstallPrompt() {
 
   return (
     <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+64px)] left-4 right-4 z-50">
-      <div className="flex items-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-4 py-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-bg)] border border-[var(--mag-line)]">
+      <div className="flex items-center gap-3 rounded-2xl bg-[var(--mag-surface)] px-4 py-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mag-bg)]">
           <Download className="h-5 w-5 text-[var(--mag-ink)]" />
         </div>
         <div className="min-w-0 flex-1">

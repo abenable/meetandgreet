@@ -61,7 +61,7 @@ function NotificationsPage() {
           <button
             onClick={() => markAllMutation.mutate({ data: undefined })}
             disabled={markAllMutation.isPending}
-            className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-3 py-1.5 text-[10px] font-semibold text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm px-3 py-1.5 text-[10px] font-semibold text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
           >
             <CheckCheck className="h-3 w-3" /> Mark all read
           </button>
@@ -71,7 +71,7 @@ function NotificationsPage() {
       {isLoading ? (
         <div className="space-y-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex w-full items-start gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+            <div key={i} className="flex w-full items-start gap-3 rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
               <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
               <div className="min-w-0 flex-1 space-y-2">
                 <Skeleton className="h-3 w-3/4 rounded-lg" />

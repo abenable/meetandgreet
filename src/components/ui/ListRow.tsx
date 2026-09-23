@@ -33,7 +33,7 @@ export function ListRow({
       {...(as === 'button' ? { type: 'button' as const, onClick } : { onClick })}
       className={cn(
         'flex w-full items-center gap-3 border-b border-hairline-soft px-1 py-3 text-left transition',
-        (onClick || chevron) && 'hover:bg-canvas-soft',
+        (onClick || chevron) && 'cursor-pointer hover:bg-canvas-soft',
         className,
       )}
     >

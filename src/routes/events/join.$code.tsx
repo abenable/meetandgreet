@@ -105,7 +105,7 @@ function ShareJoinPage() {
           </p>
         </div>
       ) : status === 'success' ? (
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
+        <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-5 text-center">
           <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-[var(--mag-ink)]" />
           <h2 className="text-lg font-bold text-[var(--mag-ink)]">
             {alreadyJoined ? 'You are already in!' : waitlisted ? 'You are on the waitlist!' : 'You are in!'}
@@ -119,7 +119,7 @@ function ShareJoinPage() {
       ) : status === 'error' ? (
         <div className="space-y-3">
           {event && (
-            <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+            <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
               <div className="flex items-start gap-3">
                 {(event as any).photo && (
                   <img src={(event as any).photo} alt={event.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
@@ -183,7 +183,7 @@ function ShareJoinPage() {
 
           <button
             onClick={() => navigate({ to: '/events' })}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--mag-card)] shadow-sm py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
           >
             Browse Events
           </button>
@@ -191,7 +191,7 @@ function ShareJoinPage() {
       ) : (
         <div className="space-y-3">
           {event && (
-            <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+            <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
               <div className="flex items-start gap-3">
                 {(event as any).photo && (
                   <img src={(event as any).photo} alt={event.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
@@ -225,7 +225,7 @@ function ShareJoinPage() {
           )}
 
           {confirmInfo ? (
-            <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+            <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
               <h3 className="mb-2 text-sm font-bold text-[var(--mag-ink)]">Leave current event?</h3>
               <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
                 You are already checked into <strong className="text-[var(--mag-ink)]">{confirmInfo.currentEventName}</strong>. You can only be in one event at a time.
@@ -236,7 +236,7 @@ function ShareJoinPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => { setConfirmInfo(null); navigate({ to: '/events' }) }}
-                  className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                  className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
                 >
                   Cancel
                 </button>

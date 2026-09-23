@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
-import { ArrowLeft, Calendar, MapPin, Plus, Users, X, ImageIcon, Eye, EyeOff, Sparkles } from 'lucide-react'
+import { ArrowLeft, Calendar, MapPin, Plus, Users, X, ImageIcon, Eye, EyeOff } from 'lucide-react'
 import { createEvent } from '#/server/events'
 import { localDatetimeToUTCISO } from '#/lib/datetime'
 
@@ -37,7 +37,6 @@ function CreateEventPage() {
   const [copied, setCopied] = useState(false)
   const [photo, setPhoto] = useState<string | null>(null)
   const [isPublic, setIsPublic] = useState(true)
-  const [mysteryMode, setMysteryMode] = useState(false)
   const [photoError, setPhotoError] = useState('')
   const [createError, setCreateError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
@@ -80,7 +79,6 @@ function CreateEventPage() {
         startsAt: startsAtIso,
         photo: photo || undefined,
         isPublic,
-        mysteryMode,
         force,
       } })
 
@@ -123,7 +121,7 @@ function CreateEventPage() {
       </div>
 
       {code ? (
-        <div className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-4 text-center">
+        <div className="mb-6 rounded-2xl bg-[var(--mag-card)] shadow-sm p-4 text-center">
           <p className="text-xs font-medium text-[var(--mag-ink-soft)] uppercase tracking-wide">Event Created</p>
           <p className="mt-2 text-3xl font-mono font-bold tracking-widest text-[var(--mag-ink)]">{code}</p>
           <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">Share this code or link so others can join</p>
@@ -140,7 +138,7 @@ function CreateEventPage() {
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Event Name</label>
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Fremont Friday Night"
-            className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+            className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
 
         <div>
@@ -182,7 +180,7 @@ function CreateEventPage() {
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
                 isPublic
                   ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+                  : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
               }`}
             >
               <Eye className="h-3.5 w-3.5" /> Public
@@ -193,7 +191,7 @@ function CreateEventPage() {
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
                 !isPublic
                   ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+                  : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
               }`}
             >
               <EyeOff className="h-3.5 w-3.5" /> Private
@@ -207,47 +205,16 @@ function CreateEventPage() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-center text-xs font-medium text-[var(--mag-ink)]">Mystery Mode</label>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setMysteryMode(true)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
-                mysteryMode
-                  ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
-              }`}
-            >
-              <Sparkles className="h-3.5 w-3.5" /> On
-            </button>
-            <button
-              type="button"
-              onClick={() => setMysteryMode(false)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
-                !mysteryMode
-                  ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                  : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
-              }`}
-            >
-              Off
-            </button>
-          </div>
-          <p className="mt-1 text-[10px] text-[var(--mag-ink-muted)]">
-            Attendees' photos are blurred until they've exchanged 10 messages
-          </p>
-        </div>
-
-        <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Description</label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What is this event about?" rows={3}
-            className="w-full resize-none rounded-card border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+            className="w-full resize-none rounded-card bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Location</label>
           <div className="relative">
             <MapPin className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
             <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Capitol Hill, Seattle"
-              className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
           </div>
         </div>
         <div>
@@ -255,7 +222,7 @@ function CreateEventPage() {
           <div className="relative">
             <Users className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
             <input type="number" min={1} max={1000} value={maxAttendees} onChange={(e) => setMaxAttendees(e.target.value === '' ? '' : Number(e.target.value))} placeholder="No limit"
-              className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
           </div>
         </div>
         <div>
@@ -263,7 +230,7 @@ function CreateEventPage() {
           <div className="relative">
             <Calendar className="absolute left-3 top-3 h-4 w-4 text-[var(--mag-ink-muted)]" />
             <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)}
-              className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+              className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
           </div>
         </div>
       </div>
@@ -281,7 +248,7 @@ function CreateEventPage() {
       {/* Confirm leave current event modal */}
       {confirmModal?.open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
+          <div className="w-full max-w-sm rounded-card bg-[var(--mag-card)] p-5 shadow-lg">
             <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Leave current event?</h3>
             <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
               You are already checked into <strong className="text-[var(--mag-ink)]">{confirmModal.currentEventName}</strong>. You can only be in one event at a time.
@@ -292,7 +259,7 @@ function CreateEventPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmModal(null)}
-                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
               >
                 Cancel
               </button>

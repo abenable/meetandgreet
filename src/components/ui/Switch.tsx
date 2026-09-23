@@ -52,12 +52,12 @@ export function Switch({
         onClick={() => onChange(!checked)}
         className={cn(
           'relative mt-0.5 h-7 w-12 shrink-0 rounded-full transition disabled:opacity-50',
-          checked ? 'bg-ink' : 'bg-hairline',
+          checked ? 'bg-ink shadow-sm' : 'bg-hairline',
         )}
       >
         <span
           className={cn(
-            'absolute top-1 h-5 w-5 rounded-full bg-canvas transition-all',
+            'absolute top-1 h-5 w-5 rounded-full bg-canvas-raised shadow-sm transition-all',
             checked ? 'left-6' : 'left-1',
           )}
         />

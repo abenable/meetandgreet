@@ -40,7 +40,7 @@ function EventDetailPage() {
           </button>
           <h1 className="text-lg font-bold text-[var(--mag-ink)]">Event Details</h1>
         </div>
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5 text-center">
+        <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-5 text-center">
           <p className="text-sm font-semibold text-[var(--mag-ink)]">Event not found.</p>
         </div>
       </main>
@@ -63,7 +63,7 @@ function EventDetailPage() {
       </div>
 
       {hasSponsor && (
-        <div className="mb-4 flex items-center justify-center gap-2 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] py-3">
+        <div className="mb-4 flex items-center justify-center gap-2 rounded-2xl bg-[var(--mag-card)] shadow-sm py-3">
           <span className="text-xs font-medium text-[var(--mag-ink-soft)]">Sponsored by</span>
           {(event as any).sponsorLogo ? (
             <img
@@ -78,7 +78,7 @@ function EventDetailPage() {
       )}
 
       <div
-        className="relative rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3"
+        className="relative rounded-2xl bg-[var(--mag-card)] shadow-sm p-3"
         style={
           frameUrl
             ? {

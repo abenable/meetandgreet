@@ -101,7 +101,7 @@ function EventsExplorePage() {
 
       {isLoading ? (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+          <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm">
             <Skeleton className="h-40 w-full rounded-t-2xl" />
             <div className="p-3 space-y-2">
               <Skeleton className="h-5 w-1/2 rounded-lg" />
@@ -114,7 +114,7 @@ function EventsExplorePage() {
           </div>
           <div className="space-y-2">
             {[1, 2].map((i) => (
-              <div key={i} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+              <div key={i} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
                 <div className="flex items-start gap-3">
                   <Skeleton className="h-16 w-16 shrink-0 rounded-xl" />
                   <div className="min-w-0 flex-1 space-y-2">
@@ -134,7 +134,7 @@ function EventsExplorePage() {
         <>
           {/* Active Event Hero */}
           {activeEvent ? (
-        <div className="mb-6 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)]">
+        <div className="mb-6 rounded-2xl bg-[var(--mag-card)] shadow-sm">
           <div className="relative">
             {activeEvent.photo ? (
               <div className="relative h-40 w-full overflow-hidden">
@@ -165,11 +165,11 @@ function EventsExplorePage() {
                 Discover People <ArrowRight className="h-4 w-4" />
               </Link>
               {activeEvent.createdById === session?.user?.id && (
-                <Link to="/events/manage/$eventId" params={{ eventId: activeEvent.id }} className="inline-flex items-center justify-center rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-5 py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
+                <Link to="/events/manage/$eventId" params={{ eventId: activeEvent.id }} className="inline-flex items-center justify-center rounded-full bg-[var(--mag-card)] shadow-sm px-5 py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
                   Manage
                 </Link>
               )}
-              <button onClick={handleLeave} className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-5 py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]">Leave</button>
+              <button onClick={handleLeave} className="rounded-full bg-[var(--mag-card)] shadow-sm px-5 py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]">Leave</button>
             </div>
           </div>
         </div>
@@ -198,7 +198,7 @@ function EventsExplorePage() {
             )}
             <Link
               to="/events/create"
-              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-5 py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--mag-card)] shadow-sm px-5 py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline"
             >
               <Plus className="h-4 w-4" /> Create Event
             </Link>
@@ -224,7 +224,7 @@ function EventsExplorePage() {
             {waitlistedEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
               return (
-                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+                <div key={event.id} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
                   <div className="flex items-start gap-3">
                     {event.photo && (
                       <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
@@ -247,11 +247,11 @@ function EventsExplorePage() {
                   <div className="mt-3 flex gap-2">
                     <button
                       onClick={() => handleLeaveWaitlist(event.id)}
-                      className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                      className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
                     >
                       <X className="h-3 w-3" /> Leave Waitlist
                     </button>
-                    <Link to="/events/waitlist/$eventId" params={{ eventId: event.id }} className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
+                    <Link to="/events/waitlist/$eventId" params={{ eventId: event.id }} className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
                       Waiting Room
                     </Link>
                   </div>
@@ -267,14 +267,14 @@ function EventsExplorePage() {
         <section id="current-events" className="mb-8">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-bold text-[var(--mag-ink)]">Current Events</h3>
-            <span className="rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-ink)] border border-[var(--mag-line)]">Live now</span>
+            <span className="rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--mag-ink)]">Live now</span>
           </div>
           <div className="space-y-2">
             {currentEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
               const isJoined = activeEvent?.id === event.id
               return (
-                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+                <div key={event.id} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
                   <div className="flex items-start gap-3">
                     {event.photo && (
                       <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
@@ -284,10 +284,10 @@ function EventsExplorePage() {
                         <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
                         {isJoined && <span className="shrink-0 rounded-full bg-[var(--mag-ink)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-bg)]">Joined</span>}
                         {(event as any).mysteryMode && (
-                          <span className="shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">Mystery</span>
+                          <span className="shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)]">Mystery</span>
                         )}
                         {(event as any).sponsorName && (
-                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">
+                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)]">
                             <Star className="h-3 w-3" /> Sponsored
                           </span>
                         )}
@@ -309,7 +309,7 @@ function EventsExplorePage() {
                       </button>
                     )}
                     {(event as any).createdById === session?.user?.id && (
-                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
+                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
                         Manage
                       </Link>
                     )}
@@ -332,7 +332,7 @@ function EventsExplorePage() {
             {upcomingEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
               return (
-                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 opacity-90">
+                <div key={event.id} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 opacity-90">
                   <div className="flex items-start gap-3">
                     {event.photo && (
                       <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
@@ -341,10 +341,10 @@ function EventsExplorePage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
                         {(event as any).mysteryMode && (
-                          <span className="shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">Mystery</span>
+                          <span className="shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)]">Mystery</span>
                         )}
                         {(event as any).sponsorName && (
-                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">
+                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)]">
                             <Star className="h-3 w-3" /> Sponsored
                           </span>
                         )}
@@ -367,7 +367,7 @@ function EventsExplorePage() {
                       <ListOrdered className="h-3 w-3" /> Join Waitlist
                     </button>
                     {(event as any).createdById === session?.user?.id && (
-                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
+                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm px-4 py-2 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] no-underline">
                         Manage
                       </Link>
                     )}
@@ -390,7 +390,7 @@ function EventsExplorePage() {
             {pastEvents.map((event) => {
               const count = (event as any)._count?.attendees ?? 0
               return (
-                <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 opacity-70">
+                <div key={event.id} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 opacity-70">
                   <div className="flex items-start gap-3">
                     {event.photo && (
                       <img src={event.photo} alt={event.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
@@ -400,7 +400,7 @@ function EventsExplorePage() {
                         <h4 className="text-sm font-semibold text-[var(--mag-ink)]">{event.name}</h4>
                         <span className="shrink-0 rounded-full bg-[var(--mag-ink-muted)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink-muted)]">Ended</span>
                         {(event as any).sponsorName && (
-                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)] border border-[var(--mag-line)]">
+                          <span className="inline-flex items-center gap-1 shrink-0 rounded-full bg-[var(--mag-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--mag-ink)]">
                             <Star className="h-3 w-3" /> Sponsored
                           </span>
                         )}
@@ -414,7 +414,7 @@ function EventsExplorePage() {
                   </div>
                   {(event as any).createdById === session?.user?.id && (
                     <div className="mt-3 flex justify-center">
-                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex items-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-2 text-xs font-medium text-[var(--mag-ink)] no-underline transition hover:bg-[var(--mag-surface)]">
+                      <Link to="/events/manage/$eventId" params={{ eventId: event.id }} className="inline-flex items-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm px-4 py-2 text-xs font-medium text-[var(--mag-ink)] no-underline transition hover:bg-[var(--mag-surface)]">
                         Manage
                       </Link>
                     </div>
@@ -426,15 +426,10 @@ function EventsExplorePage() {
         </section>
       )}
 
-      {/* Bottom Create CTA */}
-      <Link to="/events/create" className="mb-8 flex items-center justify-center gap-2 rounded-full bg-[var(--mag-ink)] py-3.5 text-sm font-medium text-[var(--mag-bg)] transition hover:opacity-80 no-underline">
-        <Plus className="h-4 w-4" /> Create New Event
-      </Link>
-
       {/* Enter event code modal */}
       {joinCodeModal?.open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
+          <div className="w-full max-w-sm rounded-card bg-[var(--mag-card)] p-5 shadow-lg">
             <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Join {joinCodeModal.eventName}</h3>
             <p className="mb-3 text-xs text-[var(--mag-ink-soft)]">Enter the event code to join.</p>
             <input
@@ -445,13 +440,13 @@ function EventsExplorePage() {
               maxLength={10}
               autoFocus
               disabled={!!joinSuccess}
-              className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-center text-sm font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:border-[var(--mag-ink)] focus:outline-none disabled:opacity-50"
+              className="w-full rounded-full bg-[var(--input-bg)] px-4 py-3 text-center text-sm font-mono tracking-widest uppercase text-[var(--mag-ink)] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal focus:border-[var(--mag-ink)] focus:outline-none disabled:opacity-50"
             />
             {joinError && (
               <p className="mt-2 text-xs font-semibold text-[var(--mag-sale)]">{joinError}</p>
             )}
             {joinSuccess && (
-              <div className="mt-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 text-xs text-[var(--mag-ink-soft)]">
+              <div className="mt-2 rounded-xl bg-[var(--mag-surface)] px-3 py-2 text-xs text-[var(--mag-ink-soft)]">
                 {joinSuccess}
               </div>
             )}
@@ -467,7 +462,7 @@ function EventsExplorePage() {
                 <>
                   <button
                     onClick={() => { setJoinError(''); setJoinSuccess(''); setJoinCodeModal(null) }}
-                    className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                    className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
                   >
                     Cancel
                   </button>
@@ -492,7 +487,7 @@ function EventsExplorePage() {
       {/* Confirm leave + join modal */}
       {confirmModal?.open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 sm:items-center sm:pb-0">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] p-5 border border-[var(--mag-line)]">
+          <div className="w-full max-w-sm rounded-card bg-[var(--mag-card)] p-5 shadow-lg">
             <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Leave current event?</h3>
             <p className="mb-3 text-xs text-[var(--mag-ink-soft)]">
               You are already checked into <strong className="text-[var(--mag-ink)]">{confirmModal.currentEventName}</strong>. You can only be in one event at a time.
@@ -506,7 +501,7 @@ function EventsExplorePage() {
             <div className="flex gap-2">
               <button
                 onClick={() => { setJoinError(''); setConfirmModal(null) }}
-                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
               >
                 Cancel
               </button>

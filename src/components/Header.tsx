@@ -41,7 +41,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--mag-line)] bg-[var(--header-bg)] backdrop-blur-lg">
+    <header className="chrome-blur sticky top-0 z-50 shadow-[0_1px_12px_rgba(16,16,22,0.06)]">
       <div className="page-wrap flex items-center justify-between py-3">
         <Link to="/" className="flex items-center gap-1.5 no-underline">
           <Logo className="h-6 w-auto" />
@@ -51,7 +51,7 @@ export default function Header() {
           {session?.user && (
             <Link
               to="/notifications"
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] hover:text-[var(--mag-ink)]"
             >
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
@@ -64,14 +64,14 @@ export default function Header() {
           {session?.user?.role === 'admin' && (
             <Link
               to="/admin"
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] hover:text-[var(--mag-ink)]"
             >
               <Shield className="h-5 w-5" />
             </Link>
           )}
           <button
             onClick={toggle}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] hover:text-[var(--mag-ink)]"
             aria-label="Toggle theme"
           >
             {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}

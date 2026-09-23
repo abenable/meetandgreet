@@ -566,14 +566,14 @@ function DiscoverPage() {
       {/* Report Modal */}
       {reportModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 px-4 pb-20 sm:items-center sm:pb-0">
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] border border-[var(--mag-line)] p-5">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] shadow-sm p-5">
             <h3 className="mb-1 text-base font-bold text-[var(--mag-ink)]">Report user</h3>
             <p className="mb-4 text-xs text-[var(--mag-ink-soft)]">
               This will be sent to the event organizer. Be honest — false reports may result in action against you.
             </p>
 
             {reportSuccess ? (
-              <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-4 py-3 text-xs text-[var(--mag-success)]">
+              <div className="rounded-2xl bg-[var(--mag-surface)] px-4 py-3 text-xs text-[var(--mag-success)]">
                 {reportSuccess}
               </div>
             ) : (
@@ -582,7 +582,7 @@ function DiscoverPage() {
                   {REPORT_REASONS.map((r) => (
                     <label
                       key={r}
-                      className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 transition hover:border-[var(--mag-line)]"
+                      className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--mag-surface)] px-3 py-2 transition hover:border-[var(--mag-line)]"
                     >
                       <input
                         type="radio"
@@ -603,14 +603,14 @@ function DiscoverPage() {
                     onChange={(e) => setReportCustom(e.target.value)}
                     placeholder="Describe the issue..."
                     rows={3}
-                    className="mb-3 w-full resize-none rounded-card border border-[var(--mag-line)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
+                    className="mb-3 w-full resize-none rounded-card bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
                   />
                 )}
 
                 <div className="flex gap-2">
                   <button
                     onClick={() => setReportModalOpen(false)}
-                    className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                    className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm py-2.5 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
                   >
                     Cancel
                   </button>

@@ -12,12 +12,16 @@
   --ink-muted: #707070;
   --ink-faint: #adadad;
 
-  --canvas: #ffffff;
-  --canvas-soft: #f3f3f3;
+  --canvas: #f3f3f6;
   --canvas-raised: #ffffff;
-  --field: #f0f0f0;
-  --hairline-soft: #f0f0f0;
-  --hairline: #e0e0e0;
+  --canvas-soft: #e8e8ee;
+  --field: #ececf1;
+  --hairline-soft: #e6e6ec;
+  --hairline: #dcdce3;
+
+  --elev-1: 0 1px 2px rgba(16, 16, 22, 0.06), 0 1px 3px rgba(16, 16, 22, 0.05);
+  --elev-2: 0 2px 6px rgba(16, 16, 22, 0.07), 0 8px 20px rgba(16, 16, 22, 0.08);
+  --elev-3: 0 12px 34px rgba(16, 16, 22, 0.18);
 
   --on-ink: #ffffff;
 
@@ -35,7 +39,7 @@
   --scrim-strong: rgba(0, 0, 0, 0.72);
   --on-scrim: #ffffff;
 
-  --chrome-bg: rgba(255, 255, 255, 0.88);
+  --chrome-bg: rgba(250, 250, 252, 0.86);
 
   --app-header-h: 65px;
   --app-nav-h: calc(64px + env(safe-area-inset-bottom, 0px));
@@ -50,12 +54,16 @@
   --ink-muted: #8f8f8f;
   --ink-faint: #616161;
 
-  --canvas: #0a0a0a;
-  --canvas-soft: #171717;
-  --canvas-raised: #1c1c1c;
-  --field: #1f1f1f;
-  --hairline-soft: #1f1f1f;
-  --hairline: #2e2e2e;
+  --canvas: #0a0a0c;
+  --canvas-raised: #17171b;
+  --canvas-soft: #202027;
+  --field: #24242b;
+  --hairline-soft: #22222a;
+  --hairline: #2d2d36;
+
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.55);
+  --elev-2: 0 4px 14px rgba(0, 0, 0, 0.55);
+  --elev-3: 0 16px 40px rgba(0, 0, 0, 0.7);
 
   --on-ink: #0a0a0a;
 
@@ -73,7 +81,7 @@
   --scrim-strong: rgba(0, 0, 0, 0.78);
   --on-scrim: #ffffff;
 
-  --chrome-bg: rgba(10, 10, 10, 0.88);
+  --chrome-bg: rgba(12, 12, 15, 0.86);
 }
 
 :root,
@@ -127,6 +135,10 @@
   --color-warning-soft: var(--warning-soft);
   --color-scrim: var(--scrim);
   --color-on-scrim: var(--on-scrim);
+
+  --shadow-sm: var(--elev-1);
+  --shadow-md: var(--elev-2);
+  --shadow-lg: var(--elev-3);
 
   --radius-media: 16px;
   --radius-card: 24px;
@@ -278,11 +290,12 @@
   border-top: 1px solid var(--hairline);
 }
 
-.card-shadow,
-.card-shadow-lg,
-.dark .card-shadow,
-.dark .card-shadow-lg {
-  box-shadow: none;
+.card-shadow {
+  box-shadow: var(--elev-1);
+}
+
+.card-shadow-lg {
+  box-shadow: var(--elev-2);
 }
 
 .gradient-overlay {

@@ -199,7 +199,7 @@ function VerifyCapturePage() {
             <button
               onClick={retake}
               disabled={submitMutation.isPending}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--mag-card)] shadow-sm py-3 text-sm font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
             >
               <RefreshCw className="h-4 w-4" /> Retake
             </button>

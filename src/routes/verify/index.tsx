@@ -20,7 +20,7 @@ function VerifyIntroPage() {
           'We match it to your profile photos',
           'Get a verified badge on your profile',
         ].map((step, i) => (
-          <div key={i} className="flex items-center justify-center gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
+          <div key={i} className="flex items-center justify-center gap-3 rounded-2xl bg-[var(--mag-card)] shadow-sm p-3">
             <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--mag-ink)]" />
             <span className="text-sm text-[var(--mag-ink)]">{step}</span>
           </div>

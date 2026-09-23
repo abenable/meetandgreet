@@ -27,7 +27,7 @@ export default function BottomNav() {
   ]
 
   return (
-    <nav className="chrome-blur fixed inset-x-0 bottom-0 z-50 border-t border-hairline pb-safe">
+    <nav className="chrome-blur fixed inset-x-0 bottom-0 z-50 pb-safe shadow-[0_-1px_12px_rgba(16,16,22,0.06)]">
       <div className="page-wrap flex items-center justify-around py-1">
         {items.map(({ to, label, icon: Icon, badge }) => {
           const active = path === to || path.startsWith(to + '/')

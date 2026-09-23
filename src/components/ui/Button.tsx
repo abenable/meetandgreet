@@ -13,13 +13,12 @@ export type ButtonVariant =
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-ink text-on-ink hover:opacity-85',
-  outline: 'bg-canvas text-ink border border-hairline hover:bg-canvas-soft',
-  soft: 'bg-canvas-soft text-ink hover:bg-field',
+  primary: 'bg-ink text-on-ink shadow-sm hover:shadow-md hover:opacity-90',
+  outline: 'bg-canvas-raised text-ink shadow-sm hover:bg-canvas-soft hover:shadow-md',
+  soft: 'bg-canvas-soft text-ink hover:bg-hairline',
   ghost: 'bg-transparent text-ink-muted hover:bg-canvas-soft hover:text-ink',
-  danger: 'bg-danger text-white hover:opacity-85',
-  scrim:
-    'bg-black/35 text-on-scrim border border-white/20 backdrop-blur-sm hover:bg-black/50',
+  danger: 'bg-danger text-white shadow-sm hover:shadow-md hover:opacity-90',
+  scrim: 'bg-black/40 text-on-scrim backdrop-blur-md hover:bg-black/60',
 }
 
 const SIZES: Record<ButtonSize, string> = {

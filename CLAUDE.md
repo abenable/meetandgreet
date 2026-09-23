@@ -25,9 +25,20 @@ Cloudflare R2 for media.
 `DESIGN.md` is the source of truth for visual decisions. Build screens from the
 kit in `src/components/ui/` rather than re-deriving chrome.
 
-Project override: single-line text fields are `rounded-full`, not the 16px
-`DESIGN.md` specifies. Multi-line textareas are `rounded-card`. This applies to
-every input, select and OTP box in the app.
+Project overrides, which take precedence over `DESIGN.md`:
+
+- **Elevation is shadows, not hairlines.** `DESIGN.md` describes a shadow-free
+  system where 1px outlines carry every edge. That reads as undifferentiated
+  white-on-white in this app. Cards, sheets, raised buttons and the active
+  segment use `shadow-sm` / `shadow-md` / `shadow-lg` (the `--elev-*` tokens).
+- **No outline borders on surfaces.** Separate things with a different shade,
+  not a border. The page sits on `canvas`, cards on `canvas-raised`, fills and
+  tracks on `canvas-soft`, inputs on `field`. Dividers inside a list and dashed
+  empty-state frames are fine; a border drawn around a card is not.
+- **Everything interactive gets a hover state** — a shade change, or a lift to
+  the next shadow step.
+- Single-line text fields are `rounded-full`, not the 16px `DESIGN.md`
+  specifies. Multi-line textareas are `rounded-card`.
 
 ## Local development
 

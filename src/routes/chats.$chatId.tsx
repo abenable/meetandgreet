@@ -51,7 +51,7 @@ function VoiceMessagePlayer({ url, isMine }: { url: string; isMine: boolean }) {
   }
 
   return (
-    <div className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 ${isMine ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]' : 'border border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
+    <div className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 ${isMine ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]' : 'bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
       <button
         onClick={toggle}
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isMine ? 'bg-white/20 text-white' : 'bg-[var(--mag-line)] text-[var(--mag-ink)]'}`}
@@ -397,12 +397,12 @@ function UnifiedChatPage() {
 
       {/* Unlock progress */}
       {isPhotosLocked && remainingMessages > 0 && (
-        <div className="mb-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 text-center text-xs font-medium text-[var(--mag-ink)]">
+        <div className="mb-2 rounded-xl bg-[var(--mag-surface)] px-3 py-2 text-center text-xs font-medium text-[var(--mag-ink)]">
           Send {remainingMessages} more message{remainingMessages !== 1 ? 's' : ''} to reveal their photo 🔒
         </div>
       )}
       {isPhotosLocked && remainingMessages === 0 && (
-        <div className="mb-2 rounded-xl border border-[var(--mag-line)] bg-[var(--mag-surface)] px-3 py-2 text-center text-xs font-medium text-[var(--mag-ink)]">
+        <div className="mb-2 rounded-xl bg-[var(--mag-surface)] px-3 py-2 text-center text-xs font-medium text-[var(--mag-ink)]">
           Almost there! Send one more message to reveal 🔒
         </div>
       )}
@@ -431,7 +431,7 @@ function UnifiedChatPage() {
                 <button
                   onClick={loadOlder}
                   disabled={loadingOlder}
-                  className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-4 py-1.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
+                  className="rounded-full bg-[var(--mag-card)] shadow-sm px-4 py-1.5 text-xs font-medium text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)] disabled:opacity-50"
                 >
                   {loadingOlder ? 'Loading…' : 'Load earlier messages'}
                 </button>
@@ -454,7 +454,7 @@ function UnifiedChatPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${msg.isMine ? 'rounded-br-md bg-[var(--mag-ink)] text-[var(--mag-bg)]' : 'rounded-bl-md border border-[var(--mag-line)] bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
+                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${msg.isMine ? 'rounded-br-md bg-[var(--mag-ink)] text-[var(--mag-bg)]' : 'rounded-bl-md bg-[var(--mag-surface)] text-[var(--mag-ink)]'}`}>
                     {msg.content}
                     <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${msg.isMine ? 'text-white/70' : 'text-[var(--mag-ink-muted)]'}`}>
                       <span suppressHydrationWarning>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -494,7 +494,7 @@ function UnifiedChatPage() {
             <button
               key={ice.id}
               onClick={() => setInput(ice.text)}
-              className="shrink-0 rounded-full border border-[var(--mag-line)] bg-[var(--mag-bg)] px-3 py-1.5 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+              className="shrink-0 rounded-full bg-[var(--mag-card)] shadow-sm px-3 py-1.5 text-xs font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
             >
               {ice.text}
             </button>
@@ -522,7 +522,7 @@ function UnifiedChatPage() {
           </>
         ) : previewUrl ? (
           <>
-            <div className="flex flex-1 items-center gap-2 rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2 text-sm">
+            <div className="flex flex-1 items-center gap-2 rounded-full bg-[var(--input-bg)] px-4 py-2 text-sm">
               <button
                 onClick={() => {
                   const audio = new Audio(previewUrl)
@@ -555,7 +555,7 @@ function UnifiedChatPage() {
             <input type="text" value={input} onChange={(e) => handleInputChange(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Type a message..."
               disabled={sending}
-              className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-2 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-line)] disabled:opacity-60" />
+              className="flex-1 rounded-full bg-[var(--input-bg)] px-4 py-2 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-line)] disabled:opacity-60" />
             {matchId && (
               <button
                 onClick={startRecording}
@@ -575,7 +575,7 @@ function UnifiedChatPage() {
       {/* Block Confirmation Dialog */}
       {blockDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-5">
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--mag-card)] shadow-sm p-5">
             <div className="mb-1 flex items-center gap-2 text-[var(--mag-sale)]">
               <Ban className="h-5 w-5" />
               <h3 className="text-sm font-semibold">Block {peerProfile?.name ?? 'User'}</h3>
@@ -586,7 +586,7 @@ function UnifiedChatPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setBlockDialogOpen(false)}
-                className="flex-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-bg)] px-6 py-3 font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+                className="flex-1 rounded-full bg-[var(--mag-card)] shadow-sm px-6 py-3 font-medium text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
               >
                 Cancel
               </button>

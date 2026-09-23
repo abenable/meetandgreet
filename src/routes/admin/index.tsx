@@ -119,7 +119,7 @@ function OverviewTab() {
     return (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4 space-y-2">
+          <div key={i} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 md:p-4 space-y-2">
             <Skeleton className="h-5 w-5 rounded-md" />
             <Skeleton className="h-8 w-16 rounded-lg" />
             <Skeleton className="h-3 w-20 rounded-lg" />
@@ -142,7 +142,7 @@ function OverviewTab() {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {cards.map((c) => (
-        <div key={c.label} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
+        <div key={c.label} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 md:p-4">
           <div className={`mb-2 ${c.color}`}>{c.icon}</div>
           <div className="text-2xl font-bold text-[var(--mag-ink)]">{c.value.toLocaleString()}</div>
           <div className="text-xs text-[var(--mag-ink-muted)]">{c.label}</div>
@@ -216,7 +216,7 @@ function UsersTab() {
           value={search}
           onChange={(e) => { setSearch(e.target.value); setCursor(undefined); setFilter('all') }}
           placeholder="Search by name or email..."
-          className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] py-2.5 pl-9 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-line)] focus:outline-none"
+          className="w-full rounded-full bg-[var(--input-bg)] py-2.5 pl-9 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-line)] focus:outline-none"
         />
       </div>
 
@@ -229,7 +229,7 @@ function UsersTab() {
             className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${
               filter === f.key
                 ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
+                : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)]'
             }`}
           >
             {f.label}
@@ -239,7 +239,7 @@ function UsersTab() {
 
       {/* List */}
       {isLoading ? (
-        <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+        <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl bg-[var(--mag-card)] shadow-sm overflow-hidden">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex items-center gap-3 px-3 py-2.5">
               <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
@@ -256,7 +256,7 @@ function UsersTab() {
           {search ? 'No users match your search.' : 'No users found.'}
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+        <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl bg-[var(--mag-card)] shadow-sm overflow-hidden">
           {filteredItems.map((user: any) => (
             <div key={user.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
               {/* Avatar — always wrapped in fixed-size rounded container */}
@@ -268,7 +268,7 @@ function UsersTab() {
                 <div className="flex items-center gap-1.5">
                   <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{user.name || user.email}</span>
                   {user.role === 'admin' && (
-                    <span className="shrink-0 rounded bg-[var(--mag-surface)] border border-[var(--mag-line)] px-1 py-px text-[9px] font-bold uppercase tracking-wide text-[var(--mag-ink)]">
+                    <span className="shrink-0 rounded bg-[var(--mag-surface)] px-1 py-px text-[9px] font-bold uppercase tracking-wide text-[var(--mag-ink)]">
                       admin
                     </span>
                   )}
@@ -365,7 +365,7 @@ function EventsTab() {
       {isLoading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
+            <div key={i} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 md:p-4">
               <div className="flex items-start gap-3">
                 <Skeleton className="h-12 w-12 shrink-0 rounded-xl" />
                 <div className="min-w-0 flex-1 space-y-2">
@@ -384,7 +384,7 @@ function EventsTab() {
         <>
           <div className="space-y-2">
             {data?.items.map((event: any) => (
-              <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
+              <div key={event.id} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 md:p-4">
                 <div className="flex items-start gap-3">
                   {event.photo ? (
                     <img src={event.photo} alt={event.name} className="h-12 w-12 shrink-0 rounded-xl object-cover" />
@@ -423,7 +423,7 @@ function EventsTab() {
                         deleteMutation.mutate({ data: event.id })
                       }
                     }}
-                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[var(--mag-line)] bg-[var(--mag-bg)] py-1.5 text-[10px] font-medium text-[var(--mag-sale)] transition hover:bg-[var(--mag-surface)]"
+                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-card)] shadow-sm py-1.5 text-[10px] font-medium text-[var(--mag-sale)] transition hover:bg-[var(--mag-surface)]"
                     disabled={deleteMutation.isPending}
                   >
                     <Trash2 className="h-3 w-3" /> Delete
@@ -481,7 +481,7 @@ function ReportsTab() {
       {isLoading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4 space-y-2">
+            <div key={i} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 md:p-4 space-y-2">
               <div className="flex items-center gap-2">
                 <Skeleton className="h-4 w-4 rounded-md" />
                 <Skeleton className="h-3 w-24 rounded-lg" />
@@ -498,7 +498,7 @@ function ReportsTab() {
         <>
           <div className="space-y-2">
             {data?.items.map((report: any) => (
-              <div key={report.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
+              <div key={report.id} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 md:p-4">
                 <div className="mb-2 flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-[var(--mag-sale)]" />
                   <span className="text-xs font-medium text-[var(--mag-ink-soft)]">{new Date(report.createdAt).toLocaleString()}</span>
@@ -618,7 +618,7 @@ function ModerationTab() {
           Flagged Users ({flaggedUsers?.length ?? 0})
         </h2>
         {flaggedLoading ? (
-          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl bg-[var(--mag-card)] shadow-sm overflow-hidden">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center gap-3 px-3 py-2.5">
                 <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
@@ -633,7 +633,7 @@ function ModerationTab() {
         ) : !flaggedUsers || flaggedUsers.length === 0 ? (
           <div className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No flagged users</div>
         ) : (
-          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl bg-[var(--mag-card)] shadow-sm overflow-hidden">
             {flaggedUsers.map((user: any) => (
               <div key={user.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
                 <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-[var(--mag-surface)]">
@@ -694,7 +694,7 @@ function ModerationTab() {
           Pending Reports
         </h2>
         {reportsLoading ? (
-          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl bg-[var(--mag-card)] shadow-sm overflow-hidden">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center gap-3 px-3 py-2.5">
                 <div className="min-w-0 flex-1 space-y-1.5">
@@ -708,13 +708,13 @@ function ModerationTab() {
         ) : !pendingReports?.items || pendingReports.items.length === 0 ? (
           <div className="py-6 text-center text-sm text-[var(--mag-ink-muted)]">No pending reports</div>
         ) : (
-          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] overflow-hidden">
+          <div className="flex flex-col divide-y divide-[var(--mag-line)] rounded-2xl bg-[var(--mag-card)] shadow-sm overflow-hidden">
             {pendingReports.items.map((report: any) => (
               <div key={report.id} className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--mag-surface)]">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate text-sm font-semibold text-[var(--mag-ink)]">{report.reason}</span>
-                    <span className="shrink-0 rounded bg-[var(--mag-surface)] border border-[var(--mag-line)] px-1 py-px text-[9px] font-bold uppercase tracking-wide text-[var(--mag-ink)]">
+                    <span className="shrink-0 rounded bg-[var(--mag-surface)] px-1 py-px text-[9px] font-bold uppercase tracking-wide text-[var(--mag-ink)]">
                       pending
                     </span>
                   </div>
@@ -765,7 +765,7 @@ function SponsorsTab() {
       {isLoading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
+            <div key={i} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 md:p-4">
               <div className="flex items-start gap-3">
                 <Skeleton className="h-12 w-12 shrink-0 rounded-xl" />
                 <div className="min-w-0 flex-1 space-y-2">
@@ -781,7 +781,7 @@ function SponsorsTab() {
         <>
           <div className="space-y-2">
             {events?.map((event: any) => (
-              <div key={event.id} className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
+              <div key={event.id} className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 md:p-4">
                 <div className="flex items-start gap-3">
                   {event.photo ? (
                     <img src={event.photo} alt={event.name} className="h-12 w-12 shrink-0 rounded-xl object-cover" />

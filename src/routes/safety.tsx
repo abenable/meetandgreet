@@ -59,7 +59,7 @@ function SafetyPage() {
             desc: 'Review our guidelines to understand what behavior is expected on Meet & Greet.',
           },
         ].map((item) => (
-          <div key={item.title} className="flex gap-3 rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3 md:p-4">
+          <div key={item.title} className="flex gap-3 rounded-2xl bg-[var(--mag-card)] shadow-sm p-3 md:p-4">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[var(--mag-surface)] text-[var(--mag-ink)]">
               <item.icon className="h-5 w-5" />
             </div>

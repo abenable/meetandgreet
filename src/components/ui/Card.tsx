@@ -4,7 +4,7 @@ import { cn } from '#/lib/cn'
 export type CardVariant = 'plain' | 'soft' | 'inverse' | 'dashed'
 
 const VARIANTS: Record<CardVariant, string> = {
-  plain: 'bg-canvas-raised border border-hairline-soft',
+  plain: 'bg-canvas-raised shadow-sm',
   soft: 'bg-canvas-soft',
   inverse: 'bg-ink text-on-ink',
   dashed: 'bg-canvas-raised border border-dashed border-hairline',

@@ -244,7 +244,7 @@ function OnboardingPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your name"
-                    className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
+                    className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
                   />
                 </div>
               </div>
@@ -259,7 +259,7 @@ function OnboardingPage() {
                       className={`rounded-full px-4 py-2 text-xs font-medium transition ${
                         gender === g
                           ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                          : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)] hover:bg-[var(--mag-surface)]'
+                          : 'bg-[var(--mag-card)] shadow-sm text-[var(--mag-ink)] hover:bg-[var(--mag-surface)]'
                       }`}
                     >
                       {g}
@@ -284,7 +284,7 @@ function OnboardingPage() {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="City, Country"
-                className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
+                className="w-full rounded-full bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
               />
             </div>
           </div>
@@ -303,7 +303,7 @@ function OnboardingPage() {
                 onChange={(e) => setBio(e.target.value.slice(0, MAX_BIO))}
                 placeholder="Hi! I'm into..."
                 rows={6}
-                className="w-full resize-none rounded-card border border-[var(--mag-line)] bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
+                className="w-full resize-none rounded-card bg-[var(--input-bg)] py-3 pl-10 pr-4 text-sm text-[var(--mag-ink)] placeholder:text-[var(--mag-ink-muted)] focus:border-[var(--mag-ink)] focus:outline-none"
               />
             </div>
             <p className={`mt-1.5 text-right text-xs ${bio.trim().length === MAX_BIO ? 'text-red-600 dark:text-red-400' : 'text-[var(--mag-ink-muted)]'}`}>
@@ -322,7 +322,7 @@ function OnboardingPage() {
           {step > 1 && (
             <button
               onClick={() => goTo((step - 1) as 1 | 2 | 3 | 4)}
-              className="rounded-full border border-[var(--mag-line)] bg-[var(--mag-card)] px-8 py-3 text-sm font-semibold text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
+              className="rounded-full bg-[var(--mag-card)] shadow-sm px-8 py-3 text-sm font-semibold text-[var(--mag-ink)] transition hover:bg-[var(--mag-surface)]"
             >
               Back
             </button>

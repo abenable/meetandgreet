@@ -85,7 +85,7 @@ export function Sheet({
         aria-label={typeof title === 'string' ? title : undefined}
         tabIndex={-1}
         className={cn(
-          'sheet-in relative w-full max-h-[88dvh] overflow-y-auto bg-canvas-raised outline-none',
+          'sheet-in relative w-full max-h-[88dvh] overflow-y-auto bg-canvas-raised shadow-lg outline-none',
           'rounded-t-card pb-safe px-5 pt-3 pb-6',
           'sm:mx-4 sm:max-w-sm sm:rounded-card sm:px-6 sm:pt-6',
           className,

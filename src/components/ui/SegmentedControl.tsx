@@ -41,7 +41,7 @@ export function SegmentedControl<T extends string>({
             className={cn(
               'flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-body-sm font-semibold transition',
               active
-                ? 'bg-canvas-raised text-ink ring-1 ring-hairline'
+                ? 'bg-canvas-raised text-ink shadow-sm'
                 : 'text-ink-muted hover:text-ink',
             )}
           >

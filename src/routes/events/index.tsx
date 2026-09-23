@@ -34,7 +34,7 @@ function EventsExplorePage() {
 
   const isLoading = eventsLoading || activeEventLoading || sessionLoading
 
-  const [confirmModal, setConfirmModal] = useState<{ open: boolean; eventName: string; code: string; currentEventName: string } | null>(null)
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; eventName: string; target: { code?: string; eventId?: string }; currentEventName: string } | null>(null)
   const [joinCodeModal, setJoinCodeModal] = useState<{ open: boolean; eventName: string } | null>(null)
   const [enteredCode, setEnteredCode] = useState('')
   const [joinError, setJoinError] = useState('')
@@ -51,10 +51,13 @@ function EventsExplorePage() {
     queryClient.invalidateQueries({ queryKey: ['my-waitlisted-events'] })
   }
 
-  const handleJoin = async (code: string, force = false) => {
+  const handleJoin = async (
+    target: { code?: string; eventId?: string },
+    force = false,
+  ) => {
     setJoinError('')
     setJoinSuccess('')
-    const result = await joinEvent({ data: { code, force } })
+    const result = await joinEvent({ data: { ...target, force } })
     if (!result) {
       setJoinError('The server did not respond. Reload the page and try again.')
       return
@@ -78,7 +81,7 @@ function EventsExplorePage() {
       setConfirmModal({
         open: true,
         eventName: (result as any).eventName,
-        code,
+        target,
         currentEventName: (result as any).currentEvent.name,
       })
     } else {
@@ -88,7 +91,7 @@ function EventsExplorePage() {
 
   const confirmJoin = async () => {
     if (!confirmModal) return
-    await handleJoin(confirmModal.code, true)
+    await handleJoin(confirmModal.target, true)
   }
 
   const now = Date.now()
@@ -303,7 +306,7 @@ function EventsExplorePage() {
                   <div className="mt-3 flex gap-2">
                     {!isJoined && (
                       <button
-                        onClick={() => { setEnteredCode(''); setJoinError(''); setJoinCodeModal({ open: true, eventName: event.name }) }}
+                        onClick={() => handleJoin({ eventId: event.id })}
                         className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80"
                       >
                         <LogIn className="h-3 w-3" /> Join
@@ -359,7 +362,7 @@ function EventsExplorePage() {
                   </div>
                   <div className="mt-3 flex gap-2">
                     <button
-                      onClick={() => { setEnteredCode(''); setJoinError(''); setJoinSuccess(''); setJoinCodeModal({ open: true, eventName: event.name }) }}
+                      onClick={() => handleJoin({ eventId: event.id })}
                       className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[var(--mag-ink)] px-4 py-2 text-sm font-bold text-[var(--on-ink)] transition hover:opacity-80"
                     >
                       <ListOrdered className="h-3 w-3" /> Join Waitlist
@@ -468,7 +471,7 @@ function EventsExplorePage() {
                     onClick={() => {
                       const code = enteredCode.trim()
                       if (!code) return
-                      handleJoin(code)
+                      handleJoin({ code })
                     }}
                     disabled={!enteredCode.trim()}
                     className="flex-1 rounded-full bg-[var(--mag-ink)] py-2.5 text-base font-bold text-[var(--on-ink)] transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"

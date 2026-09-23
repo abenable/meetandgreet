@@ -153,6 +153,10 @@ export const listEvents = createServerFn({ method: 'GET' })
         createdAt: true,
         startsAt: true,
         maxAttendees: true,
+        isActive: true,
+        isPublic: true,
+        endedAt: true,
+        createdById: true,
         sponsorName: true,
         sponsorLogo: true,
         sponsorFrameUrl: true,
@@ -453,20 +457,32 @@ export const createEvent = createServerFn({ method: 'POST' })
   })
 
 export const joinEvent = createServerFn({ method: 'POST' })
-  .inputValidator(z.object({
-    code: z.string(),
-    force: z.boolean().optional(),
-  }))
+  .inputValidator(
+    z
+      .object({
+        code: z.string().optional(),
+        eventId: z.string().optional(),
+        force: z.boolean().optional(),
+      })
+      .refine((v) => !!v.code || !!v.eventId, {
+        message: 'An event code or id is required',
+      }),
+  )
   .handler(async ({ data }) => {
     const session = await requireSession()
     const now = new Date()
 
-    const event = await prisma.event.findUnique({
-      where: { code: data.code.toUpperCase() },
-      include: {
-        _count: { select: { attendees: { where: { leftAt: null } } } },
-      },
-    })
+    // A code joins anything. An id joins public events only, so an unlisted
+    // event still requires the code even if its id leaks.
+    const event = data.code
+      ? await prisma.event.findUnique({
+          where: { code: data.code.toUpperCase() },
+          include: { _count: { select: { attendees: { where: { leftAt: null } } } } },
+        })
+      : await prisma.event.findFirst({
+          where: { id: data.eventId, isPublic: true },
+          include: { _count: { select: { attendees: { where: { leftAt: null } } } } },
+        })
 
     if (!event) {
       return { success: false, message: 'Event not found' }

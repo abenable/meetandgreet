@@ -345,6 +345,20 @@ async function maybePromoteWaitlist(eventId: string) {
   }
 }
 
+function describeServerFailure(scope: string, err: unknown): string {
+  console.error(`[${scope}] failed:`, err)
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === 'P2022' || err.code === 'P2021') {
+      return 'The server is running against an out-of-date database. Migrations need to be applied.'
+    }
+    return `Something went wrong (${err.code}). Please try again.`
+  }
+  if (err instanceof Prisma.PrismaClientInitializationError) {
+    return 'The server could not reach the database. Please try again shortly.'
+  }
+  return err instanceof Error && err.message ? err.message : 'Something went wrong. Please try again.'
+}
+
 export const createEvent = createServerFn({ method: 'POST' })
   .inputValidator(z.object({
     name: z.string().min(1).max(100),
@@ -374,64 +388,68 @@ export const createEvent = createServerFn({ method: 'POST' })
       }
     }
 
-    const photoIsBase64 = data.photo && data.photo.startsWith('data:image')
-    if (photoIsBase64 && data.photo!.length > MAX_BASE64_LENGTH) {
-      return { success: false as const, message: 'Event photo is too large.' }
-    }
-
-    const event = await prisma.$transaction(async (tx) => {
-      await leaveAllActiveEvents(session.user.id, tx)
-
-      const event = await createEventWithUniqueCode(tx, {
-        name: sanitizeText(data.name),
-        photo: photoIsBase64 ? null : data.photo ?? null,
-        description: data.description ? sanitizeText(data.description) : undefined,
-        location: data.location ? sanitizeText(data.location) : undefined,
-        maxAttendees: data.maxAttendees,
-        startsAt: data.startsAt ? new Date(data.startsAt) : null,
-        createdById: session.user.id,
-        isPublic: data.isPublic ?? true,
-        sponsorName: data.sponsorName ? sanitizeText(data.sponsorName) : undefined,
-        sponsorLogo: data.sponsorLogo,
-        sponsorFrameUrl: data.sponsorFrameUrl,
-      })
-      await tx.eventAttendee.create({
-        data: { eventId: event.id, userId: session.user.id },
-      })
-      return event
-    })
-
-    // Upload base64 photo to R2 after event is created so we know the eventId
-    if (photoIsBase64) {
-      try {
-        const key = `events/${event.id}/photo-${crypto.randomUUID()}.jpg`
-        const base64Data = data.photo!.split(',')[1]
-        if (base64Data) {
-          const buffer = Buffer.from(base64Data, 'base64')
-          await r2Client.send(
-            new PutObjectCommand({
-              Bucket: R2_BUCKET_NAME,
-              Key: key,
-              Body: buffer,
-              ContentType: 'image/jpeg',
-            })
-          )
-          const publicUrl = `${R2_PUBLIC_URL}/${key}`
-          await prisma.event.update({
-            where: { id: event.id },
-            data: { photo: publicUrl },
-          })
-          event.photo = publicUrl
-        }
-      } catch (err: any) {
-        console.error('[Create Event] R2 photo upload failed:', err)
+    try {
+      const photoIsBase64 = data.photo && data.photo.startsWith('data:image')
+      if (photoIsBase64 && data.photo!.length > MAX_BASE64_LENGTH) {
+        return { success: false as const, message: 'Event photo is too large.' }
       }
+
+      const event = await prisma.$transaction(async (tx) => {
+        await leaveAllActiveEvents(session.user.id, tx)
+
+        const event = await createEventWithUniqueCode(tx, {
+          name: sanitizeText(data.name),
+          photo: photoIsBase64 ? null : data.photo ?? null,
+          description: data.description ? sanitizeText(data.description) : undefined,
+          location: data.location ? sanitizeText(data.location) : undefined,
+          maxAttendees: data.maxAttendees,
+          startsAt: data.startsAt ? new Date(data.startsAt) : null,
+          createdById: session.user.id,
+          isPublic: data.isPublic ?? true,
+          sponsorName: data.sponsorName ? sanitizeText(data.sponsorName) : undefined,
+          sponsorLogo: data.sponsorLogo,
+          sponsorFrameUrl: data.sponsorFrameUrl,
+        })
+        await tx.eventAttendee.create({
+          data: { eventId: event.id, userId: session.user.id },
+        })
+        return event
+      })
+
+      // Upload base64 photo to R2 after event is created so we know the eventId
+      if (photoIsBase64) {
+        try {
+          const key = `events/${event.id}/photo-${crypto.randomUUID()}.jpg`
+          const base64Data = data.photo!.split(',')[1]
+          if (base64Data) {
+            const buffer = Buffer.from(base64Data, 'base64')
+            await r2Client.send(
+              new PutObjectCommand({
+                Bucket: R2_BUCKET_NAME,
+                Key: key,
+                Body: buffer,
+                ContentType: 'image/jpeg',
+              })
+            )
+            const publicUrl = `${R2_PUBLIC_URL}/${key}`
+            await prisma.event.update({
+              where: { id: event.id },
+              data: { photo: publicUrl },
+            })
+            event.photo = publicUrl
+          }
+        } catch (err: any) {
+          console.error('[Create Event] R2 photo upload failed:', err)
+        }
+      }
+
+      // Award event_host badge
+      await awardBadgeIfNotExists(session.user.id, 'event_host')
+
+      return { success: true as const, event }
+    } catch (err) {
+      return { success: false as const, message: describeServerFailure('createEvent', err) }
     }
-
-    // Award event_host badge
-    await awardBadgeIfNotExists(session.user.id, 'event_host')
-
-    return { success: true as const, event }
   })
 
 export const joinEvent = createServerFn({ method: 'POST' })

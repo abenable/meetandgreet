@@ -1,22 +1,24 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeft, Users, SlidersHorizontal, Globe, Calendar, Check } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Skeleton } from '@heroui/react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Calendar, Check, Globe } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
 import { getMyActiveEvent } from '#/server/events'
+import { PageHeader } from '#/components/PageHeader'
+import { Button, buttonClasses, Card, Skeleton, useToast } from '#/components/ui'
+import { cn } from '#/lib/cn'
 
 export const Route = createFileRoute('/settings/discovery')({ component: DiscoverySettingsPage })
 
 const SHOW_ME_OPTIONS = ['Women', 'Men', 'Everyone'] as const
 
 function DiscoverySettingsPage() {
-  const queryClient = useQueryClient()
+  const qc = useQueryClient()
+  const { toast } = useToast()
   const [ageMin, setAgeMin] = useState(18)
   const [ageMax, setAgeMax] = useState(99)
-  const [savedJustNow, setSavedJustNow] = useState(false)
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading } = useQuery({
     queryKey: ['my-profile'],
     queryFn: () => getMyProfile(),
   })
@@ -31,155 +33,187 @@ function DiscoverySettingsPage() {
     setAgeMax(profile.prefAgeMax)
   }, [profile])
 
+  const save = useMutation({
+    mutationFn: updateProfile,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-profile'] })
+      qc.invalidateQueries({ queryKey: ['swipe-deck'] })
+    },
+    onError: () => toast('Could not save that. Try again.', { tone: 'error' }),
+  })
+
   const discoveryMode = profile?.discoveryMode ?? 'global'
   const showMe = profile?.prefShowMe ?? 'Everyone'
 
-  const invalidateAfterSave = () => {
-    queryClient.invalidateQueries({ queryKey: ['my-profile'] })
-    queryClient.invalidateQueries({ queryKey: ['swipe-deck'] })
-    setSavedJustNow(true)
-    setTimeout(() => setSavedJustNow(false), 1500)
-  }
-
-  const setModeMutation = useMutation({
-    mutationFn: (mode: 'global' | 'event') => updateProfile({ data: { discoveryMode: mode } }),
-    onSuccess: invalidateAfterSave,
-  })
-
-  const setShowMeMutation = useMutation({
-    mutationFn: (value: (typeof SHOW_ME_OPTIONS)[number]) => updateProfile({ data: { prefShowMe: value } }),
-    onSuccess: invalidateAfterSave,
-  })
-
-  const setAgeRangeMutation = useMutation({
-    mutationFn: (range: { prefAgeMin: number; prefAgeMax: number }) => updateProfile({ data: range }),
-    onSuccess: invalidateAfterSave,
-  })
-
-  const commitAgeRange = () => {
-    setAgeRangeMutation.mutate({ prefAgeMin: ageMin, prefAgeMax: ageMax })
-  }
+  const commitAges = (min: number, max: number) =>
+    save.mutate({ data: { prefAgeMin: min, prefAgeMax: max } })
 
   return (
-    <main className="page-wrap px-4 py-4">
-      <div className="mb-4 flex items-center gap-2">
-        <Link to="/settings" className="rounded-full p-2 text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)] no-underline">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="text-lg font-bold text-[var(--mag-ink)]">Discovery Settings</h1>
-      </div>
+    <main className="page-wrap py-5 pb-28">
+      <PageHeader title="Discovery" back="/settings" />
 
-      <div className="mx-auto max-w-md space-y-5">
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
-          <h2 className="mb-3 text-sm font-semibold text-[var(--mag-ink)]">Discovery Pool</h2>
-          {profileLoading ? (
-            <Skeleton className="h-16 w-full rounded-xl" />
-          ) : (
-            <div className="space-y-2">
-              <button
-                onClick={() => setModeMutation.mutate('global')}
-                disabled={setModeMutation.isPending}
-                className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition disabled:opacity-60 ${
-                  discoveryMode === 'global'
-                    ? 'border-[var(--mag-ink)] bg-[var(--mag-surface)]'
-                    : 'border-[var(--mag-line)]'
-                }`}
-              >
-                <Globe className="mt-0.5 h-4 w-4 shrink-0 text-[var(--mag-ink-soft)]" />
-                <div>
-                  <p className="text-sm font-medium text-[var(--mag-ink)]">Global</p>
-                  <p className="text-xs text-[var(--mag-ink-muted)]">
-                    Be discoverable to everyone on the app, no event check-in required. Default.
-                  </p>
-                </div>
-              </button>
-              <button
-                onClick={() => setModeMutation.mutate('event')}
-                disabled={setModeMutation.isPending}
-                className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition disabled:opacity-60 ${
-                  discoveryMode === 'event'
-                    ? 'border-[var(--mag-ink)] bg-[var(--mag-surface)]'
-                    : 'border-[var(--mag-line)]'
-                }`}
-              >
-                <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-[var(--mag-ink-soft)]" />
-                <div>
-                  <p className="text-sm font-medium text-[var(--mag-ink)]">This Event</p>
-                  <p className="text-xs text-[var(--mag-ink-muted)]">
-                    {activeEvent
-                      ? `Only discoverable by attendees of ${activeEvent.name}. You won't appear in the global pool.`
-                      : "Only discoverable within an event you've checked into. You won't appear in the global pool. Join an event to use this."}
-                  </p>
-                </div>
-              </button>
-            </div>
-          )}
+      <section className="mb-7">
+        <h2 className="mb-2 text-label text-ink-faint">Who can find you</h2>
+        {isLoading ? (
+          <Skeleton className="h-40 w-full rounded-card" />
+        ) : (
+          <div className="space-y-2">
+            <ModeOption
+              icon={<Globe />}
+              title="Everyone"
+              description="You appear in the global pool. No event check-in needed."
+              selected={discoveryMode === 'global'}
+              disabled={save.isPending}
+              onSelect={() => save.mutate({ data: { discoveryMode: 'global' } })}
+            />
+            <ModeOption
+              icon={<Calendar />}
+              title="Only at events"
+              description={
+                activeEvent
+                  ? `Only attendees of ${activeEvent.name} can find you. You leave the global pool.`
+                  : 'Only attendees of an event you have checked into can find you. You leave the global pool.'
+              }
+              selected={discoveryMode === 'event'}
+              disabled={save.isPending}
+              onSelect={() => save.mutate({ data: { discoveryMode: 'event' } })}
+            />
+            {discoveryMode === 'event' && !activeEvent && (
+              <Card variant="soft" className="flex items-center justify-between gap-3">
+                <p className="text-body-sm text-ink-muted">
+                  You are not checked into an event, so nobody can find you right now.
+                </p>
+                <Link to="/events" className={buttonClasses({ size: 'sm', className: 'shrink-0' })}>
+                  Browse
+                </Link>
+              </Card>
+            )}
+          </div>
+        )}
+      </section>
+
+      <section className="mb-7">
+        <h2 className="mb-2 text-label text-ink-faint">Show me</h2>
+        <div className="flex flex-wrap gap-2">
+          {SHOW_ME_OPTIONS.map((option) => (
+            <Button
+              key={option}
+              size="sm"
+              variant={showMe === option ? 'primary' : 'outline'}
+              disabled={save.isPending}
+              onClick={() => save.mutate({ data: { prefShowMe: option } })}
+            >
+              {option}
+            </Button>
+          ))}
         </div>
+      </section>
 
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
-          <div className="mb-3 flex items-center gap-2">
-            <Users className="h-4 w-4 text-[var(--mag-ink-soft)]" />
-            <h2 className="text-sm font-semibold text-[var(--mag-ink)]">Age Range</h2>
-            <span className="ml-auto text-sm font-medium text-[var(--mag-ink)]">{ageMin} - {ageMax}</span>
-          </div>
-          <div className="flex gap-4">
-            <input
-              type="range"
-              min={18}
-              max={99}
-              value={ageMin}
-              onChange={(e) => setAgeMin(Math.min(Number(e.target.value), ageMax))}
-              onMouseUp={commitAgeRange}
-              onTouchEnd={commitAgeRange}
-              onKeyUp={commitAgeRange}
-              className="w-full accent-[#111111]"
-            />
-            <input
-              type="range"
-              min={18}
-              max={99}
-              value={ageMax}
-              onChange={(e) => setAgeMax(Math.max(Number(e.target.value), ageMin))}
-              onMouseUp={commitAgeRange}
-              onTouchEnd={commitAgeRange}
-              onKeyUp={commitAgeRange}
-              className="w-full accent-[#111111]"
-            />
-          </div>
-          <p className="mt-2 text-[10px] text-[var(--mag-ink-muted)]">
-            People outside this range won't show up in your deck. Profiles without a birthday are always shown.
+      <section>
+        <h2 className="mb-2 text-label text-ink-faint">Age range</h2>
+        <Card>
+          <AgeSlider
+            label="Youngest"
+            value={ageMin}
+            min={18}
+            max={ageMax}
+            onChange={setAgeMin}
+            onCommit={() => commitAges(ageMin, ageMax)}
+          />
+          <AgeSlider
+            label="Oldest"
+            value={ageMax}
+            min={ageMin}
+            max={99}
+            onChange={setAgeMax}
+            onCommit={() => commitAges(ageMin, ageMax)}
+            className="mt-5"
+          />
+          <p className="mt-4 text-body-sm text-ink-faint">
+            Showing people aged {ageMin} to {ageMax}. Profiles without a birthday are always
+            shown.
           </p>
-        </div>
-
-        <div className="rounded-2xl border border-[var(--mag-line)] bg-[var(--mag-card)] p-3">
-          <div className="mb-3 flex items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4 text-[var(--mag-ink-soft)]" />
-            <h2 className="text-sm font-semibold text-[var(--mag-ink)]">Show Me</h2>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {SHOW_ME_OPTIONS.map((option) => (
-              <button
-                key={option}
-                onClick={() => setShowMeMutation.mutate(option)}
-                disabled={setShowMeMutation.isPending}
-                className={`rounded-full px-4 py-2 text-xs font-medium transition disabled:opacity-60 ${
-                  showMe === option
-                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                    : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)]'
-                }`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {savedJustNow && (
-          <p className="flex items-center justify-center gap-1.5 text-xs font-medium text-[var(--mag-success)]">
-            <Check className="h-3.5 w-3.5" /> Saved
+        </Card>
+        {save.isSuccess && !save.isPending && (
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-body-sm text-success">
+            <Check className="h-4 w-4" /> Saved
           </p>
         )}
-      </div>
+      </section>
     </main>
+  )
+}
+
+function ModeOption({
+  icon,
+  title,
+  description,
+  selected,
+  disabled,
+  onSelect,
+}: {
+  icon: React.ReactNode
+  title: string
+  description: string
+  selected: boolean
+  disabled?: boolean
+  onSelect: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={disabled}
+      aria-pressed={selected}
+      className={cn(
+        'flex w-full items-start gap-3 rounded-card border p-4 text-left transition disabled:opacity-60',
+        selected ? 'border-ink bg-canvas-soft' : 'border-hairline hover:bg-canvas-soft',
+      )}
+    >
+      <span className="mt-0.5 shrink-0 text-ink-muted [&>svg]:h-5 [&>svg]:w-5">{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-title text-ink">{title}</span>
+        <span className="mt-0.5 block text-body-sm text-ink-muted">{description}</span>
+      </span>
+      {selected && <Check className="mt-0.5 h-5 w-5 shrink-0 text-ink" />}
+    </button>
+  )
+}
+
+function AgeSlider({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+  onCommit,
+  className,
+}: {
+  label: string
+  value: number
+  min: number
+  max: number
+  onChange: (next: number) => void
+  onCommit: () => void
+  className?: string
+}) {
+  return (
+    <div className={className}>
+      <div className="mb-2 flex items-baseline justify-between">
+        <label className="text-body-sm font-semibold text-ink-soft">{label}</label>
+        <span className="text-body text-ink tabular-nums">{value}</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        onPointerUp={onCommit}
+        onKeyUp={onCommit}
+        aria-label={`${label} age`}
+        className="w-full accent-ink"
+      />
+    </div>
   )
 }

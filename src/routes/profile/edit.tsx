@@ -1,117 +1,305 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Camera, Heart, Users, Briefcase } from 'lucide-react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Briefcase, Heart, ImagePlus, Users, X } from 'lucide-react'
 import { getMyProfile, updateProfile } from '#/server/profiles'
+import { PageHeader } from '#/components/PageHeader'
+import {
+  Avatar,
+  Button,
+  buttonClasses,
+  Field,
+  Input,
+  Skeleton,
+  Textarea,
+  useToast,
+} from '#/components/ui'
+import { cn } from '#/lib/cn'
 
 export const Route = createFileRoute('/profile/edit')({ component: EditProfilePage })
+
+const MAX_BIO = 500
+const MAX_INTERESTS = 20
+
+const GENDERS = ['Woman', 'Man', 'Non-binary', 'Prefer not to say']
+
+const INTENTS = [
+  { value: 'dating' as const, label: 'Dating', icon: Heart },
+  { value: 'friends' as const, label: 'Friends', icon: Users },
+  { value: 'networking' as const, label: 'Networking', icon: Briefcase },
+]
+
+type Intent = (typeof INTENTS)[number]['value']
 
 function EditProfilePage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
-  const { data: profile } = useQuery({ queryKey: ['my-profile'], queryFn: () => getMyProfile() })
+  const { toast } = useToast()
 
-  const [bio, setBio] = useState(profile?.bio || '')
-  const [job, setJob] = useState(profile?.job || '')
-  const [location, setLocation] = useState(profile?.location || '')
-  const [gender, setGender] = useState(profile?.gender || '')
-  const [interests, setInterests] = useState((profile?.interests || []).join(', '))
-  type IntentOption = 'dating' | 'friends' | 'networking'
-  const [lookingFor, setLookingFor] = useState<IntentOption[]>((profile?.lookingFor as IntentOption[]) || [])
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: () => getMyProfile(),
+  })
 
-  const toggleLookingFor = (value: IntentOption) => {
+  const [name, setName] = useState('')
+  const [bio, setBio] = useState('')
+  const [job, setJob] = useState('')
+  const [location, setLocation] = useState('')
+  const [gender, setGender] = useState('')
+  const [birthDate, setBirthDate] = useState('')
+  const [interests, setInterests] = useState<string[]>([])
+  const [interestDraft, setInterestDraft] = useState('')
+  const [lookingFor, setLookingFor] = useState<Intent[]>([])
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    if (!profile || hydrated) return
+    setName(profile.name ?? '')
+    setBio(profile.bio ?? '')
+    setJob(profile.job ?? '')
+    setLocation(profile.location ?? '')
+    setGender(profile.gender ?? '')
+    setBirthDate(profile.birthDate ?? '')
+    setInterests(profile.interests ?? [])
+    setLookingFor((profile.lookingFor ?? []) as Intent[])
+    setHydrated(true)
+  }, [profile, hydrated])
+
+  const save = useMutation({
+    mutationFn: updateProfile,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-profile'] })
+      qc.invalidateQueries({ queryKey: ['swipe-deck'] })
+      toast('Profile saved', { tone: 'success' })
+      navigate({ to: '/profile' })
+    },
+    onError: (e: Error) => toast(e.message || 'Could not save your profile.', { tone: 'error' }),
+  })
+
+  const addInterest = () => {
+    const value = interestDraft.trim().replace(/,$/, '')
+    if (!value || interests.length >= MAX_INTERESTS) return
+    if (interests.some((i) => i.toLowerCase() === value.toLowerCase())) {
+      setInterestDraft('')
+      return
+    }
+    setInterests((prev) => [...prev, value.slice(0, 50)])
+    setInterestDraft('')
+  }
+
+  const toggleIntent = (value: Intent) =>
     setLookingFor((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
+    )
+
+  if (isLoading || !hydrated) {
+    return (
+      <main className="page-wrap py-5 pb-28">
+        <PageHeader title="Edit profile" back="/profile" />
+        <div className="space-y-5">
+          <Skeleton className="h-28 w-full rounded-card" />
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-card" />
+          ))}
+        </div>
+      </main>
     )
   }
 
-  const handleSave = async () => {
-    await updateProfile({
-      data: {
-        bio,
-        job,
-        location,
-        gender,
-        interests: interests.split(',').map((i) => i.trim()).filter(Boolean),
-        lookingFor,
-      },
-    })
-    qc.invalidateQueries({ queryKey: ['my-profile'] })
-    navigate({ to: '/profile' })
-  }
-
   return (
-    <main className="page-wrap px-4 py-4">
-      <div className="mb-5 flex items-center gap-2">
-        <button onClick={() => navigate({ to: '/profile' })} className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <h1 className="text-lg font-bold text-[var(--mag-ink)]">Edit Profile</h1>
-      </div>
+    <main className="page-wrap py-5 pb-28">
+      <PageHeader title="Edit profile" back="/profile" />
 
-      <div className="mb-6 flex gap-2 overflow-x-auto hide-scrollbar">
-        {(profile?.photos || []).map((photo, i) => (
-          <div key={i} className="relative min-w-[120px] flex-shrink-0 overflow-hidden rounded-2xl">
-            <img src={photo} alt="" className="aspect-[3/4] w-full object-cover" />
-            <button className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/60">
-              <Camera className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        ))}
-      </div>
+      <section className="mb-7">
+        <div className="mb-2 flex items-baseline justify-between">
+          <h2 className="text-label text-ink-faint">Photos</h2>
+          <span className="text-body-sm text-ink-faint">{(profile?.photos ?? []).length}/6</span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+          {(profile?.photos ?? []).map((photo, i) => (
+            <Avatar key={`${photo}-${i}`} src={photo} size="xl" square className="shrink-0" />
+          ))}
+          <Link
+            to="/profile/media"
+            aria-label="Manage photos"
+            className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-media border border-dashed border-hairline text-ink-faint no-underline transition hover:border-ink hover:text-ink"
+          >
+            <ImagePlus className="h-5 w-5" />
+            <span className="text-caption">Manage</span>
+          </Link>
+        </div>
+      </section>
 
-      <div className="mx-auto max-w-md space-y-4">
+      <div className="space-y-5">
+        <Field label="Name">
+          {({ id }) => (
+            <Input
+              id={id}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
+              maxLength={100}
+              placeholder="Your name"
+            />
+          )}
+        </Field>
+
+        <Field label="Bio" aside={`${bio.length}/${MAX_BIO}`}>
+          {({ id }) => (
+            <Textarea
+              id={id}
+              value={bio}
+              onChange={(e) => setBio(e.target.value.slice(0, MAX_BIO))}
+              rows={4}
+              placeholder="What are you into? What are you looking for?"
+            />
+          )}
+        </Field>
+
+        <Field label="Birthday" hint="Used for age filtering. Never shown as a date.">
+          {({ id, describedBy }) => (
+            <Input
+              id={id}
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              aria-describedby={describedBy}
+              max={new Date().toISOString().slice(0, 10)}
+            />
+          )}
+        </Field>
+
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Bio</label>
-          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}           className="w-full resize-none rounded-card border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Job</label>
-          <input type="text" value={job} onChange={(e) => setJob(e.target.value)}           className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Location</label>
-          <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}           className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Gender</label>
+          <p className="mb-2 text-body-sm font-semibold text-ink-soft">Gender</p>
           <div className="flex flex-wrap gap-2">
-            {['Male', 'Female'].map((g) => (
-              <button key={g} onClick={() => setGender(g)} className={`rounded-full px-4 py-2 text-xs font-medium ${g === gender ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]' : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink)]'}`}>{g}</button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">I'm Looking For</label>
-          <div className="flex flex-wrap gap-2">
-            {([
-              { value: 'dating' as const, label: 'Dating', icon: Heart },
-              { value: 'friends' as const, label: 'Friends', icon: Users },
-              { value: 'networking' as const, label: 'Networking', icon: Briefcase },
-            ] as const).map(({ value, label, icon: Icon }) => (
-              <button
-                key={value}
-                onClick={() => toggleLookingFor(value)}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium transition ${
-                  lookingFor.includes(value)
-                    ? 'bg-[var(--mag-ink)] text-[var(--mag-bg)]'
-                    : 'border border-[var(--mag-line)] bg-[var(--mag-card)] text-[var(--mag-ink-soft)]'
-                }`}
+            {GENDERS.map((option) => (
+              <Button
+                key={option}
+                size="sm"
+                variant={gender === option ? 'primary' : 'outline'}
+                onClick={() => setGender(option)}
               >
-                <Icon className="h-3.5 w-3.5" />
-                {label}
-              </button>
+                {option}
+              </Button>
             ))}
           </div>
         </div>
+
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[var(--mag-ink)]">Interests (comma separated)</label>
-          <input type="text" value={interests} onChange={(e) => setInterests(e.target.value)}           className="w-full rounded-full border border-[var(--mag-line)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none" />
+          <p className="mb-2 text-body-sm font-semibold text-ink-soft">I'm looking for</p>
+          <div className="flex flex-wrap gap-2">
+            {INTENTS.map(({ value, label, icon: Icon }) => (
+              <Button
+                key={value}
+                size="sm"
+                variant={lookingFor.includes(value) ? 'primary' : 'outline'}
+                onClick={() => toggleIntent(value)}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </Button>
+            ))}
+          </div>
         </div>
+
+        <Field label="Location">
+          {({ id }) => (
+            <Input
+              id={id}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              maxLength={200}
+              placeholder="City"
+            />
+          )}
+        </Field>
+
+        <Field label="Work">
+          {({ id }) => (
+            <Input
+              id={id}
+              value={job}
+              onChange={(e) => setJob(e.target.value)}
+              maxLength={200}
+              placeholder="What you do"
+            />
+          )}
+        </Field>
+
+        <Field
+          label="Interests"
+          hint={`Press Enter to add. ${interests.length}/${MAX_INTERESTS}`}
+        >
+          {({ id, describedBy }) => (
+            <>
+              {interests.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-2">
+                  {interests.map((interest) => (
+                    <span
+                      key={interest}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-canvas-soft py-1.5 pr-1.5 pl-3 text-body-sm text-ink"
+                    >
+                      {interest}
+                      <button
+                        type="button"
+                        aria-label={`Remove ${interest}`}
+                        onClick={() => setInterests((prev) => prev.filter((i) => i !== interest))}
+                        className="flex h-5 w-5 items-center justify-center rounded-full text-ink-faint transition hover:bg-hairline hover:text-ink"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <Input
+                id={id}
+                value={interestDraft}
+                aria-describedby={describedBy}
+                disabled={interests.length >= MAX_INTERESTS}
+                onChange={(e) => setInterestDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault()
+                    addInterest()
+                  }
+                  if (e.key === 'Backspace' && !interestDraft && interests.length > 0) {
+                    setInterests((prev) => prev.slice(0, -1))
+                  }
+                }}
+                onBlur={addInterest}
+                placeholder={interests.length >= MAX_INTERESTS ? 'Maximum reached' : 'Add an interest'}
+              />
+            </>
+          )}
+        </Field>
       </div>
 
-      <div className="mt-6 flex justify-center">
-        <button onClick={handleSave} className="inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[var(--mag-ink)] py-3.5 text-sm font-bold text-[var(--mag-bg)] transition hover:opacity-80 active:scale-95">Save Changes</button>
+      <div className={cn('mt-8 flex gap-2')}>
+        <Link to="/profile" className={buttonClasses({ variant: 'outline', block: true })}>
+          Cancel
+        </Link>
+        <Button
+          block
+          size="md"
+          loading={save.isPending}
+          onClick={() =>
+            save.mutate({
+              data: {
+                name,
+                bio,
+                job,
+                location,
+                gender,
+                birthDate,
+                interests,
+                lookingFor,
+              },
+            })
+          }
+        >
+          Save changes
+        </Button>
       </div>
     </main>
   )

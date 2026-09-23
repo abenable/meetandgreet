@@ -11,7 +11,7 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
 
 export async function createNotification(data: {
   userId: string
-  type: 'like' | 'match' | 'message' | 'system'
+  type: 'like' | 'match' | 'message' | 'system' | 'friend_request' | 'friend_accepted'
   title: string
   body: string
   link?: string

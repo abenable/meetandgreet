@@ -8,37 +8,39 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  name          String?
-  email         String    @unique
-  emailVerified Boolean  @default(false)
-  image         String?
-  role          String    @default("user")
-  disabledAt    DateTime?
-  streakCount   Int       @default(0)
+  id                  String             @id @default(uuid())
+  name                String?
+  email               String             @unique
+  emailVerified       Boolean            @default(false)
+  image               String?
+  role                String             @default("user")
+  disabledAt          DateTime?
+  streakCount         Int                @default(0)
   // Presence heartbeat. Written at most once per PRESENCE_WRITE_INTERVAL_MS.
-  lastActiveDate DateTime?
+  lastActiveDate      DateTime?
   // Streak bookkeeping lives in its own column so the presence heartbeat can't
   // clobber the value the streak calculation reads.
-  lastStreakDate DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  pushSubscriptions PushSubscription[]
-  blockedUsers      UserBlock[]       @relation("BlockedBy")
-  blockingUsers     UserBlock[]       @relation("Blocking")
-  badges            UserBadge[]
-  profile           Profile?
-  attendances       EventAttendee[]
-  swipesGiven       EventSwipe[]      @relation("SwipesGiven")
-  swipesReceived    EventSwipe[]      @relation("SwipesReceived")
-  matchesAsUser1    EventMatch[]      @relation("MatchUser1")
-  matchesAsUser2    EventMatch[]      @relation("MatchUser2")
-  messagesSent      EventMessage[]
-  notifications     Notification[]
-  reportsMade       Report[]          @relation("ReportsMade")
-  reportsReceived   Report[]          @relation("ReportsReceived")
+  lastStreakDate      DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  sessions            Session[]
+  accounts            Account[]
+  pushSubscriptions   PushSubscription[]
+  blockedUsers        UserBlock[]        @relation("BlockedBy")
+  blockingUsers       UserBlock[]        @relation("Blocking")
+  badges              UserBadge[]
+  profile             Profile?
+  attendances         EventAttendee[]
+  swipesGiven         EventSwipe[]       @relation("SwipesGiven")
+  swipesReceived      EventSwipe[]       @relation("SwipesReceived")
+  matchesAsUser1      EventMatch[]       @relation("MatchUser1")
+  matchesAsUser2      EventMatch[]       @relation("MatchUser2")
+  friendshipsSent     Friendship[]       @relation("FriendshipRequester")
+  friendshipsReceived Friendship[]       @relation("FriendshipAddressee")
+  messagesSent        EventMessage[]
+  notifications       Notification[]
+  reportsMade         Report[]           @relation("ReportsMade")
+  reportsReceived     Report[]           @relation("ReportsReceived")
 }
 
 model Session {
@@ -56,9 +58,9 @@ model Session {
 }
 
 model Account {
-  id                    String   @id @default(uuid())
+  id                    String    @id @default(uuid())
   userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accountId             String
   providerId            String
   accessToken           String?
@@ -68,8 +70,8 @@ model Account {
   scope                 String?
   idToken               String?
   password              String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   @@unique([providerId, accountId])
 }
@@ -90,31 +92,31 @@ model Verification {
 }
 
 model Profile {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String?
-  bio         String?
-  photos      String[]
-  gender      String?
-  birthDate   String?
-  location    String?
-  interests   String[]
-  lookingFor  String[] @default([])
-  job         String?
+  id                      String    @id @default(uuid())
+  userId                  String    @unique
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                    String?
+  bio                     String?
+  photos                  String[]
+  gender                  String?
+  birthDate               String?
+  location                String?
+  interests               String[]
+  lookingFor              String[]  @default([])
+  job                     String?
   // Set only by an admin review (server/admin.ts). Users submit a capture,
   // which lands in the three fields below; they cannot grant themselves the
   // badge.
-  verifiedAt  DateTime?
+  verifiedAt              DateTime?
   verificationPhoto       String?
   verificationSubmittedAt DateTime?
-  verificationStatus      String?   // null | 'pending' | 'approved' | 'rejected'
-  discoveryMode String  @default("global") // 'global' | 'event'
-  prefAgeMin  Int      @default(18)
-  prefAgeMax  Int      @default(99)
-  prefShowMe  String   @default("Everyone") // 'Women' | 'Men' | 'Everyone'
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime @updatedAt
+  verificationStatus      String? // null | 'pending' | 'approved' | 'rejected'
+  discoveryMode           String    @default("global") // 'global' | 'event'
+  prefAgeMin              Int       @default(18)
+  prefAgeMax              Int       @default(99)
+  prefShowMe              String    @default("Everyone") // 'Women' | 'Men' | 'Everyone'
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
   @@index([discoveryMode])
   @@index([verificationStatus, verificationSubmittedAt])
@@ -133,12 +135,12 @@ model PushSubscription {
 }
 
 model UserBlock {
-  id         String   @id @default(uuid())
-  blockerId  String
-  blocker    User     @relation("BlockedBy", fields: [blockerId], references: [id], onDelete: Cascade)
-  blockedId  String
-  blocked    User     @relation("Blocking", fields: [blockedId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  blockerId String
+  blocker   User     @relation("BlockedBy", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("Blocking", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@unique([blockerId, blockedId])
   @@index([blockerId])
@@ -146,44 +148,44 @@ model UserBlock {
 }
 
 model Event {
-  id          String                  @id @default(uuid())
-  code        String                  @unique
-  name        String
-  photo       String?
-  description String?
-  location    String?
-  createdById String
-  isActive    Boolean                 @default(true)
-  isPublic    Boolean                 @default(true)
-  mysteryMode Boolean                 @default(false)
-  sponsorName String?
-  sponsorLogo String?
-  sponsorFrameUrl String?
-  createdAt   DateTime                @default(now())
-  expiresAt    DateTime?
-  maxAttendees Int?
-  startsAt     DateTime?
-  endedAt      DateTime?
-  attendees    EventAttendee[]
-  blockedUsers EventBlockedUser[]
+  id                String                  @id @default(uuid())
+  code              String                  @unique
+  name              String
+  photo             String?
+  description       String?
+  location          String?
+  createdById       String
+  isActive          Boolean                 @default(true)
+  isPublic          Boolean                 @default(true)
+  mysteryMode       Boolean                 @default(false)
+  sponsorName       String?
+  sponsorLogo       String?
+  sponsorFrameUrl   String?
+  createdAt         DateTime                @default(now())
+  expiresAt         DateTime?
+  maxAttendees      Int?
+  startsAt          DateTime?
+  endedAt           DateTime?
+  attendees         EventAttendee[]
+  blockedUsers      EventBlockedUser[]
   organizerMessages EventOrganizerMessage[]
-  swipes      EventSwipe[]
-  matches     EventMatch[]
-  waitlist    EventWaitlist[]
-  posts       EventPost[]
+  swipes            EventSwipe[]
+  matches           EventMatch[]
+  waitlist          EventWaitlist[]
+  posts             EventPost[]
 
   @@index([isPublic, isActive])
   @@index([createdById])
 }
 
 model EventAttendee {
-  id        String   @id @default(uuid())
-  eventId   String
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  joinedAt  DateTime @default(now())
-  leftAt    DateTime?
+  id          String    @id @default(uuid())
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt    DateTime  @default(now())
+  leftAt      DateTime?
   removedById String?
   removedAt   DateTime?
 
@@ -195,11 +197,11 @@ model EventAttendee {
 }
 
 model EventWaitlist {
-  id        String   @id @default(uuid())
-  eventId   String
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  userId    String
-  joinedAt  DateTime @default(now())
+  id       String   @id @default(uuid())
+  eventId  String
+  event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId   String
+  joinedAt DateTime @default(now())
 
   @@unique([eventId, userId])
   @@index([userId])
@@ -219,13 +221,13 @@ model EventBlockedUser {
 }
 
 model EventOrganizerMessage {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   eventId    String
-  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event      Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
   senderId   String
   receiverId String
   content    String
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
   readAt     DateTime?
 
   // getConversations filters on sender/receiver without an eventId, so each
@@ -268,15 +270,30 @@ model EventSwipe {
   @@index([swipedId, direction])
 }
 
+model Friendship {
+  id          String    @id @default(uuid())
+  requesterId String
+  requester   User      @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addresseeId String
+  addressee   User      @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+  status      String    @default("pending")
+  createdAt   DateTime  @default(now())
+  respondedAt DateTime?
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status, createdAt])
+  @@index([requesterId, status, createdAt])
+}
+
 model EventMatch {
-  id                 String          @id @default(uuid())
+  id                 String         @id @default(uuid())
   eventId            String?
-  event              Event?          @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  event              Event?         @relation(fields: [eventId], references: [id], onDelete: SetNull)
   user1Id            String
-  user1              User            @relation("MatchUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user1              User           @relation("MatchUser1", fields: [user1Id], references: [id], onDelete: Cascade)
   user2Id            String
-  user2              User            @relation("MatchUser2", fields: [user2Id], references: [id], onDelete: Cascade)
-  createdAt          DateTime        @default(now())
+  user2              User           @relation("MatchUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  createdAt          DateTime       @default(now())
   messagesUnlockedAt DateTime?
   messages           EventMessage[]
 
@@ -317,38 +334,37 @@ model Report {
   status     String   @default("pending")
   createdAt  DateTime @default(now())
 
+  // One report per reporter/target/event. Global reports (eventId IS NULL) are
+  // deduped by a partial unique index added in the migration.
+  @@unique([reporterId, reportedId, eventId])
   // Auto-moderation groups by reportedId over pending reports in a time window.
   @@index([reportedId, status, createdAt])
   @@index([status, createdAt])
   @@index([reporterId, createdAt])
-  // One report per reporter/target/event. Global reports (eventId IS NULL) are
-  // deduped by a partial unique index added in the migration.
-  @@unique([reporterId, reportedId, eventId])
 }
 
 model Notification {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String   // like | match | message | organizer_message | request | request_accepted
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // like | match | message | organizer_message | request | request_accepted
   title     String
   body      String
   link      String?
   readAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId, readAt])
   @@index([userId, createdAt])
 }
 
 model UserBadge {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String
-  earnedAt  DateTime @default(now())
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type     String
+  earnedAt DateTime @default(now())
 
   @@unique([userId, type])
   @@index([userId])
 }
-

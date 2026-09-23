@@ -2,10 +2,13 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@heroui/react'
-import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, RotateCcw, Sparkles } from 'lucide-react'
+import { X, Heart, MapPin, Users, ArrowRight, Flag, MessageCircle, RotateCcw, Sparkles, UserPlus, UserCheck } from 'lucide-react'
 import { getMyActiveEvent, reportUser } from '#/server/events'
 import { recordSwipe, getSwipeDeck, rewindLastSwipe } from '#/server/swipes'
 import { startConversation } from '#/server/conversations'
+import { sendFriendRequest } from '#/server/friends'
+import type { FriendState } from '#/server/friends'
+import { useToast } from '#/components/ui'
 import { getMyProfile } from '#/server/profiles'
 import AvatarImage from '#/components/AvatarImage'
 import { VerifiedBadge } from '#/components/VerifiedBadge'
@@ -100,6 +103,9 @@ function DiscoverPage() {
   const [reportSuccess, setReportSuccess] = useState('')
 
   const [swipeError, setSwipeError] = useState('')
+  const [friendStates, setFriendStates] = useState<Record<string, FriendState>>({})
+  const [friendPendingIds, setFriendPendingIds] = useState<Set<string>>(new Set())
+  const { toast } = useToast()
 
   const swipeMutation = useMutation({
     mutationFn: recordSwipe,
@@ -138,6 +144,29 @@ function DiscoverPage() {
       setChatStartPendingIds((prev) => {
         const next = new Set(prev)
         next.delete(vars.data.receiverId)
+        return next
+      })
+    },
+  })
+
+  const addFriendMutation = useMutation({
+    mutationFn: sendFriendRequest,
+    onSuccess: (result, vars) => {
+      setFriendStates((prev) => ({ ...prev, [vars.data.userId]: result.state }))
+      queryClient.invalidateQueries({ queryKey: ['friends'] })
+      queryClient.invalidateQueries({ queryKey: ['friend-requests'] })
+      queryClient.invalidateQueries({ queryKey: ['pending-request-count'] })
+      toast(result.state === 'friends' ? 'You are now friends' : 'Request sent', {
+        tone: 'success',
+      })
+    },
+    onError: (error: Error) => {
+      toast(error.message || 'Could not send that request.', { tone: 'error' })
+    },
+    onSettled: (_, __, vars) => {
+      setFriendPendingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(vars.data.userId)
         return next
       })
     },
@@ -198,6 +227,16 @@ function DiscoverPage() {
       ;(container.children[next] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [currentIndex, effectiveEventId, baseProfiles, swipeMutation, swipedIds])
+
+  const handleAddFriend = useCallback(
+    (userId: string) => {
+      if (friendPendingIds.has(userId)) return
+      if ((friendStates[userId] ?? 'none') !== 'none') return
+      setFriendPendingIds((prev) => new Set(prev).add(userId))
+      addFriendMutation.mutate({ data: { userId } })
+    },
+    [addFriendMutation, friendPendingIds, friendStates],
+  )
 
   const handleRewind = useCallback(() => {
     if (!lastSwipe || rewindMutation.isPending) return
@@ -348,6 +387,8 @@ function DiscoverPage() {
           const hasPhotos = profile.photos.length > 0
           const lastActive = formatLastActive(profile.lastActiveDate)
           const sharedInterests: string[] = profile.sharedInterests ?? []
+          const friendState = friendStates[profile.userId] ?? 'none'
+          const friendPending = friendPendingIds.has(profile.userId)
           return (
             <section
               key={profile.userId}
@@ -399,7 +440,7 @@ function DiscoverPage() {
                   />
                 </>
               )}
-              <div className="absolute bottom-0 left-0 right-0 p-5 pb-28">
+              <div className="absolute bottom-0 left-0 right-0 p-5 pb-40">
                 <h2 className="text-3xl font-bold text-white flex items-center gap-2">
                   {formatNameWithGender(profile.name, profile.gender)}
                   {profile.verifiedAt && <VerifiedBadge />}
@@ -449,64 +490,17 @@ function DiscoverPage() {
                   ))}
                 </div>
               </div>
-              <div className="absolute right-3 bottom-28 flex flex-col items-center gap-3">
+              <div className="absolute right-3 top-14 z-10 flex flex-col items-center gap-2">
                 {lastSwipe && (
                   <button
                     onClick={handleRewind}
                     disabled={rewindMutation.isPending}
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40"
-                    title="Rewind last swipe"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/35 backdrop-blur-sm transition hover:bg-black/55 disabled:opacity-40"
+                    aria-label="Rewind last swipe"
                   >
-                    <RotateCcw className="h-4 w-4 text-amber-300" />
+                    <RotateCcw className="h-4 w-4 text-white" />
                   </button>
                 )}
-                <button
-                  onClick={() => handleAction('like')}
-                  disabled={swipedIds.has(profile.userId)}
-                  className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${
-                    swipedIds.has(profile.userId) ? 'bg-[var(--mag-ink)]' : 'bg-black/30'
-                  }`}
-                >
-                  <Heart
-                    className={`h-6 w-6 ${
-                      swipedIds.has(profile.userId)
-                        ? 'fill-white text-white'
-                        : 'fill-transparent text-white'
-                    }`}
-                  />
-                </button>
-                <button
-                  onClick={handleStartChat}
-                  disabled={chatStartedIds.has(profile.userId) || chatStartPendingIds.has(profile.userId)}
-                  className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${
-                    chatStartedIds.has(profile.userId) ? 'bg-[var(--mag-ink)]' : 'bg-black/30'
-                  }`}
-                  title={chatStartedIds.has(profile.userId) ? 'Chat started' : 'Start a chat'}
-                >
-                  {chatStartPendingIds.has(profile.userId) ? (
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  ) : (
-                    <MessageCircle
-                      className={`h-6 w-6 ${
-                        chatStartedIds.has(profile.userId)
-                          ? 'fill-white text-white'
-                          : 'fill-transparent text-white'
-                      }`}
-                    />
-                  )}
-                </button>
-                <button
-                  onClick={() => handleAction('pass')}
-                  disabled={swipedIds.has(profile.userId)}
-                  className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition hover:scale-110 disabled:opacity-40 disabled:hover:scale-100 ${
-                    swipedIds.has(profile.userId) ? 'bg-[var(--mag-ink)]' : 'bg-black/30'
-                  }`}
-                >
-                  <X
-                    className="h-6 w-6 text-white"
-                    strokeWidth={2.5}
-                  />
-                </button>
                 <button
                   onClick={() => {
                     setReportModalOpen(true)
@@ -514,10 +508,62 @@ function DiscoverPage() {
                     setReportCustom('')
                     setReportSuccess('')
                   }}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm transition hover:scale-110"
-                  title="Report user"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/35 backdrop-blur-sm transition hover:bg-black/55"
+                  aria-label="Report user"
                 >
                   <Flag className="h-4 w-4 text-white" />
+                </button>
+              </div>
+              <div className="absolute inset-x-0 bottom-24 z-10 flex items-center justify-center gap-2.5 px-5">
+                <button
+                  onClick={() => handleAction('pass')}
+                  disabled={swipedIds.has(profile.userId)}
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/55 active:scale-95 disabled:opacity-40"
+                  aria-label="Pass"
+                >
+                  <X className="h-6 w-6" strokeWidth={2.5} />
+                </button>
+                <button
+                  onClick={() => handleAddFriend(profile.userId)}
+                  disabled={friendState !== 'none' || friendPending}
+                  className="flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-white px-4 text-link text-[#141414] transition active:scale-95 disabled:opacity-90"
+                >
+                  {friendPending ? (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#141414] border-t-transparent" />
+                  ) : friendState === 'friends' ? (
+                    <UserCheck className="h-5 w-5" />
+                  ) : (
+                    <UserPlus className="h-5 w-5" />
+                  )}
+                  <span className="truncate">
+                    {friendState === 'friends'
+                      ? 'Friends'
+                      : friendState === 'outgoing'
+                        ? 'Requested'
+                        : 'Add friend'}
+                  </span>
+                </button>
+                <button
+                  onClick={() => handleAction('like')}
+                  disabled={swipedIds.has(profile.userId)}
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/55 active:scale-95 disabled:opacity-40"
+                  aria-label="Like"
+                >
+                  <Heart
+                    className={`h-6 w-6 ${swipedIds.has(profile.userId) ? 'fill-white' : 'fill-transparent'}`}
+                  />
+                </button>
+                <button
+                  onClick={handleStartChat}
+                  disabled={chatStartedIds.has(profile.userId) || chatStartPendingIds.has(profile.userId)}
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/55 active:scale-95 disabled:opacity-40"
+                  aria-label="Send a message"
+                >
+                  {chatStartPendingIds.has(profile.userId) ? (
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    <MessageCircle className="h-6 w-6" />
+                  )}
                 </button>
               </div>
             </section>
@@ -565,7 +611,7 @@ function DiscoverPage() {
                     onChange={(e) => setReportCustom(e.target.value)}
                     placeholder="Describe the issue..."
                     rows={3}
-                    className="mb-3 w-full resize-none rounded-xl border border-[var(--mag-line)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
+                    className="mb-3 w-full resize-none rounded-card border border-[var(--mag-line)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--mag-ink)] focus:border-[var(--mag-ink)] focus:outline-none"
                   />
                 )}
 

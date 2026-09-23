@@ -804,6 +804,8 @@ async function buildSwipeDeck({
           blockedUsers: { none: { blockedId: myUserId } },
           // I blocked the candidate.
           blockingUsers: { none: { blockerId: myUserId } },
+          friendshipsSent: { none: { addresseeId: myUserId } },
+          friendshipsReceived: { none: { requesterId: myUserId } },
         },
       },
       ...(intent ? [{ lookingFor: { has: intent } }] : []),

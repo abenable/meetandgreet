@@ -55,7 +55,8 @@ function NotificationsPage() {
           <button onClick={() => history.back()} className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Notifications</h1>
+          <h1 className="min-w-0 flex-1 truncate text-center text-2xl font-bold text-[var(--mag-ink)]">Notifications</h1>
+          <span aria-hidden="true" className="w-10 shrink-0" />
         </div>
         {unreadCount > 0 && (
           <button

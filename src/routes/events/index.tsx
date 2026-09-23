@@ -97,7 +97,7 @@ function EventsExplorePage() {
 
   return (
     <div className="page-wrap flex flex-1 flex-col px-4 py-4 pb-nav">
-      <h1 className="mb-6 text-base font-medium uppercase tracking-wide text-[var(--mag-ink-muted)]">Explore Events</h1>
+      <h1 className="mb-6 text-center text-h1 text-ink">Events</h1>
 
       {isLoading ? (
         <div className="space-y-6">

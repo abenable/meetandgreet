@@ -181,7 +181,7 @@ function OnboardingPage() {
 
         {step === 1 && (
           <div className="rise-in flex flex-1 flex-col">
-            <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">Add a photo</h1>
+            <h1 className="mb-2 text-center text-2xl font-bold text-[var(--mag-ink)]">Add a photo</h1>
             <p className="mb-6 text-base text-[var(--mag-ink-soft)]">
               Optional, but profiles with photos get far more matches. Your first photo is your avatar — or just hit Next to skip.
             </p>
@@ -229,7 +229,7 @@ function OnboardingPage() {
 
         {step === 2 && (
           <div className="rise-in flex flex-1 flex-col">
-            <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">About you</h1>
+            <h1 className="mb-2 text-center text-2xl font-bold text-[var(--mag-ink)]">About you</h1>
             <p className="mb-6 text-base text-[var(--mag-ink-soft)]">
               Tell us a little about yourself.
             </p>
@@ -273,7 +273,7 @@ function OnboardingPage() {
 
         {step === 3 && (
           <div className="rise-in flex flex-1 flex-col">
-            <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">Where are you?</h1>
+            <h1 className="mb-2 text-center text-2xl font-bold text-[var(--mag-ink)]">Where are you?</h1>
             <p className="mb-6 text-base text-[var(--mag-ink-soft)]">
               Shown on your profile so people nearby can find you.
             </p>
@@ -292,7 +292,7 @@ function OnboardingPage() {
 
         {step === 4 && (
           <div className="rise-in flex flex-1 flex-col">
-            <h1 className="mb-2 text-2xl font-bold text-[var(--mag-ink)]">Your bio</h1>
+            <h1 className="mb-2 text-center text-2xl font-bold text-[var(--mag-ink)]">Your bio</h1>
             <p className="mb-6 text-base text-[var(--mag-ink-soft)]">
               A quick intro — what you're about and what you're looking for.
             </p>

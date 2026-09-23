@@ -118,7 +118,8 @@ function CreateEventPage() {
         <button onClick={() => navigate({ to: '/events' })} className="rounded-full p-2 text-[var(--mag-ink-soft)] transition hover:bg-[var(--mag-surface)]">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Create Event</h1>
+        <h1 className="min-w-0 flex-1 truncate text-center text-xl font-bold text-[var(--mag-ink)]">Create Event</h1>
+        <span aria-hidden="true" className="w-10 shrink-0" />
       </div>
 
       {code ? (

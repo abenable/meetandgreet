@@ -12,7 +12,8 @@ function PrivacyPage() {
         </Link>
         <div className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-[var(--mag-ink)]" />
-          <h1 className="text-xl font-bold text-[var(--mag-ink)]">Privacy Policy</h1>
+          <h1 className="min-w-0 flex-1 truncate text-center text-xl font-bold text-[var(--mag-ink)]">Privacy Policy</h1>
+          <span aria-hidden="true" className="w-10 shrink-0" />
         </div>
       </div>
 

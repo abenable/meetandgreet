@@ -69,7 +69,7 @@ function AdminPage() {
     <div className="page-wrap mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 py-3 md:px-4 md:py-4 pb-nav">
       <div className="mb-4 flex items-center gap-2">
         <Shield className="h-5 w-5 text-[var(--mag-ink)]" />
-        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Admin Dashboard</h1>
+        <h1 className="text-center text-xl font-bold text-[var(--mag-ink)]">Admin Dashboard</h1>
       </div>
 
       {/* Tabs */}

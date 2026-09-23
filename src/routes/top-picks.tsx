@@ -13,7 +13,7 @@ function TopPicksPage() {
   return (
     <main className="page-wrap px-4 py-4 pb-nav">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Top Picks</h1>
+        <h1 className="text-center text-2xl font-bold text-[var(--mag-ink)]">Top Picks</h1>
         <div className="flex items-center gap-1 rounded-full bg-[var(--mag-line)] px-3 py-1 text-sm font-medium text-[var(--mag-ink-soft)]">
           <Clock className="h-3 w-3" />Resets daily
         </div>

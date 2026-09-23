@@ -11,7 +11,7 @@ function AboutPage() {
         <div className="mb-4 inline-flex items-center justify-center rounded-full bg-[var(--mag-ink)]">
           <Logo className="h-16 w-16" />
         </div>
-        <h1 className="text-2xl font-bold text-[var(--mag-ink)]">About Meet & Greet</h1>
+        <h1 className="text-center text-2xl font-bold text-[var(--mag-ink)]">About Meet & Greet</h1>
         <p className="mt-2 text-base text-[var(--mag-ink-soft)]">
           Making connections that matter.
         </p>

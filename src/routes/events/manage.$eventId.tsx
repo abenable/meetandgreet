@@ -346,7 +346,8 @@ function ManageEventPage() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-bold text-[var(--mag-ink)]">Manage Event</h1>
+          <h1 className="min-w-0 flex-1 truncate text-center text-xl font-bold text-[var(--mag-ink)]">Manage Event</h1>
+          <span aria-hidden="true" className="w-10 shrink-0" />
         </div>
         <div className="space-y-4">
           <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-4 text-center space-y-2">
@@ -401,7 +402,8 @@ function ManageEventPage() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-bold text-[var(--mag-ink)]">Manage Event</h1>
+          <h1 className="min-w-0 flex-1 truncate text-center text-xl font-bold text-[var(--mag-ink)]">Manage Event</h1>
+          <span aria-hidden="true" className="w-10 shrink-0" />
         </div>
         <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-5 text-center">
           <p className="text-base font-semibold text-[var(--mag-ink)]">You don't have permission to manage this event.</p>
@@ -426,7 +428,8 @@ function ManageEventPage() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-bold text-[var(--mag-ink)]">Manage Event</h1>
+          <h1 className="min-w-0 flex-1 truncate text-center text-xl font-bold text-[var(--mag-ink)]">Manage Event</h1>
+          <span aria-hidden="true" className="w-10 shrink-0" />
         </div>
         <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-5 text-center">
           <p className="text-base font-semibold text-[var(--mag-ink)]">You don't have permission to manage this event.</p>
@@ -451,7 +454,8 @@ function ManageEventPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Manage Event</h1>
+        <h1 className="min-w-0 flex-1 truncate text-center text-xl font-bold text-[var(--mag-ink)]">Manage Event</h1>
+        <span aria-hidden="true" className="w-10 shrink-0" />
       </div>
 
       {/* Event Code */}

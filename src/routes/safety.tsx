@@ -18,7 +18,8 @@ function SafetyPage() {
         <Link to="/settings/privacy" className="rounded-full p-2 text-[var(--mag-ink-soft)] hover:bg-[var(--mag-surface)] no-underline">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Safety Center</h1>
+        <h1 className="min-w-0 flex-1 truncate text-center text-xl font-bold text-[var(--mag-ink)]">Safety Center</h1>
+        <span aria-hidden="true" className="w-10 shrink-0" />
       </div>
 
       <div className="mb-6 rounded-2xl bg-[var(--mag-ink)] p-4 md:p-5 text-[var(--on-ink)]">

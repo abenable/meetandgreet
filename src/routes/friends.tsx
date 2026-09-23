@@ -175,7 +175,7 @@ function FriendsPage() {
 
   return (
     <div className="page-wrap flex flex-1 flex-col py-5 pb-28">
-      <h1 className="text-h1 text-ink">Friends</h1>
+      <h1 className="text-center text-h1 text-ink">Friends</h1>
 
       <SegmentedControl
         aria-label="Friends sections"

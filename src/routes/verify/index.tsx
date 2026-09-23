@@ -9,7 +9,7 @@ function VerifyIntroPage() {
       <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--mag-surface)]">
         <Shield className="h-10 w-10 text-[var(--mag-ink)]" />
       </div>
-      <h1 className="text-2xl font-bold text-[var(--mag-ink)]">Get Verified</h1>
+      <h1 className="text-center text-2xl font-bold text-[var(--mag-ink)]">Get Verified</h1>
       <p className="mt-2 max-w-sm text-base text-[var(--mag-ink-soft)]">
         Verified profiles get more matches. Complete a quick photo pose to earn your blue checkmark.
       </p>

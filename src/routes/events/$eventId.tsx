@@ -38,7 +38,8 @@ function EventDetailPage() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-bold text-[var(--mag-ink)]">Event Details</h1>
+          <h1 className="min-w-0 flex-1 truncate text-center text-xl font-bold text-[var(--mag-ink)]">Event Details</h1>
+          <span aria-hidden="true" className="w-10 shrink-0" />
         </div>
         <div className="rounded-2xl bg-[var(--mag-card)] shadow-sm p-5 text-center">
           <p className="text-base font-semibold text-[var(--mag-ink)]">Event not found.</p>
@@ -59,7 +60,8 @@ function EventDetailPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-bold text-[var(--mag-ink)]">Event Details</h1>
+        <h1 className="min-w-0 flex-1 truncate text-center text-xl font-bold text-[var(--mag-ink)]">Event Details</h1>
+        <span aria-hidden="true" className="w-10 shrink-0" />
       </div>
 
       {hasSponsor && (

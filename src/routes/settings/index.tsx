@@ -67,7 +67,7 @@ function SettingsPage() {
 
   return (
     <main className="page-wrap py-5 pb-28">
-      <h1 className="mb-6 text-h1 text-ink">Settings</h1>
+      <h1 className="mb-6 text-center text-h1 text-ink">Settings</h1>
 
       <div className="space-y-7">
         {SECTIONS.map((section) => (

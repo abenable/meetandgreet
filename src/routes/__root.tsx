@@ -36,7 +36,6 @@ const PUBLIC_PATHS = [
   '/terms',
   '/privacy',
   '/safety',
-  '/pricing',
 ]
 
 function isPublicPath(pathname: string): boolean {

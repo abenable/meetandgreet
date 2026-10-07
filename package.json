@@ -6,18 +6,18 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "dotenv -e .env.development -- sh -c \"NODE_OPTIONS='--import ./instrument.server.mjs' vite dev --port 3000\"",
-    "build": "vite build && mkdir -p dist/server && cp instrument.server.mjs dist/server",
+    "dev": "vite dev --port 3000",
+    "build": "prisma generate && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "deploy": "bun run build && wrangler deploy",
+    "cf-typegen": "wrangler types",
     "db:generate": "prisma generate",
-    "db:migrate": "dotenv -e .env.development -- prisma migrate dev",
-    "db:deploy": "dotenv -e .env.development -- prisma migrate deploy",
-    "db:push": "dotenv -e .env.development -- prisma db push",
-    "db:seed": "dotenv -e .env.development -- tsx prisma/seed.ts",
-    "db:studio": "dotenv -e .env.development -- prisma studio",
-    "start": "bun run server.prod.ts",
-    "start:docker": "bun run server.prod.ts"
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1041.0",
@@ -41,31 +41,29 @@
     "better-auth": "^1.5.3",
     "clsx": "^2.1.1",
     "dotenv-cli": "^11.0.0",
-    "isomorphic-dompurify": "^3.12.0",
     "lucide-react": "^0.545.0",
-    "mailtrap": "^4.5.1",
-    "nodemailer": "^8.0.7",
     "pg": "^8.16.3",
     "prisma": "^7.8.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "sanitize-html": "^2.18.0",
     "tailwind-merge": "^3.7.0",
     "tailwindcss": "^4.1.18",
     "web-push": "^3.6.7",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.63.0",
+    "@cloudflare/workers-types": "^5.20261007.1",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-vite": "latest",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^22.10.2",
-    "@types/nodemailer": "^8.0.0",
     "@types/pg": "^8.15.6",
     "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
+    "@types/react-dom": "^19.2.3",
     "@types/web-push": "^3.6.4",
-    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^6.0.1",
     "dotenv": "^17.3.1",
     "jsdom": "^28.1.0",
@@ -74,7 +72,7 @@
     "vite": "^8.0.0",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.1.5",
-    "ws": "^8.20.0"
+    "wrangler": "^4.148.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

@@ -1,5 +1,8 @@
 // WebSocket broadcasting utilities
-// Supports both Bun server (production) and dev-mode Vite plugin
+// Broadcasts are delivered through the WebSocketHub Durable Object
+// (see src/durable/WebSocketHub.ts and src/worker.ts).
+
+import type { WebSocketHub } from '#/durable/WebSocketHub'
 
 export interface WSMessage {
   type: 'chat_message' | 'match_created' | 'typing' | 'read_receipt' | 'online_status' | 'event_post' | 'error'
@@ -7,45 +10,31 @@ export interface WSMessage {
   timestamp: number
 }
 
-let bunServer: any = null
+type HubStub = DurableObjectStub<WebSocketHub>
 
-export function setBunServer(server: any) {
-  bunServer = server
+async function getHub(): Promise<DurableObjectStub<WebSocketHub> | null> {
+  try {
+    const { env } = await import('cloudflare:workers')
+    const hub = env.WEB_SOCKET_HUB
+    return hub.get(hub.idFromName('hub'))
+  } catch {
+    // cloudflare:workers is unavailable (e.g. unit tests) — skip broadcasting
+    return null
+  }
 }
 
-function getPublisher() {
-  if (bunServer) return bunServer
-  const dev = (globalThis as any).__devWSS__
-  if (dev) return dev
-  const prod = (globalThis as any).__bunServer__
-  if (prod) return prod
-  return null
+function dispatch(run: (hub: HubStub) => Promise<void>) {
+  getHub()
+    .then((hub) => (hub ? run(hub) : undefined))
+    .catch((error) => console.error('Failed to broadcast WebSocket message:', error))
 }
 
 export function broadcastToUser(userId: string, message: WSMessage) {
-  const publisher = getPublisher()
-  if (!publisher) {
-    console.warn('WebSocket server not initialized for broadcasting')
-    return
-  }
-  try {
-    publisher.publish(`user:${userId}`, JSON.stringify(message))
-  } catch (error) {
-    console.error('Failed to broadcast to user:', error)
-  }
+  dispatch((hub) => hub.broadcastToUser(userId, JSON.stringify(message)))
 }
 
 export function broadcastToEvent(eventId: string, message: WSMessage) {
-  const publisher = getPublisher()
-  if (!publisher) {
-    console.warn('WebSocket server not initialized for broadcasting')
-    return
-  }
-  try {
-    publisher.publish(`event:${eventId}`, JSON.stringify(message))
-  } catch (error) {
-    console.error('Failed to broadcast to event:', error)
-  }
+  dispatch((hub) => hub.broadcastToEvent(eventId, JSON.stringify(message)))
 }
 
 export function broadcastChatMessage(chatId: string, message: any, recipientId: string) {
@@ -54,7 +43,7 @@ export function broadcastChatMessage(chatId: string, message: any, recipientId: 
     payload: { chatId, message },
     timestamp: Date.now(),
   }
-  
+
   broadcastToUser(recipientId, wsMessage)
 }
 
@@ -64,13 +53,13 @@ export function broadcastMatchCreated(eventId: string | null, user1Id: string, u
     payload: { eventId, matchId, peerId: user2Id },
     timestamp: Date.now(),
   }
-  
+
   const wsMessage2: WSMessage = {
     type: 'match_created',
     payload: { eventId, matchId, peerId: user1Id },
     timestamp: Date.now(),
   }
-  
+
   broadcastToUser(user1Id, wsMessage1)
   broadcastToUser(user2Id, wsMessage2)
 }
@@ -81,6 +70,6 @@ export function broadcastReadReceipt(chatId: string, userId: string, messageId: 
     payload: { chatId, userId, messageId },
     timestamp: Date.now(),
   }
-  
+
   broadcastToUser(recipientId, wsMessage)
 }

@@ -8,6 +8,8 @@ dev-dist
 .env.local
 .env.development
 .env.production
+.dev.vars
+worker-configuration.d.ts
 .nitro
 .tanstack
 .wrangler

@@ -1,17 +1,20 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
-import { resolve } from 'node:path'
 
+// Vitest gets its own config: the app's vite.config.ts uses the Cloudflare
+// plugin, whose worker environment is incompatible with vitest's SSR externals.
 export default defineConfig({
   resolve: {
     alias: {
-      '#': resolve(__dirname, './src'),
-      '@': resolve(__dirname, './src'),
+      '#': fileURLToPath(new URL('./src', import.meta.url)),
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
   test: {
     environment: 'node',
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    // Prisma's validation tests below construct a client; give them room.
+    passWithNoTests: true,
+    // Prisma's validation tests construct a client; give them room.
     testTimeout: 20_000,
   },
 })

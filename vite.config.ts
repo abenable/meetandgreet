@@ -1,20 +1,20 @@
 import { defineConfig } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
+import { cloudflare } from '@cloudflare/vite-plugin'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { devWebSocketPlugin } from './dev-ws-plugin'
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
   plugins: [
+    cloudflare({ viteEnvironment: { name: 'ssr' } }),
     devtools(),
     tailwindcss(),
     tanstackStart(),
     viteReact(),
-    devWebSocketPlugin(),
     // VitePWA has been removed rather than reconfigured.
     //
     // Its generateSW output was never used: public/sw.js is copied into

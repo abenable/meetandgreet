@@ -1,21 +1,10 @@
 import '@tanstack/react-start/server-only'
-import nodemailer from 'nodemailer'
-import { MailtrapTransport } from 'mailtrap'
 
+const MAILTRAP_API_URL = 'https://send.api.mailtrap.io/api/send'
+
+// Mailtrap's HTTP API is used instead of SMTP because Workers (workerd)
+// does not support raw TCP/STARTTLS connections required by nodemailer.
 const TOKEN = process.env.MAILTRAP_TOKEN
-
-export function getMailTransport() {
-  if (!TOKEN) {
-    console.warn('[EMAIL] MAILTRAP_TOKEN not set — emails will be logged to console only')
-    return null
-  }
-
-  return nodemailer.createTransport(
-    MailtrapTransport({
-      token: TOKEN,
-    })
-  )
-}
 
 export const sender = {
   address: 'hello@byte10x.dev',
@@ -29,8 +18,6 @@ interface SendOtpEmailOptions {
 }
 
 export async function sendOtpEmail({ to, otp, purpose }: SendOtpEmailOptions) {
-  const transport = getMailTransport()
-
   const subject =
     purpose === 'email-verify'
       ? 'Verify your email — Meet & Greet'
@@ -85,16 +72,33 @@ export async function sendOtpEmail({ to, otp, purpose }: SendOtpEmailOptions) {
 </body>
 </html>`
 
-  if (transport) {
-    await transport.sendMail({
-      from: sender,
-      to: [to],
+  const text = `${heading}\n\n${bodyText}\n\nYour code: ${otp}\n\nIf you didn't request this, you can safely ignore this email.`
+
+  if (!TOKEN) {
+    console.warn('[EMAIL] MAILTRAP_TOKEN not set — email will be logged to console only')
+    console.log(`[DEV] ${purpose} OTP for ${to}: ${otp}`)
+    return
+  }
+
+  const response = await fetch(MAILTRAP_API_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: { email: sender.address, name: sender.name },
+      to: [{ email: to }],
       subject,
       html,
-      text: `${heading}\n\n${bodyText}\n\nYour code: ${otp}\n\nIf you didn't request this, you can safely ignore this email.`,
-    })
-    console.log(`[EMAIL] OTP email sent to ${to} via Mailtrap`)
-  } else {
-    console.log(`[DEV] ${purpose} OTP for ${to}: ${otp}`)
+      text,
+    }),
+  })
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => '')
+    throw new Error(`[EMAIL] Mailtrap API error ${response.status}: ${body}`)
   }
+
+  console.log(`[EMAIL] OTP email sent to ${to} via Mailtrap`)
 }

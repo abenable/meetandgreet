@@ -18,6 +18,11 @@ export const Route = createFileRoute('/events/join/$code')({
   component: ShareJoinPage,
 })
 
+// Keep the event lookup browser-only. Shared join links get crawled, and
+// running it during SSR would hit the database (and trigger waitlist
+// promotion writes) on every crawler request.
+const IS_CLIENT = typeof window !== 'undefined'
+
 function ShareJoinPage() {
   const { code } = useParams({ from: '/events/join/$code' })
   const navigate = useNavigate()
@@ -37,13 +42,21 @@ function ShareJoinPage() {
   // straight to /login, discarding whatever the visitor was doing here.
   const { session } = Route.useRouteContext()
 
-  const { data: event, isLoading: eventLoading } = useQuery({
+  const { data: event, isError: eventError } = useQuery({
     queryKey: ['event-by-code', code],
     queryFn: () => getEventByCode({ data: code }),
+    enabled: IS_CLIENT,
   })
 
   useEffect(() => {
-    if (eventLoading) return
+    if (eventError) {
+      setStatus('error')
+      setMessage('Something went wrong. Please try again.')
+      return
+    }
+
+    // undefined means the browser-only event query hasn't resolved yet.
+    if (event === undefined) return
 
     if (!session?.user) {
       setStatus('error')
@@ -58,7 +71,7 @@ function ShareJoinPage() {
     }
 
     setStatus('ready')
-  }, [session, event, eventLoading])
+  }, [session, event, eventError, code, navigate])
 
   const doJoin = async (force = false) => {
     setStatus('joining')

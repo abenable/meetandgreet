@@ -22,7 +22,22 @@ interface MyRouterContext {
   session?: Awaited<ReturnType<typeof getSession>>
 }
 
-const PUBLIC_PATHS = ['/', '/login', '/signup', '/forgot-password', '/about', '/api', '/events/join']
+const PUBLIC_PATHS = [
+  '/',
+  '/login',
+  '/signup',
+  '/forgot-password',
+  '/about',
+  '/api',
+  '/events/join',
+  // Public content pages — linked from the footer/landing page, must be
+  // crawlable (otherwise crawlers get redirected to /login and report
+  // "Page with redirect" in Search Console).
+  '/terms',
+  '/privacy',
+  '/safety',
+  '/pricing',
+]
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(

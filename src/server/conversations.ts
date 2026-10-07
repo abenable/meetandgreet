@@ -2,8 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { prisma } from '#/db'
 import { requireSession } from '#/server/auth'
-import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
-import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { putR2Object, R2_PUBLIC_URL } from '#/lib/r2'
 import { randomUUID } from 'node:crypto'
 import { createNotification } from './notifications.server'
 import { broadcastChatMessage, broadcastMatchCreated } from './websocket-broadcast'
@@ -615,14 +614,7 @@ export const uploadVoiceMessage = createServerFn({ method: 'POST' })
 
     const key = `voice/${data.matchId}/${randomUUID()}.webm`
 
-    await r2Client.send(
-      new PutObjectCommand({
-        Bucket: R2_BUCKET_NAME,
-        Key: key,
-        Body: buffer,
-        ContentType: 'audio/webm',
-      })
-    )
+    await putR2Object(key, buffer, 'audio/webm')
 
     return { audioUrl: `${R2_PUBLIC_URL}/${key}` }
   })

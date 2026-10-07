@@ -4,9 +4,16 @@
   "main": "src/worker.ts",
   "compatibility_date": "2026-10-07",
   "compatibility_flags": ["nodejs_compat"],
+  "keep_vars": true,
   "observability": {
     "enabled": true
   },
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "meetandgreet"
+    }
+  ],
   "routes": [
     {
       "pattern": "meetandgreet.tech",

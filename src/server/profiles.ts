@@ -3,8 +3,7 @@ import { z } from 'zod'
 import { prisma } from '#/db'
 import { requireSession, invalidateSessionsForUser } from '#/server/auth'
 import { sanitizeProfile } from '#/lib/sanitize'
-import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
-import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { putR2Object, R2_PUBLIC_URL } from '#/lib/r2'
 
 export const getMyProfile = createServerFn({ method: 'GET' })
   .handler(async () => {
@@ -190,14 +189,7 @@ export const submitPhotoVerification = createServerFn({ method: 'POST' })
 
     const key = `profiles/${user.id}/verification-${crypto.randomUUID()}.jpg`
 
-    await r2Client.send(
-      new PutObjectCommand({
-        Bucket: R2_BUCKET_NAME,
-        Key: key,
-        Body: Buffer.from(base64Data, 'base64'),
-        ContentType: 'image/jpeg',
-      })
-    )
+    await putR2Object(key, Buffer.from(base64Data, 'base64'), 'image/jpeg')
 
     await prisma.profile.update({
       where: { userId: user.id },

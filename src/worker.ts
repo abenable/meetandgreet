@@ -1,4 +1,5 @@
 import handler from '@tanstack/react-start/server-entry'
+import { runWithPrisma } from './db'
 import { WebSocketHub } from './durable/WebSocketHub'
 
 export { WebSocketHub }
@@ -10,14 +11,16 @@ export { WebSocketHub }
  * - Everything else goes to the TanStack Start server handler.
  */
 export default {
-  async fetch(request: Request, env: Cloudflare.Env, _ctx: ExecutionContext): Promise<Response> {
-    const { pathname } = new URL(request.url)
+  fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext): Promise<Response> {
+    return runWithPrisma(ctx, async () => {
+      const { pathname } = new URL(request.url)
 
-    if (pathname === '/ws') {
-      return handleWebSocketUpgrade(request, env)
-    }
+      if (pathname === '/ws') {
+        return handleWebSocketUpgrade(request, env)
+      }
 
-    return handler.fetch(request)
+      return handler.fetch(request)
+    })
   },
 } satisfies ExportedHandler<Cloudflare.Env>
 

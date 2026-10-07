@@ -62,8 +62,18 @@ interface ExportedHandler<Env = unknown> {
   fetch?(request: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response>
 }
 
+interface R2Bucket {
+  put(
+    key: string,
+    value: ArrayBufferView | ArrayBuffer | string,
+    options?: { httpMetadata?: { contentType?: string } },
+  ): Promise<unknown>
+  delete(keys: string | string[]): Promise<void>
+}
+
 declare namespace Cloudflare {
   interface Env {
+    R2: R2Bucket
     /** Durable Object that owns all WebSocket connections */
     WEB_SOCKET_HUB: DurableObjectNamespace<DurableObjectBranded>
   }

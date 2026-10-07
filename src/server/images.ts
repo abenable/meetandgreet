@@ -1,7 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { deleteR2Object, getR2KeyFromUrl, r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
-import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { deleteR2Object, getR2KeyFromUrl, putR2Object, R2_PUBLIC_URL } from '#/lib/r2'
 import { requireSession } from '#/server/auth'
 import { prisma } from '#/db'
 
@@ -65,14 +64,7 @@ export const uploadImage = createServerFn({ method: 'POST' })
 
     const buffer = Buffer.from(base64Data, 'base64')
 
-    await r2Client.send(
-      new PutObjectCommand({
-        Bucket: R2_BUCKET_NAME,
-        Key: data.key,
-        Body: buffer,
-        ContentType: 'image/jpeg',
-      })
-    )
+    await putR2Object(data.key, buffer, 'image/jpeg')
 
     return { url: `${R2_PUBLIC_URL}/${data.key}` }
   })

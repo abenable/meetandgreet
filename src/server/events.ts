@@ -1,13 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { randomBytes } from 'node:crypto'
-import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { Prisma } from '@prisma/client'
 import { prisma } from '#/db'
 import { gendersMatching } from '#/lib/gender'
 import { requireSession } from '#/server/auth'
 import { broadcastToEvent } from '#/server/websocket-broadcast'
-import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from '#/lib/r2'
+import { putR2Object, R2_PUBLIC_URL } from '#/lib/r2'
 import { rateLimit } from '#/lib/rate-limit'
 import { sanitizeText } from '#/lib/sanitize'
 import { awardBadgeIfNotExists } from './badges.server'
@@ -430,14 +429,7 @@ export const createEvent = createServerFn({ method: 'POST' })
           const base64Data = data.photo!.split(',')[1]
           if (base64Data) {
             const buffer = Buffer.from(base64Data, 'base64')
-            await r2Client.send(
-              new PutObjectCommand({
-                Bucket: R2_BUCKET_NAME,
-                Key: key,
-                Body: buffer,
-                ContentType: 'image/jpeg',
-              })
-            )
+            await putR2Object(key, buffer, 'image/jpeg')
             const publicUrl = `${R2_PUBLIC_URL}/${key}`
             await prisma.event.update({
               where: { id: event.id },

@@ -1,24 +1,34 @@
 import '@tanstack/react-start/server-only'
+import { AsyncLocalStorage } from 'node:async_hooks'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
 
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
-  // Pool defaults have no connection timeout: a stalled Neon connect would
-  // hang the request forever, get killed by the Workers runtime, and leave
-  // the slot checked out — poisoning the isolate until every later request
-  // in it fails instantly. Fail fast instead so slots are always released.
-  max: 5,
-  connectionTimeoutMillis: 10_000,
-  idleTimeoutMillis: 20_000,
-  statement_timeout: 15_000,
-  query_timeout: 15_000,
+function createClient() {
+  const adapter = new PrismaPg({
+    connectionString: process.env.DATABASE_URL,
+    max: 5,
+    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 20_000,
+    statement_timeout: 15_000,
+    query_timeout: 15_000,
+  })
+  return new PrismaClient({ adapter })
+}
+
+const requestClient = new AsyncLocalStorage<PrismaClient>()
+let standaloneClient: PrismaClient | undefined
+
+export function runWithPrisma<T>(ctx: ExecutionContext, handle: () => Promise<T>): Promise<T> {
+  const client = createClient()
+  return requestClient.run(client, handle).finally(() => ctx.waitUntil(client.$disconnect()))
+}
+
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, property) {
+    const client = requestClient.getStore() ?? (standaloneClient ??= createClient())
+    const value = Reflect.get(client, property, client)
+    return typeof value === 'function' ? value.bind(client) : value
+  },
 })
-
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter })
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export * from '@prisma/client'

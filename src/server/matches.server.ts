@@ -1,7 +1,6 @@
 import { Prisma, type EventMatch } from '@prisma/client'
 import { prisma } from '#/db'
-import { DeleteObjectCommand } from '@aws-sdk/client-s3'
-import { getR2KeyFromUrl, r2Client, R2_BUCKET_NAME } from '#/lib/r2'
+import { deleteR2Object, getR2KeyFromUrl } from '#/lib/r2'
 
 /**
  * Server-only helpers shared by swipes.ts, requests.ts and admin.ts.
@@ -80,7 +79,7 @@ export async function deleteVoiceFilesForMatches(matchIds: string[]) {
       const key = msg.audioUrl ? getR2KeyFromUrl(msg.audioUrl) : null
       if (!key) return
       try {
-        await r2Client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key }))
+        await deleteR2Object(key)
       } catch (err) {
         console.warn('[R2 Cleanup] Failed to delete voice file:', err)
       }

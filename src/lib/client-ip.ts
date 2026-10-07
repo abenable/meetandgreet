@@ -1,10 +1,6 @@
 /**
  * Resolving the client IP.
  *
- * This module is deliberately dependency-free: server.prod.ts imports it with a
- * relative path at runtime, so it must never import anything under the `#/*`
- * alias (Bun cannot resolve those — see the note in server.prod.ts).
- *
  * There is exactly one trustworthy answer per request, and it is computed once,
  * by the edge of the process, into CLIENT_IP_HEADER. Everything downstream
  * (our OTP limiters, better-auth's own limiter) reads that header and nothing
@@ -13,10 +9,15 @@
  */
 
 /**
- * Set by server.prod.ts from the resolved client address, after stripping any
- * inbound value — so unlike x-forwarded-for it cannot be spoofed by a client.
+ * On the Cloudflare Workers deployment this is set by Cloudflare's edge for
+ * every request from the real TCP peer — clients cannot forge or strip it
+ * inside the zone, so it is authoritative. (The old Bun server injected its
+ * own x-mag-client-ip after stripping inbound values; that server is gone.)
+ *
+ * In local dev the Cloudflare Vite plugin / workerd also sets this header
+ (to a loopback address), so rate limiting still gets a stable key.
  */
-export const CLIENT_IP_HEADER = 'x-mag-client-ip'
+export const CLIENT_IP_HEADER = 'cf-connecting-ip'
 
 /**
  * TRUST_PROXY says how many right-most `x-forwarded-for` entries were appended

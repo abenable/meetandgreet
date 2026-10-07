@@ -8,15 +8,14 @@ const trustedHops = parseTrustedHops(process.env.TRUST_PROXY)
 export function getClientIdentifier(): string {
   const request = getRequest()
 
-  // In production server.prod.ts has already resolved this — applying the
-  // TRUST_PROXY rules once, at the edge — and stripped any inbound value, so
-  // the header is authoritative and unforgeable. Re-deriving it here would
-  // risk the two paths disagreeing about which hop to trust.
+  // cf-connecting-ip is set by Cloudflare's edge from the real TCP peer, so it
+  // is authoritative on the Workers deployment (and set to a loopback address
+  // in local dev by workerd). Re-deriving it from x-forwarded-for would risk
+  // trusting a hop the edge doesn't.
   const resolved = request.headers.get(CLIENT_IP_HEADER)
   if (resolved?.trim()) return resolved.trim()
 
-  // Dev runs under Vite with no such edge, so fall back to deriving it. There
-  // is no socket address available here, hence no peerAddress.
+  // Fallback for runtimes where the edge doesn't set the header.
   return resolveClientIp(request.headers, { trustedHops }) ?? 'unknown'
 }
 

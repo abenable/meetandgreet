@@ -113,19 +113,15 @@ export const auth = betterAuth({
     // already removes the repeated-lookup cost this would have saved.
   },
   advanced: {
-    // Bun's Request exposes no socket, so better-auth cannot find a client IP
-    // on its own and silently skips its own rate limiting ("Rate limiting
-    // skipped: could not determine client IP address"). server.prod.ts injects
-    // the resolved client address into this header, stripping any inbound value
-    // first, so it is not client-controllable.
+    // On the Cloudflare Workers deployment, cf-connecting-ip is set by the
+    // edge from the real TCP peer — clients cannot forge it inside the zone.
+    // (The old Bun server injected its own stripped header; that server is
+    // gone, and nothing would have set x-mag-client-ip here.)
     ipAddress: {
-      // Only ever this one header. It is set by server.prod.ts from the
-      // already-resolved client address (see lib/client-ip.ts), so listing
-      // x-forwarded-for alongside it would be strictly worse: better-auth reads
-      // the *left-most* entry of that header, which is the part the caller
-      // supplies, so a client could hand itself a fresh rate-limit bucket on
-      // every request. TRUST_PROXY is honoured when the header is computed, not
-      // here.
+      // Only ever this one header. Listing x-forwarded-for alongside it would
+      // be strictly worse: better-auth reads the *left-most* entry of that
+      // header, which is the part the caller supplies, so a client could hand
+      // itself a fresh rate-limit bucket on every request.
       ipAddressHeaders: [CLIENT_IP_HEADER],
     },
     // Ties the Secure attribute to the scheme in isHttps above, not NODE_ENV —

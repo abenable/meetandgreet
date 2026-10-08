@@ -15,7 +15,7 @@
  * next.
  */
 
-const CACHE_VERSION = 'mag-v1'
+const CACHE_VERSION = 'mag-v2'
 const ASSET_CACHE = `${CACHE_VERSION}-assets`
 
 self.addEventListener('install', () => {

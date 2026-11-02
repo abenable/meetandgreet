@@ -8,6 +8,8 @@
   "observability": {
     "enabled": true
   },
+  "upload_source_maps": true,
+  "send_email": [{ "name": "EMAIL" }],
   "r2_buckets": [
     {
       "binding": "R2",

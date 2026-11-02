@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "prisma generate && vite build",
-    "preview": "vite preview",
+    "preview": "bun run build && vite preview",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "deploy": "bun run build && wrangler deploy",
     "cf-typegen": "wrangler types",

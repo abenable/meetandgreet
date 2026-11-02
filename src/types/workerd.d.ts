@@ -71,9 +71,26 @@ interface R2Bucket {
   delete(keys: string | string[]): Promise<void>
 }
 
+/** Email Sending binding — https://developers.cloudflare.com/email-service/api/send-emails/workers-api/ */
+interface SendEmailBinding {
+  send(message: {
+    to: string | { email: string; name?: string } | Array<string | { email: string; name?: string }>
+    from: string | { email: string; name?: string }
+    subject: string
+    html?: string
+    text?: string
+    cc?: string | { email: string; name?: string } | Array<string | { email: string; name?: string }>
+    bcc?: string | { email: string; name?: string } | Array<string | { email: string; name?: string }>
+    replyTo?: string | { email: string; name?: string }
+    headers?: { [key: string]: string }
+  }): Promise<{ messageId: string }>
+}
+
 declare namespace Cloudflare {
   interface Env {
     R2: R2Bucket
+    /** Email Sending binding (verified domain: meetandgreet.tech) */
+    EMAIL: SendEmailBinding
     /** Durable Object that owns all WebSocket connections */
     WEB_SOCKET_HUB: DurableObjectNamespace<DurableObjectBranded>
   }

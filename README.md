@@ -49,7 +49,7 @@ npx -y @better-auth/cli secret
 | `BETTER_AUTH_SECRET` | yes | Session signing key |
 | `BETTER_AUTH_URL` | yes | Public origin of the app |
 | `ADDITIONAL_TRUSTED_ORIGINS` | no | Extra origins allowed to call server functions |
-| `MAILTRAP_TOKEN` | yes | Sends OTP emails; without it codes cannot be delivered |
+| Cloudflare Email Sending | — | OTP emails are sent via the `EMAIL` Workers binding from `no-reply@meetandgreet.tech` (domain onboarded in Cloudflare); no env var needed |
 | `R2_*` | yes | Cloudflare R2 bucket for photos and voice notes |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | no | Web push; push is skipped when absent |
 | `TRUST_PROXY` | no | Set behind a reverse proxy so client IPs resolve for rate limiting |

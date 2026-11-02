@@ -1,13 +1,13 @@
 import '@tanstack/react-start/server-only'
+import { env } from 'cloudflare:workers'
 
-const MAILTRAP_API_URL = 'https://send.api.mailtrap.io/api/send'
-
-// Mailtrap's HTTP API is used instead of SMTP because Workers (workerd)
-// does not support raw TCP/STARTTLS connections required by nodemailer.
-const TOKEN = process.env.MAILTRAP_TOKEN
+// Email is sent through the native Email Sending binding (env.EMAIL) instead of
+// a third-party HTTP API. The binding requires no API keys and sends from the
+// verified domain meetandgreet.tech. Workers (workerd) cannot use SMTP, so the
+// binding (not nodemailer) is the only viable transport here.
 
 export const sender = {
-  address: 'hello@byte10x.dev',
+  address: 'no-reply@meetandgreet.tech',
   name: 'Meet & Greet',
 }
 
@@ -74,31 +74,23 @@ export async function sendOtpEmail({ to, otp, purpose }: SendOtpEmailOptions) {
 
   const text = `${heading}\n\n${bodyText}\n\nYour code: ${otp}\n\nIf you didn't request this, you can safely ignore this email.`
 
-  if (!TOKEN) {
-    console.warn('[EMAIL] MAILTRAP_TOKEN not set — email will be logged to console only')
+  if (!env.EMAIL) {
+    console.warn('[EMAIL] EMAIL binding not available — email will be logged to console only')
     console.log(`[DEV] ${purpose} OTP for ${to}: ${otp}`)
     return
   }
 
-  const response = await fetch(MAILTRAP_API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+  try {
+    await env.EMAIL.send({
+      to,
       from: { email: sender.address, name: sender.name },
-      to: [{ email: to }],
       subject,
       html,
       text,
-    }),
-  })
-
-  if (!response.ok) {
-    const body = await response.text().catch(() => '')
-    throw new Error(`[EMAIL] Mailtrap API error ${response.status}: ${body}`)
+    })
+    console.log(`[EMAIL] OTP email sent to ${to} via Cloudflare Email Sending`)
+  } catch (error: any) {
+    const code = error?.code ? ` (code: ${error.code})` : ''
+    throw new Error(`[EMAIL] Email Sending error${code}: ${error?.message ?? String(error)}`)
   }
-
-  console.log(`[EMAIL] OTP email sent to ${to} via Mailtrap`)
 }

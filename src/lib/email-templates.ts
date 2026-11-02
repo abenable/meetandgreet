@@ -7,7 +7,8 @@ const brand = {
   name: 'Meet & Greet',
   url: 'https://meetandgreet.tech',
   accent: '#10b981',
-  footer: "Meet & Greet — Byte10x",
+  logoUrl: 'https://meetandgreet.tech/logo.png',
+  footer: "Meet & Greet",
 }
 
 // Postmark base stylesheet, accent-coloured per brand at render time.
@@ -473,8 +474,8 @@ ${style}
           <table class="email-content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
               <td class="email-masthead">
-                <a href="${brand.url}" class="f-fallback email-masthead_name">
-                  ${escapeHtml(brand.name)}
+                <a href="${brand.url}" class="f-fallback email-masthead_logo">
+                  <img src="${brand.logoUrl}" width="94" height="94" alt="${escapeHtml(brand.name)} logo" style="width: 100%; max-width: 94px; height: auto; display: block; margin: 0 auto;" />
                 </a>
               </td>
             </tr>
